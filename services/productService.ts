@@ -1,3 +1,8 @@
+/**
+ * This file contains the ProductService class, which handles the business logic related to products.
+ * It provides methods for CRUD operations on products, including getting all products, getting a product by ID, creating a new product, updating an existing product, and deleting a product.
+ */
+
 import { Product } from "../models/productModel.ts";
 
 // The ProductService class handles the business logic related to products

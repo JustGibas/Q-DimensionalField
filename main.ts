@@ -1,3 +1,9 @@
+/**
+ * This file is the entry point of the application.
+ * It sets up the Oak application, configures middleware, and defines routes.
+ * The application listens on a specified port and handles incoming HTTP requests.
+ */
+
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 
 // The Application class is used to create a new Oak application

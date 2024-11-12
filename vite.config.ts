@@ -1,3 +1,9 @@
+/**
+ * This file contains the configuration options for the Vite build tool.
+ * It includes server settings, build options, module resolution, and more.
+ * Each configuration option is explained in detail to help students understand its purpose.
+ */
+
 import { defineConfig } from 'vite';
 
 export default defineConfig({

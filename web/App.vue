@@ -5,12 +5,22 @@
 </template>
 
 <script>
+/**
+ * This file contains the main Vue component for the application.
+ * It initializes the WebGPU context and renders a simple triangle on the canvas.
+ * The component includes methods for setting up WebGPU, creating a pipeline, and rendering the triangle.
+ */
+
 export default {
   name: 'App',
   mounted() {
     this.initWebGPU();
   },
   methods: {
+    /**
+     * Initializes the WebGPU context and sets up the rendering pipeline.
+     * @returns {Promise<void>}
+     */
     async initWebGPU() {
       if (!navigator.gpu) {
         throw new Error('WebGPU is not supported by your browser.');
@@ -34,6 +44,12 @@ export default {
       const pipeline = await this.createPipeline(device, swapChainFormat);
       this.render(device, context, pipeline);
     },
+    /**
+     * Creates a render pipeline for the WebGPU context.
+     * @param {GPUDevice} device - The GPU device.
+     * @param {string} swapChainFormat - The format of the swap chain.
+     * @returns {Promise<GPURenderPipeline>}
+     */
     async createPipeline(device, swapChainFormat) {
       const shaderModule = device.createShaderModule({
         code: `
@@ -75,6 +91,12 @@ export default {
 
       return pipeline;
     },
+    /**
+     * Renders a triangle on the canvas using the WebGPU context.
+     * @param {GPUDevice} device - The GPU device.
+     * @param {GPUCanvasContext} context - The WebGPU canvas context.
+     * @param {GPURenderPipeline} pipeline - The render pipeline.
+     */
     render(device, context, pipeline) {
       const commandEncoder = device.createCommandEncoder();
       const textureView = context.getCurrentTexture().createView();

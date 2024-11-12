@@ -1,4 +1,10 @@
 /**
+ * This file contains helper functions that are used throughout the application.
+ * These functions perform common tasks such as string manipulation, ID generation, date formatting, and email validation.
+ * Each function is explained in detail to help students understand its purpose and parameters.
+ */
+
+/**
  * Capitalizes the first letter of a string.
  * @param {string} string - The string to capitalize.
  * @returns {string} - The string with the first letter capitalized.

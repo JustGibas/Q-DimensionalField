@@ -1,6 +1,16 @@
+/**
+ * This file contains the main JavaScript code for the application.
+ * It initializes the WebGPU context, sets up the rendering pipeline, and handles the main rendering loop.
+ * Additionally, it sets up a simple HTTP server using Deno and initializes a Vue.js app.
+ */
+
 import { mat4, vec3 } from 'gl-matrix';
 import { serve } from "https://deno.land/std@0.114.0/http/server.ts";
 
+/**
+ * Initializes the WebGPU context and sets up the rendering pipeline.
+ * @returns {Promise<{ device: GPUDevice, context: GPUCanvasContext, swapChainFormat: string }>}
+ */
 async function initWebGPU() {
     if (!navigator.gpu) {
         throw new Error('WebGPU is not supported by your browser.');
@@ -24,6 +34,12 @@ async function initWebGPU() {
     return { device, context, swapChainFormat };
 }
 
+/**
+ * Creates a render pipeline for the WebGPU context.
+ * @param {GPUDevice} device - The GPU device.
+ * @param {string} swapChainFormat - The format of the swap chain.
+ * @returns {Promise<GPURenderPipeline>}
+ */
 async function createPipeline(device, swapChainFormat) {
     const shaderModule = device.createShaderModule({
         code: `
@@ -66,6 +82,12 @@ async function createPipeline(device, swapChainFormat) {
     return pipeline;
 }
 
+/**
+ * Renders a triangle on the canvas using the WebGPU context.
+ * @param {GPUDevice} device - The GPU device.
+ * @param {GPUCanvasContext} context - The WebGPU canvas context.
+ * @param {GPURenderPipeline} pipeline - The render pipeline.
+ */
 async function render(device, context, pipeline) {
     const commandEncoder = device.createCommandEncoder();
     const textureView = context.getCurrentTexture().createView();
@@ -87,6 +109,9 @@ async function render(device, context, pipeline) {
     device.queue.submit([commandEncoder.finish()]);
 }
 
+/**
+ * The main function that initializes WebGPU, creates the pipeline, and starts the rendering loop.
+ */
 async function main() {
     const { device, context, swapChainFormat } = await initWebGPU();
     const pipeline = await createPipeline(device, swapChainFormat);
@@ -99,13 +124,16 @@ async function main() {
     requestAnimationFrame(frame);
 }
 
+// Initialize the main function
 main();
 
+// Set up a simple HTTP server using Deno
 serve((req) => {
     const body = new TextEncoder().encode("Hello from Deno!");
     return new Response(body, { status: 200 });
 });
 
+// Initialize a Vue.js app
 new Vue({
     el: '#app',
     data: {

@@ -1,9 +1,18 @@
+/**
+ * This file contains the ProductController class, which handles the HTTP requests related to products.
+ * It interacts with the ProductService to perform CRUD operations on products.
+ */
+
 import { ProductService } from "../services/productService.ts";
 
 // The ProductController class handles the HTTP requests related to products
 export class ProductController {
   private productService: ProductService;
 
+  /**
+   * Constructor for the ProductController class
+   * Initializes the ProductService instance
+   */
   constructor() {
     this.productService = new ProductService();
   }

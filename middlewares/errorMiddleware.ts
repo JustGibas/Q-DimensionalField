@@ -1,3 +1,8 @@
+/**
+ * This file contains the error handling middleware for the application.
+ * It handles errors that occur during request processing and responds with appropriate status and message.
+ */
+
 import { Context } from "https://deno.land/x/oak/mod.ts";
 
 // This middleware function handles errors that occur during request processing

@@ -1,3 +1,8 @@
+/**
+ * This file contains the userService functions, which handle the business logic related to users.
+ * It provides methods for CRUD operations on users, including getting a user by ID, creating a new user, updating an existing user, and deleting a user.
+ */
+
 import { User } from "../models/userModel.ts";
 
 let users: User[] = [];

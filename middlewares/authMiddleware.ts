@@ -1,3 +1,9 @@
+/**
+ * This file contains the authentication middleware for the application.
+ * It handles the authentication of incoming requests by verifying the provided token.
+ * If the token is valid, the request is allowed to proceed; otherwise, it responds with an appropriate error message.
+ */
+
 import { Context } from "https://deno.land/x/oak/mod.ts";
 
 // This middleware function handles authentication for incoming requests
