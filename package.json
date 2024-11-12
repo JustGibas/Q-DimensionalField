@@ -1,5 +1,21 @@
 {
+  "name": "voxelspace",
+  "version": "1.0.0",
+  "description": "VoxelSpace is a VR/AR/XR game that uses voxel chunks to create a global server.",
+  "main": "web/main.js",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "test": "deno test"
+  },
   "dependencies": {
-    "vue": "^3.5.12" // Vue.js is a progressive JavaScript framework for building user interfaces
-  }
+    "vue": "^3.5.12"
+  },
+  "devDependencies": {
+    "vite": "^2.6.4",
+    "deno": "^1.14.0"
+  },
+  "author": "JustGibas",
+  "license": "MIT"
 }
