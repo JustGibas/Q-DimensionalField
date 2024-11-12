@@ -10,14 +10,14 @@
     "test": "deno test"
   },
   "dependencies": {
-    "vue": "^3.5.12",
-    "oak": "^10.5.1",
-    "gl-matrix": "^3.4.3"
+    "gl-matrix": "^3.4.3",
+    "@oakserver/oak": "^14.1.0",
+    "vue": "^3.5.12"
   },
   "devDependencies": {
-    "vite": "^2.6.4",
-    "deno": "^1.14.0"
+    "deno": "^0.1.1",
+    "vite": "^5.4.11"
   },
-  "author": "JustGibas",
+  "author": "Justinas Gibas",
   "license": "MIT"
 }

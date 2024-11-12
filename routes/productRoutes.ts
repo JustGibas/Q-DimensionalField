@@ -8,7 +8,7 @@
  * - ctx: The context object containing request and response.
  */
 
-import { Router } from "https://deno.land/x/oak/mod.ts";
+import { Router } from "@oakserver/oak";
 import { ProductController } from "../controllers/productController.ts";
 
 // Create a new router instance
