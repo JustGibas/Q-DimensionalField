@@ -1,35 +1,21 @@
-/**
- * This file contains the configuration options for the VoxelSpace project.
- * It includes scripts for building, serving, and testing the project, as well as dependencies and devDependencies.
- * Each configuration option is explained in detail to help students understand its purpose.
- */
 {
   "name": "voxelspace",
   "version": "1.0.0",
   "description": "VoxelSpace is a VR/AR/XR game that uses voxel chunks to create a global server.",
   "main": "web/main.js",
   "scripts": {
-    // The "start" script runs the Vite development server
     "start": "vite",
-    // The "build" script builds the project using Vite
     "build": "vite build",
-    // The "serve" script serves the built project using Vite
     "serve": "vite preview",
-    // The "test" script runs the tests using Deno
     "test": "deno test"
   },
   "dependencies": {
-    // Vue.js is a progressive JavaScript framework for building user interfaces
     "vue": "^3.5.12",
-    // Oak is a middleware framework for Deno's native HTTP server
     "oak": "^10.5.1",
-    // gl-matrix is a JavaScript library for matrix and vector operations
     "gl-matrix": "^3.4.3"
   },
   "devDependencies": {
-    // Vite is a build tool that provides a fast development server and optimized build process
     "vite": "^2.6.4",
-    // Deno is a secure runtime for JavaScript and TypeScript
     "deno": "^1.14.0"
   },
   "author": "JustGibas",

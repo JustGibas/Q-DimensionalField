@@ -1,230 +1,98 @@
-/**
- * This file contains the configuration options for the Deno runtime.
- * It includes tasks, import maps, compiler options, linting rules, formatting options, testing options, and more.
- * Each configuration option is explained in detail to help students understand its purpose.
- */
 {
   "tasks": {
-    // The "start" task runs the main.js file with the necessary permissions
     "start": "deno run --allow-net --allow-read web/main.js"
   },
-  // Specifies the path to the import map file
   "importMap": "./import_map.json",
   "compilerOptions": {
-    // Specifies the target ECMAScript version for the emitted JavaScript code
     "target": "ESNext",
-    // Specifies the module system to use in the emitted JavaScript code
     "module": "ESNext",
-    // Specifies the library files to be included in the compilation
     "lib": ["ESNext", "DOM"],
-    // Enables strict type-checking options
     "strict": true,
-    // Skips type checking of all declaration files (*.d.ts)
     "skipLibCheck": true,
-    // Ensures that file name casing is consistent across the project
     "forceConsistentCasingInFileNames": true
   },
   "lint": {
     "rules": {
-      // Specifies the linting rules to use
       "tags": ["recommended"],
-      // Specifies the directories to include in the linting process
       "include": ["src/", "tests/"],
-      // Specifies the directories to exclude from the linting process
       "exclude": ["node_modules/"]
     }
   },
   "fmt": {
     "options": {
-      // Specifies whether to use tabs for indentation
       "useTabs": false,
-      // Specifies the maximum line width
       "lineWidth": 80,
-      // Specifies the number of spaces to use for indentation
       "indentWidth": 2,
-      // Specifies whether to use single quotes for strings
       "singleQuote": true,
-      // Specifies how to wrap prose
       "proseWrap": "preserve"
     }
   },
   "test": {
-    // Specifies the directories to include in the testing process
     "include": ["tests/"],
-    // Specifies the directories to exclude from the testing process
     "exclude": ["node_modules/"]
   },
   "coverage": {
-    // Specifies the directories to include in the coverage report
     "include": ["src/"],
-    // Specifies the directories to exclude from the coverage report
     "exclude": ["tests/"]
   },
   "doc": {
-    // Specifies the directories to include in the documentation generation
     "include": ["src/"],
-    // Specifies the directories to exclude from the documentation generation
     "exclude": ["tests/"]
   },
   "bundle": {
-    // Specifies the directories to include in the bundling process
     "include": ["src/"],
-    // Specifies the directories to exclude from the bundling process
     "exclude": ["tests/"]
   },
   "upgrade": {
-    // Specifies the directories to include in the upgrade process
     "include": ["src/"],
-    // Specifies the directories to exclude from the upgrade process
     "exclude": ["tests/"]
   },
   "lock": {
-    // Specifies the directories to include in the lock file generation
     "include": ["src/"],
-    // Specifies the directories to exclude from the lock file generation
     "exclude": ["tests/"]
   },
   "vendor": {
-    // Specifies the directories to include in the vendor directory
     "include": ["src/"],
-    // Specifies the directories to exclude from the vendor directory
     "exclude": ["tests/"]
   },
   "info": {
-    // Specifies the directories to include in the info command
     "include": ["src/"],
-    // Specifies the directories to exclude from the info command
     "exclude": ["tests/"]
   },
   "install": {
-    // Specifies the directories to include in the install command
     "include": ["src/"],
-    // Specifies the directories to exclude from the install command
     "exclude": ["tests/"]
   },
   "uninstall": {
-    // Specifies the directories to include in the uninstall command
     "include": ["src/"],
-    // Specifies the directories to exclude from the uninstall command
     "exclude": ["tests/"]
   },
   "update": {
-    // Specifies the directories to include in the update command
     "include": ["src/"],
-    // Specifies the directories to exclude from the update command
     "exclude": ["tests/"]
   },
   "clean": {
-    // Specifies the directories to include in the clean command
     "include": ["src/"],
-    // Specifies the directories to exclude from the clean command
     "exclude": ["tests/"]
   },
   "build": {
-    // Specifies the directories to include in the build command
     "include": ["src/"],
-    // Specifies the directories to exclude from the build command
     "exclude": ["tests/"]
   },
   "serve": {
-    // Specifies the directories to include in the serve command
     "include": ["src/"],
-    // Specifies the directories to exclude from the serve command
     "exclude": ["tests/"]
   },
   "deploy": {
-    // Specifies the directories to include in the deploy command
     "include": ["src/"],
-    // Specifies the directories to exclude from the deploy command
     "exclude": ["tests/"]
   },
   "watch": {
-    // Specifies the directories to include in the watch command
     "include": ["src/"],
-    // Specifies the directories to exclude from the watch command
     "exclude": ["tests/"]
   },
   "run": {
-    // Specifies the directories to include in the run command
     "include": ["src/"],
-    // Specifies the directories to exclude from the run command
     "exclude": ["tests/"]
-  },
-  // The following options are commented out as they are unnecessary for this project
-  // "test:watch": {
-  //   "include": ["src/"],
-  //   "exclude": ["tests/"]
-  // },
-  // "test:coverage": {
-  //   "include": ["src/"],
-  //   "exclude": ["tests/"]
-  // },
-  // "test:lint": {
-  //   "include": ["src/"],
-  //   "exclude": ["tests/"]
-  // },
-  // "test:fmt": {
-  //   "include": ["src/"],
-  //   "exclude": ["tests/"]
-  // },
-  // "test:doc": {
-  //   "include": ["src/"],
-  //   "exclude": ["tests/"]
-  // },
-  // "test:bundle": {
-  //   "include": ["src/"],
-  //   "exclude": ["tests/"]
-  // },
-  // "test:upgrade": {
-  //   "include": ["src/"],
-  //   "exclude": ["tests/"]
-  // },
-  // "test:lock": {
-  //   "include": ["src/"],
-  //   "exclude": ["tests/"]
-  // },
-  // "test:vendor": {
-  //   "include": ["src/"],
-  //   "exclude": ["tests/"]
-  // },
-  // "test:info": {
-  //   "include": ["src/"],
-  //   "exclude": ["tests/"]
-  // },
-  // "test:install": {
-  //   "include": ["src/"],
-  //   "exclude": ["tests/"]
-  // },
-  // "test:uninstall": {
-  //   "include": ["src/"],
-  //   "exclude": ["tests/"]
-  // },
-  // "test:update": {
-  //   "include": ["src/"],
-  //   "exclude": ["tests/"]
-  // },
-  // "test:clean": {
-  //   "include": ["src/"],
-  //   "exclude": ["tests/"]
-  // },
-  // "test:build": {
-  //   "include": ["src/"],
-  //   "exclude": ["tests/"]
-  // },
-  // "test:serve": {
-  //   "include": ["src/"],
-  //   "exclude": ["tests/"]
-  // },
-  // "test:deploy": {
-  //   "include": ["src/"],
-  //   "exclude": ["tests/"]
-  // },
-  // "test:watch": {
-  //   "include": ["src/"],
-  //   "exclude": ["tests/"]
-  // },
-  // "test:run": {
-  //   "include": ["src/"],
-  //   "exclude": ["tests/"]
-  // }
+  }
 }
