@@ -1,5 +1,6 @@
 import { ProductService } from "../services/productService.ts";
 
+// The ProductController class handles the HTTP requests related to products
 export class ProductController {
   private productService: ProductService;
 
@@ -7,16 +8,25 @@ export class ProductController {
     this.productService = new ProductService();
   }
 
+  /**
+   * Get all products
+   * @param ctx - The context object containing request and response
+   */
   async getAllProducts(ctx: any) {
     try {
       const products = await this.productService.getAllProducts();
       ctx.response.body = products;
     } catch (error) {
+      // Handle error
       ctx.response.status = 500;
       ctx.response.body = { message: "Failed to fetch products" };
     }
   }
 
+  /**
+   * Get a product by ID
+   * @param ctx - The context object containing request and response
+   */
   async getProductById(ctx: any) {
     try {
       const id = ctx.params.id;
@@ -28,11 +38,16 @@ export class ProductController {
         ctx.response.body = { message: "Product not found" };
       }
     } catch (error) {
+      // Handle error
       ctx.response.status = 500;
       ctx.response.body = { message: "Failed to fetch product" };
     }
   }
 
+  /**
+   * Create a new product
+   * @param ctx - The context object containing request and response
+   */
   async createProduct(ctx: any) {
     try {
       const { name, price, description } = await ctx.request.body().value;
@@ -40,11 +55,16 @@ export class ProductController {
       ctx.response.status = 201;
       ctx.response.body = newProduct;
     } catch (error) {
+      // Handle error
       ctx.response.status = 500;
       ctx.response.body = { message: "Failed to create product" };
     }
   }
 
+  /**
+   * Update an existing product
+   * @param ctx - The context object containing request and response
+   */
   async updateProduct(ctx: any) {
     try {
       const id = ctx.params.id;
@@ -57,11 +77,16 @@ export class ProductController {
         ctx.response.body = { message: "Product not found" };
       }
     } catch (error) {
+      // Handle error
       ctx.response.status = 500;
       ctx.response.body = { message: "Failed to update product" };
     }
   }
 
+  /**
+   * Delete a product by ID
+   * @param ctx - The context object containing request and response
+   */
   async deleteProduct(ctx: any) {
     try {
       const id = ctx.params.id;
@@ -73,6 +98,7 @@ export class ProductController {
         ctx.response.body = { message: "Product not found" };
       }
     } catch (error) {
+      // Handle error
       ctx.response.status = 500;
       ctx.response.body = { message: "Failed to delete product" };
     }
