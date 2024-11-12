@@ -1,3 +1,14 @@
+/**
+ * This file contains the test cases for the ProductService class.
+ * It tests the functionality of CRUD operations on products, including getting all products, creating a new product, getting a product by ID, updating an existing product, and deleting a product.
+ * 
+ * Configuration options:
+ * - assertEquals: Asserts that two values are equal.
+ * - assertNotEquals: Asserts that two values are not equal.
+ * - ProductService: The service class for handling product-related operations.
+ * - Product: The interface representing a product.
+ */
+
 import { assertEquals, assertNotEquals } from "https://deno.land/std/testing/asserts.ts";
 import { ProductService } from "../services/productService.ts";
 import { Product } from "../models/productModel.ts";

@@ -1,3 +1,23 @@
+/**
+ * This file is the entry point of the VoxelSpace application.
+ * It defines the VoxelServer and Voxel structures, which manage the state and communication of voxels in the system.
+ * The application simulates event-driven communication between voxels.
+ * 
+ * Configuration options:
+ * - VoxelId: Type alias for voxel identifier.
+ * - Voxel: Represents a voxel in the system.
+ * - VoxelState: Represents the state of a voxel.
+ * - VoxelEvent: Represents an event that can occur in a voxel.
+ * - VoxelServer: Manages voxels and their communication.
+ * - id: Unique identifier of the voxel.
+ * - neighbors: List of neighboring voxel identifiers.
+ * - state: Shared state of the voxel.
+ * - data: Data stored in the voxel.
+ * - event: The event to handle.
+ * - voxels: Map of voxel identifiers to voxels.
+ * - new_data: New data to update in the voxel.
+ */
+
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::thread;

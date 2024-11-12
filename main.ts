@@ -2,6 +2,15 @@
  * This file is the entry point of the application.
  * It sets up the Oak application, configures middleware, and defines routes.
  * The application listens on a specified port and handles incoming HTTP requests.
+ * 
+ * Configuration options:
+ * - Application: The Oak application instance.
+ * - Router: The Oak router instance.
+ * - userRouter: The router for user-related routes.
+ * - productRouter: The router for product-related routes.
+ * - authMiddleware: The middleware for handling authentication.
+ * - errorMiddleware: The middleware for handling errors.
+ * - PORT: The port number on which the server listens.
  */
 
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";

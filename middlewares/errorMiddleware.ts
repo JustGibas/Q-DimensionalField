@@ -1,6 +1,11 @@
 /**
  * This file contains the error handling middleware for the application.
  * It handles errors that occur during request processing and responds with appropriate status and message.
+ * 
+ * Configuration options:
+ * - ctx: The context object containing request and response.
+ * - next: The next middleware function to call.
+ * - err: The error object that occurred during request processing.
  */
 
 import { Context } from "https://deno.land/x/oak/mod.ts";

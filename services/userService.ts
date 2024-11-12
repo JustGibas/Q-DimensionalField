@@ -1,6 +1,13 @@
 /**
  * This file contains the userService functions, which handle the business logic related to users.
  * It provides methods for CRUD operations on users, including getting a user by ID, creating a new user, updating an existing user, and deleting a user.
+ * 
+ * Configuration options:
+ * - users: An array to store the users.
+ * - id: The unique identifier of the user.
+ * - name: The name of the user.
+ * - email: The email address of the user.
+ * - password: The password of the user.
  */
 
 import { User } from "../models/userModel.ts";

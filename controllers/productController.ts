@@ -1,6 +1,13 @@
 /**
  * This file contains the ProductController class, which handles the HTTP requests related to products.
  * It interacts with the ProductService to perform CRUD operations on products.
+ * 
+ * Configuration options:
+ * - ctx: The context object containing request and response.
+ * - id: The ID of the product.
+ * - name: The name of the product.
+ * - price: The price of the product.
+ * - description: The description of the product.
  */
 
 import { ProductService } from "../services/productService.ts";

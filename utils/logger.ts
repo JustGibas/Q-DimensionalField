@@ -2,6 +2,9 @@
  * This file contains logging functions that are used throughout the application.
  * These functions log informational, warning, and error messages to the console.
  * Each function is explained in detail to help students understand its purpose and parameters.
+ * 
+ * Configuration options:
+ * - message: The message to log.
  */
 
 /**

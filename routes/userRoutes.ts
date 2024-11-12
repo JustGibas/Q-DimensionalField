@@ -1,6 +1,13 @@
 /**
  * This file contains the routes related to users.
  * It defines the endpoints for CRUD operations on users and maps them to the corresponding controller functions.
+ * 
+ * Configuration options:
+ * - Router: The Oak router instance.
+ * - getUser: The controller function for handling GET requests to fetch a user by ID.
+ * - addUser: The controller function for handling POST requests to add a new user.
+ * - updateUser: The controller function for handling PUT requests to update an existing user.
+ * - deleteUser: The controller function for handling DELETE requests to delete a user by ID.
  */
 
 import { Router } from "https://deno.land/x/oak/mod.ts";

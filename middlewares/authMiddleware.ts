@@ -2,6 +2,13 @@
  * This file contains the authentication middleware for the application.
  * It handles the authentication of incoming requests by verifying the provided token.
  * If the token is valid, the request is allowed to proceed; otherwise, it responds with an appropriate error message.
+ * 
+ * Configuration options:
+ * - ctx: The context object containing request and response.
+ * - next: The next middleware function to call.
+ * - authHeader: The Authorization header containing the token.
+ * - token: The token extracted from the Authorization header.
+ * - isValid: A boolean indicating whether the token is valid.
  */
 
 import { Context } from "https://deno.land/x/oak/mod.ts";

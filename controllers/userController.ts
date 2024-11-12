@@ -1,6 +1,11 @@
 /**
  * This file contains the userController functions, which handle the HTTP requests related to users.
  * It interacts with the userService to perform CRUD operations on users.
+ * 
+ * Configuration options:
+ * - params: The parameters object containing the user ID.
+ * - response: The response object to send the result.
+ * - request: The request object containing the user data.
  */
 
 import { Request, Response } from "https://deno.land/x/oak/mod.ts";

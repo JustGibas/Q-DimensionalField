@@ -1,6 +1,11 @@
 /**
  * This file contains the routes related to products.
  * It defines the endpoints for CRUD operations on products and maps them to the corresponding controller methods.
+ * 
+ * Configuration options:
+ * - Router: The Oak router instance.
+ * - ProductController: The controller class for handling product-related operations.
+ * - ctx: The context object containing request and response.
  */
 
 import { Router } from "https://deno.land/x/oak/mod.ts";

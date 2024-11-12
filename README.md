@@ -271,3 +271,117 @@ Microservices are implemented using Wasm modules in the `wasm` directory. Each m
 3. Use environment variables and configuration files to manage settings and secrets, avoiding hardcoding sensitive information in the code.
 4. Implement proper error handling and logging to ensure that issues can be quickly identified and resolved.
 5. Monitor the performance and usage of serverless functions to optimize their efficiency and cost-effectiveness.
+
+## Configuration Options
+
+<!-- Pe4aa -->
+This section provides detailed explanations of the configuration options used in the project. Each configuration option is explained to help students understand its purpose and how to use it.
+
+### Deno Configuration
+
+<!-- Pe4aa -->
+The `deno.json` file contains the configuration options for the Deno runtime. It includes tasks, import maps, compiler options, linting rules, formatting options, testing options, and more.
+
+- `tasks`: Defines tasks that can be run using the `deno task` command.
+  - `start`: Runs the `main.js` file with the necessary permissions.
+- `importMap`: Specifies the path to the import map file.
+- `compilerOptions`: Defines compiler options for the TypeScript compiler.
+  - `target`: Specifies the target ECMAScript version for the emitted JavaScript code.
+  - `module`: Specifies the module system to use in the emitted JavaScript code.
+  - `lib`: Specifies the library files to be included in the compilation.
+  - `strict`: Enables strict type-checking options.
+  - `skipLibCheck`: Skips type checking of all declaration files (`*.d.ts`).
+  - `forceConsistentCasingInFileNames`: Ensures that file name casing is consistent across the project.
+- `lint`: Defines linting rules and options.
+  - `rules`: Specifies the linting rules to use.
+  - `include`: Specifies the directories to include in the linting process.
+  - `exclude`: Specifies the directories to exclude from the linting process.
+- `fmt`: Defines formatting options.
+  - `options`: Specifies formatting options such as indentation, line width, and quote style.
+- `test`: Defines testing options.
+  - `include`: Specifies the directories to include in the testing process.
+  - `exclude`: Specifies the directories to exclude from the testing process.
+- `coverage`: Defines coverage options.
+  - `include`: Specifies the directories to include in the coverage report.
+  - `exclude`: Specifies the directories to exclude from the coverage report.
+- `doc`: Defines documentation generation options.
+  - `include`: Specifies the directories to include in the documentation generation.
+  - `exclude`: Specifies the directories to exclude from the documentation generation.
+- `bundle`: Defines bundling options.
+  - `include`: Specifies the directories to include in the bundling process.
+  - `exclude`: Specifies the directories to exclude from the bundling process.
+- `upgrade`: Defines upgrade options.
+  - `include`: Specifies the directories to include in the upgrade process.
+  - `exclude`: Specifies the directories to exclude from the upgrade process.
+- `lock`: Defines lock file generation options.
+  - `include`: Specifies the directories to include in the lock file generation.
+  - `exclude`: Specifies the directories to exclude from the lock file generation.
+- `vendor`: Defines vendor directory options.
+  - `include`: Specifies the directories to include in the vendor directory.
+  - `exclude`: Specifies the directories to exclude from the vendor directory.
+- `info`: Defines info command options.
+  - `include`: Specifies the directories to include in the info command.
+  - `exclude`: Specifies the directories to exclude from the info command.
+- `install`: Defines install command options.
+  - `include`: Specifies the directories to include in the install command.
+  - `exclude`: Specifies the directories to exclude from the install command.
+- `uninstall`: Defines uninstall command options.
+  - `include`: Specifies the directories to include in the uninstall command.
+  - `exclude`: Specifies the directories to exclude from the uninstall command.
+- `update`: Defines update command options.
+  - `include`: Specifies the directories to include in the update command.
+  - `exclude`: Specifies the directories to exclude from the update command.
+- `clean`: Defines clean command options.
+  - `include`: Specifies the directories to include in the clean command.
+  - `exclude`: Specifies the directories to exclude from the clean command.
+- `build`: Defines build command options.
+  - `include`: Specifies the directories to include in the build command.
+  - `exclude`: Specifies the directories to exclude from the build command.
+- `serve`: Defines serve command options.
+  - `include`: Specifies the directories to include in the serve command.
+  - `exclude`: Specifies the directories to exclude from the serve command.
+- `deploy`: Defines deploy command options.
+  - `include`: Specifies the directories to include in the deploy command.
+  - `exclude`: Specifies the directories to exclude from the deploy command.
+- `watch`: Defines watch command options.
+  - `include`: Specifies the directories to include in the watch command.
+  - `exclude`: Specifies the directories to exclude from the watch command.
+- `run`: Defines run command options.
+  - `include`: Specifies the directories to include in the run command.
+  - `exclude`: Specifies the directories to exclude from the run command.
+
+### Vercel Configuration
+
+<!-- Pe4aa -->
+The `vercel.json` file contains the configuration options for deploying the VoxelSpace project on Vercel. It includes build and routing configurations.
+
+- `builds`: Specifies the build configuration.
+  - `src`: The source file to build.
+  - `use`: The build engine to use.
+- `routes`: Specifies the routing configuration.
+  - `src`: The source route pattern.
+  - `dest`: The destination file to route to.
+
+### Package Configuration
+
+<!-- Pe4aa -->
+The `package.json` file contains the configuration options for the VoxelSpace project. It includes scripts for building, serving, and testing the project, as well as dependencies and devDependencies.
+
+- `name`: The name of the project.
+- `version`: The version of the project.
+- `description`: A brief description of the project.
+- `main`: The entry point of the project.
+- `scripts`: Defines scripts that can be run using the `npm` command.
+  - `start`: Runs the Vite development server.
+  - `build`: Builds the project using Vite.
+  - `serve`: Serves the built project using Vite.
+  - `test`: Runs the tests using Deno.
+- `dependencies`: Lists the project's dependencies.
+  - `vue`: Vue.js is a progressive JavaScript framework for building user interfaces.
+  - `oak`: Oak is a middleware framework for Deno's native HTTP server.
+  - `gl-matrix`: gl-matrix is a JavaScript library for matrix and vector operations.
+- `devDependencies`: Lists the project's development dependencies.
+  - `vite`: Vite is a build tool that provides a fast development server and optimized build process.
+  - `deno`: Deno is a secure runtime for JavaScript and TypeScript.
+- `author`: The author of the project.
+- `license`: The license of the project.

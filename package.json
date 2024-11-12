@@ -20,7 +20,11 @@
   },
   "dependencies": {
     // Vue.js is a progressive JavaScript framework for building user interfaces
-    "vue": "^3.5.12"
+    "vue": "^3.5.12",
+    // Oak is a middleware framework for Deno's native HTTP server
+    "oak": "^10.5.1",
+    // gl-matrix is a JavaScript library for matrix and vector operations
+    "gl-matrix": "^3.4.3"
   },
   "devDependencies": {
     // Vite is a build tool that provides a fast development server and optimized build process

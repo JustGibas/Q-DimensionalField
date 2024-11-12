@@ -1,3 +1,16 @@
+/**
+ * This file contains the test cases for the helper functions used throughout the application.
+ * It tests the functionality of common tasks such as string manipulation, ID generation, date formatting, and email validation.
+ * 
+ * Configuration options:
+ * - assertEquals: Asserts that two values are equal.
+ * - assertNotEquals: Asserts that two values are not equal.
+ * - capitalizeFirstLetter: Function to capitalize the first letter of a string.
+ * - generateRandomId: Function to generate a random ID.
+ * - formatDate: Function to format a date to a readable string.
+ * - isValidEmail: Function to validate an email address.
+ */
+
 import { assertEquals, assertNotEquals } from "https://deno.land/std/testing/asserts.ts";
 import { capitalizeFirstLetter, generateRandomId, formatDate, isValidEmail } from "../utils/helpers.ts";
 
