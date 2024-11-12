@@ -4,6 +4,8 @@
 
 VoxelSpace is a VR/AR/XR game that uses voxel chunks to create a global server. Each voxel acts as a server, and users interact with voxel clones. Voxels communicate through events and only with neighboring voxels. The starting point is at coordinates (0, 0, 0), and each voxel extends 5 units in all directions, making it a 10-unit size voxel.
 
+Vue.js is now integrated into the project for frontend development. 🖥️
+
 ## Project Structure
 
 The project has a clear directory structure with separate directories for Rust code, WebGPU setup, and Wasm modules:
@@ -77,6 +79,28 @@ The project has a clear directory structure with separate directories for Rust c
      ```sh
      vercel
      ```
+
+10. Install Vue.js:
+    - Add a script tag to include Vue.js from a CDN in `web/index.html`:
+      ```html
+      <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+      ```
+
+11. Initialize Vue.js app:
+    - Create a `div` element with `id="app"` in `web/index.html`:
+      ```html
+      <div id="app"></div>
+      ```
+
+    - Initialize a Vue.js app in `web/main.js`:
+      ```javascript
+      new Vue({
+        el: '#app',
+        data: {
+          message: 'Hello Vue!'
+        }
+      });
+      ```
 
 ## Event-Driven Architecture and Microservices
 

@@ -105,3 +105,13 @@ serve((req) => {
     const body = new TextEncoder().encode("Hello from Deno!");
     return new Response(body, { status: 200 });
 });
+
+new Vue({
+    el: '#app',
+    data: {
+        message: 'Hello Vue!'
+    },
+    mounted() {
+        main();
+    }
+});
