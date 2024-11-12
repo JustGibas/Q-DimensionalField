@@ -10,7 +10,7 @@
  * - deleteUser: The controller function for handling DELETE requests to delete a user by ID.
  */
 
-import { Router } from "https://deno.land/x/oak/mod.ts";
+import { Router } from "@oakserver/oak";
 import { getUser, addUser, updateUser, deleteUser } from "../controllers/userController.ts";
 
 // Create a new router instance

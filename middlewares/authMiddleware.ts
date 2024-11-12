@@ -11,7 +11,7 @@
  * - isValid: A boolean indicating whether the token is valid.
  */
 
-import { Context } from "https://deno.land/x/oak/mod.ts";
+import { Context } from "@oakserver/oak";
 
 // This middleware function handles authentication for incoming requests
 export async function authMiddleware(ctx: Context, next: () => Promise<void>) {

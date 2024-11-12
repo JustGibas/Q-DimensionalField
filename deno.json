@@ -1,12 +1,12 @@
 {
   "tasks": {
-    "start": "deno run --allow-net --allow-read web/main.js"
+    "start": "deno run --allow-net --allow-read --allow-env web/main.js"
   },
   "importMap": "./import_map.json",
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "lib": ["ESNext", "DOM"],
+    "lib": ["ESNext", "DOM", "deno.ns"],
     "strict": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true

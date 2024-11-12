@@ -8,7 +8,7 @@
  * - err: The error object that occurred during request processing.
  */
 
-import { Context } from "https://deno.land/x/oak/mod.ts";
+import { Context } from "@oakserver/oak";
 
 // This middleware function handles errors that occur during request processing
 export async function errorMiddleware(ctx: Context, next: () => Promise<void>) {
