@@ -5,13 +5,16 @@
   "main": "web/main.js",
   "scripts": {
     "start": "vite",
+    "dev": "vite",
     "build": "vite build",
     "serve": "vite preview",
     "test": "deno test"
   },
   "dependencies": {
-    "gl-matrix": "^3.4.3",
     "@oakserver/oak": "^14.1.0",
+    "@vitejs/plugin-vue": "^5.1.5",
+    "gl-matrix": "^3.4.3",
+    "vite-plugin-wasm": "^3.3.0",
     "vue": "^3.5.12"
   },
   "devDependencies": {
@@ -19,5 +22,9 @@
     "vite": "^5.4.11"
   },
   "author": "Justinas Gibas",
-  "license": "MIT"
+  "license": "MIT",
+  "directories": {
+    "test": "tests"
+  },
+  "keywords": []
 }

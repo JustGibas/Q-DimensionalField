@@ -1,8 +1,10 @@
 {
   "builds": [
-    { "src": "web/main.js", "use": "@vercel/node" }
+    { "src": "web/main.js", "use": "@vercel/node" },
+    { "src": "dist/**", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "web/main.js" }
+    { "src": "/api/(.*)", "dest": "web/main.js" },
+    { "src": "/(.*)", "dest": "/dist/$1" }
   ]
 }

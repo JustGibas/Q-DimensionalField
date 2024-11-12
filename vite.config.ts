@@ -5,6 +5,8 @@
  */
 
 import { defineConfig } from 'vite';
+import vue from "@vitejs/plugin-vue";
+import wasm from "vite-plugin-wasm";
 
 export default defineConfig({
   server: {
@@ -32,10 +34,10 @@ export default defineConfig({
   //     }
   //   }
   // },
-  // plugins: [
-  //   // Specifies the plugins to use
-  //   vue(),
-  // ],
+    plugins: [
+     // Specifies the plugins to use
+      vue(), wasm()
+    ],
   // optimizeDeps: {
   //   // Specifies the dependencies to pre-bundle
   //   include: ['vue', 'vue-router'],
