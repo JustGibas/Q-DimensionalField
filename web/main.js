@@ -1,4 +1,5 @@
 import { mat4, vec3 } from 'gl-matrix';
+import { serve } from "https://deno.land/std@0.114.0/http/server.ts";
 
 async function initWebGPU() {
     if (!navigator.gpu) {
@@ -99,3 +100,8 @@ async function main() {
 }
 
 main();
+
+serve((req) => {
+    const body = new TextEncoder().encode("Hello from Deno!");
+    return new Response(body, { status: 200 });
+});

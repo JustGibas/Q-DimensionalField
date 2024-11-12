@@ -37,6 +37,47 @@ The project has a clear directory structure with separate directories for Rust c
    vite
    ```
 
+5. Install Deno:
+   ```sh
+   curl -fsSL https://deno.land/x/install/install.sh | sh
+   ```
+
+6. Run the project using Deno:
+   ```sh
+   deno run --allow-net --allow-read web/main.js
+   ```
+
+7. Install Vite:
+   ```sh
+   npm install -g vite
+   ```
+
+8. Run the project using Vite:
+   ```sh
+   vite
+   ```
+
+9. Deploy the project on Vercel:
+   - Create a `vercel.json` file in the root directory with the following content:
+     ```json
+     {
+       "builds": [
+         { "src": "web/main.js", "use": "@vercel/node" }
+       ],
+       "routes": [
+         { "src": "/(.*)", "dest": "web/main.js" }
+       ]
+     }
+     ```
+   - Install Vercel CLI:
+     ```sh
+     npm install -g vercel
+     ```
+   - Deploy the project:
+     ```sh
+     vercel
+     ```
+
 ## Event-Driven Architecture and Microservices
 
 The project uses an event-driven architecture and microservices approach to ensure modularity and scalability. Each voxel acts as a server, handling its own state and communication with neighboring voxels. The communication is event-driven, allowing for real-time updates and interactions.
