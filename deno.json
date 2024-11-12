@@ -101,80 +101,81 @@
     "include": ["src/"],
     "exclude": ["tests/"]
   },
-  "test:watch": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
-  "test:coverage": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
-  "test:lint": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
-  "test:fmt": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
-  "test:doc": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
-  "test:bundle": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
-  "test:upgrade": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
-  "test:lock": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
-  "test:vendor": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
-  "test:info": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
-  "test:install": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
-  "test:uninstall": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
-  "test:update": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
-  "test:clean": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
-  "test:build": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
-  "test:serve": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
-  "test:deploy": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
-  "test:watch": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
-  "test:run": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  }
+  // The following options are commented out as they are unnecessary for this project
+  // "test:watch": {
+  //   "include": ["src/"],
+  //   "exclude": ["tests/"]
+  // },
+  // "test:coverage": {
+  //   "include": ["src/"],
+  //   "exclude": ["tests/"]
+  // },
+  // "test:lint": {
+  //   "include": ["src/"],
+  //   "exclude": ["tests/"]
+  // },
+  // "test:fmt": {
+  //   "include": ["src/"],
+  //   "exclude": ["tests/"]
+  // },
+  // "test:doc": {
+  //   "include": ["src/"],
+  //   "exclude": ["tests/"]
+  // },
+  // "test:bundle": {
+  //   "include": ["src/"],
+  //   "exclude": ["tests/"]
+  // },
+  // "test:upgrade": {
+  //   "include": ["src/"],
+  //   "exclude": ["tests/"]
+  // },
+  // "test:lock": {
+  //   "include": ["src/"],
+  //   "exclude": ["tests/"]
+  // },
+  // "test:vendor": {
+  //   "include": ["src/"],
+  //   "exclude": ["tests/"]
+  // },
+  // "test:info": {
+  //   "include": ["src/"],
+  //   "exclude": ["tests/"]
+  // },
+  // "test:install": {
+  //   "include": ["src/"],
+  //   "exclude": ["tests/"]
+  // },
+  // "test:uninstall": {
+  //   "include": ["src/"],
+  //   "exclude": ["tests/"]
+  // },
+  // "test:update": {
+  //   "include": ["src/"],
+  //   "exclude": ["tests/"]
+  // },
+  // "test:clean": {
+  //   "include": ["src/"],
+  //   "exclude": ["tests/"]
+  // },
+  // "test:build": {
+  //   "include": ["src/"],
+  //   "exclude": ["tests/"]
+  // },
+  // "test:serve": {
+  //   "include": ["src/"],
+  //   "exclude": ["tests/"]
+  // },
+  // "test:deploy": {
+  //   "include": ["src/"],
+  //   "exclude": ["tests/"]
+  // },
+  // "test:watch": {
+  //   "include": ["src/"],
+  //   "exclude": ["tests/"]
+  // },
+  // "test:run": {
+  //   "include": ["src/"],
+  //   "exclude": ["tests/"]
+  // }
 }

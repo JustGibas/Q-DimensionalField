@@ -15,7 +15,8 @@ export default defineConfig({
       '@': '/src',
     },
   },
-  // Uncomment the following options if needed
+  // The following options are included for educational purposes
+  // Uncomment them if needed
 
   // css: {
   //   // Specifies the CSS preprocessor options

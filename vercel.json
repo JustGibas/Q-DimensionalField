@@ -1,8 +1,10 @@
 {
   "builds": [
+    // Specifies the build configuration
     { "src": "web/main.js", "use": "@vercel/node" }
   ],
   "routes": [
+    // Specifies the routing configuration
     { "src": "/(.*)", "dest": "web/main.js" }
   ]
 }
