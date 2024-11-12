@@ -19,7 +19,7 @@ export class ProductController {
     } catch (error) {
       // Handle error
       ctx.response.status = 500;
-      ctx.response.body = { message: "Failed to fetch products" };
+      ctx.response.body = { message: "Failed to fetch products", error: error.message };
     }
   }
 
@@ -40,7 +40,7 @@ export class ProductController {
     } catch (error) {
       // Handle error
       ctx.response.status = 500;
-      ctx.response.body = { message: "Failed to fetch product" };
+      ctx.response.body = { message: "Failed to fetch product", error: error.message };
     }
   }
 
@@ -57,7 +57,7 @@ export class ProductController {
     } catch (error) {
       // Handle error
       ctx.response.status = 500;
-      ctx.response.body = { message: "Failed to create product" };
+      ctx.response.body = { message: "Failed to create product", error: error.message };
     }
   }
 
@@ -79,7 +79,7 @@ export class ProductController {
     } catch (error) {
       // Handle error
       ctx.response.status = 500;
-      ctx.response.body = { message: "Failed to update product" };
+      ctx.response.body = { message: "Failed to update product", error: error.message };
     }
   }
 
@@ -100,7 +100,7 @@ export class ProductController {
     } catch (error) {
       // Handle error
       ctx.response.status = 500;
-      ctx.response.body = { message: "Failed to delete product" };
+      ctx.response.body = { message: "Failed to delete product", error: error.message };
     }
   }
 }

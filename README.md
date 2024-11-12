@@ -109,3 +109,154 @@ The project uses an event-driven architecture and microservices approach to ensu
 ### Microservices with Wasm
 
 Microservices are implemented using Wasm modules in the `wasm` directory. Each microservice handles a specific aspect of the game, such as physics, AI, or user interactions. The event-driven architecture allows microservices to communicate with the main voxel server and other microservices by subscribing to relevant events and publishing events as needed.
+
+## To-Do List
+
+- Add detailed comments and explanations to each function and class in the code to help students understand the purpose and functionality of the code. 📝
+- Include comments explaining the parameters and return values of functions, as well as any important logic or algorithms used. 💡
+- Add comments to explain the purpose of each file and how it fits into the overall project structure. 📂
+- Expand the `README.md` file to include detailed information about the project, its structure, and how to set it up and run it. 📚
+- Include a section on the technologies and libraries used in the project, with links to relevant documentation. 🔗
+- Add a section on the project's architecture and design, explaining how the different components interact with each other. 🏗️
+- Add `oak` to the `dependencies` section in `package.json` for handling HTTP requests and middleware in `controllers/userController.ts`, `main.ts`, `middlewares/authMiddleware.ts`, and `middlewares/errorMiddleware.ts`. 🌳
+- Add `gl-matrix` to the `dependencies` section in `package.json` for matrix and vector operations in `web/main.js`. 📐
+- Add `vite` to the `devDependencies` section in `package.json` for building and serving the project in `vite.config.ts`. 🚀
+- Add `deno` to the `devDependencies` section in `package.json` for running and testing the project in `deno.json`. 🦕
+- Improve the error handling in `controllers/productController.ts` and `controllers/userController.ts` to provide more informative error messages. ⚠️
+- Add unit tests for the functions in `utils/helpers.ts` to ensure their correctness. 🧪
+- Create a comprehensive guide on how to contribute to the project, including coding standards, branching strategy, and pull request guidelines. 🤝
+
+## Docker and Kubernetes Setup
+
+### Docker
+
+1. Create a `Dockerfile` in the root directory with the following content:
+   ```Dockerfile
+   # Use the official Rust image as the base image
+   FROM rust:latest
+
+   # Set the working directory
+   WORKDIR /app
+
+   # Copy the project files to the container
+   COPY . .
+
+   # Install WebAssembly target
+   RUN rustup target add wasm32-unknown-unknown
+
+   # Build the project
+   RUN cargo build --release
+
+   # Install Vite
+   RUN npm install -g vite
+
+   # Install Deno
+   RUN curl -fsSL https://deno.land/x/install/install.sh | sh
+
+   # Expose the port
+   EXPOSE 3000
+
+   # Start the project
+   CMD ["vite"]
+   ```
+
+2. Build the Docker image:
+   ```sh
+   docker build -t voxelspace .
+   ```
+
+3. Run the Docker container:
+   ```sh
+   docker run -p 3000:3000 voxelspace
+   ```
+
+### Kubernetes
+
+1. Create a `deployment.yaml` file in the root directory with the following content:
+   ```yaml
+   apiVersion: apps/v1
+   kind: Deployment
+   metadata:
+     name: voxelspace-deployment
+   spec:
+     replicas: 3
+     selector:
+       matchLabels:
+         app: voxelspace
+     template:
+       metadata:
+         labels:
+           app: voxelspace
+       spec:
+         containers:
+         - name: voxelspace
+           image: voxelspace:latest
+           ports:
+           - containerPort: 3000
+   ```
+
+2. Apply the deployment:
+   ```sh
+   kubectl apply -f deployment.yaml
+   ```
+
+3. Create a `service.yaml` file in the root directory with the following content:
+   ```yaml
+   apiVersion: v1
+   kind: Service
+   metadata:
+     name: voxelspace-service
+   spec:
+     selector:
+       app: voxelspace
+     ports:
+       - protocol: TCP
+         port: 80
+         targetPort: 3000
+     type: LoadBalancer
+   ```
+
+4. Apply the service:
+   ```sh
+   kubectl apply -f service.yaml
+   ```
+
+## Serverless Functions with Vercel
+
+1. Create a `vercel.json` file in the root directory with the following content:
+   ```json
+   {
+     "builds": [
+       { "src": "web/main.js", "use": "@vercel/node" }
+     ],
+     "routes": [
+       { "src": "/(.*)", "dest": "web/main.js" }
+     ]
+   }
+   ```
+
+2. Install Vercel CLI:
+   ```sh
+   npm install -g vercel
+   ```
+
+3. Deploy the project:
+   ```sh
+   vercel
+   ```
+
+## Prioritizing Serverless Functions
+
+### Benefits of Serverless Functions
+
+- Scalability: Serverless functions automatically scale with the number of requests, ensuring that the application can handle high traffic without manual intervention.
+- Cost-efficiency: With serverless functions, you only pay for the actual usage, reducing costs compared to traditional server-based architectures.
+- Simplified deployment: Serverless functions can be deployed independently, allowing for faster and more frequent updates.
+
+### Guidelines for Prioritizing Serverless Functions
+
+1. Identify functions that can benefit from serverless architecture, such as those with variable workloads or high scalability requirements.
+2. Design functions to be stateless and idempotent, ensuring that they can be executed independently and repeatedly without side effects.
+3. Use environment variables and configuration files to manage settings and secrets, avoiding hardcoding sensitive information in the code.
+4. Implement proper error handling and logging to ensure that issues can be quickly identified and resolved.
+5. Monitor the performance and usage of serverless functions to optimize their efficiency and cost-effectiveness.

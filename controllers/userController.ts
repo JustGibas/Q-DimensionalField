@@ -19,7 +19,7 @@ export const getUser = async ({ params, response }: { params: { id: string }; re
   } catch (error) {
     // Handle error
     response.status = 500;
-    response.body = { message: "Failed to fetch user" };
+    response.body = { message: "Failed to fetch user", error: error.message };
   }
 };
 
@@ -37,7 +37,7 @@ export const addUser = async ({ request, response }: { request: Request; respons
   } catch (error) {
     // Handle error
     response.status = 500;
-    response.body = { message: "Failed to add user" };
+    response.body = { message: "Failed to add user", error: error.message };
   }
 };
 
@@ -61,7 +61,7 @@ export const updateUser = async ({ params, request, response }: { params: { id: 
   } catch (error) {
     // Handle error
     response.status = 500;
-    response.body = { message: "Failed to update user" };
+    response.body = { message: "Failed to update user", error: error.message };
   }
 };
 
@@ -83,6 +83,6 @@ export const deleteUser = async ({ params, response }: { params: { id: string };
   } catch (error) {
     // Handle error
     response.status = 500;
-    response.body = { message: "Failed to delete user" };
+    response.body = { message: "Failed to delete user", error: error.message };
   }
 };
