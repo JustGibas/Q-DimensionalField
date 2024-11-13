@@ -12,10 +12,7 @@
   },
   "dependencies": {
     "@oakserver/oak": "^14.1.0",
-    "@vitejs/plugin-vue": "^5.1.5",
-    "gl-matrix": "^3.4.3",
-    "vite-plugin-wasm": "^3.3.0",
-    "vue": "^3.5.12"
+    "gl-matrix": "^3.4.3"
   },
   "devDependencies": {
     "deno": "^0.1.1",
