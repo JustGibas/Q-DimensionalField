@@ -2,22 +2,22 @@ version: '3.8'
 
 services:
   navbar:
-    build: ./frontend/navbar
+    build: ./microfrontends/frontend-auth
     ports:
       - "3001:80"
     volumes:
-      - ./frontend/navbar/src:/app/src
-      - ./frontend/navbar/static:/app/static
-      - ./frontend/navbar/dist:/app/dist
+      - ./microfrontends/frontend-auth/src:/app/src
+      - ./microfrontends/frontend-auth/static:/app/static
+      - ./microfrontends/frontend-auth/dist:/app/dist
 
   main-menu:
-    build: ./frontend/main-menu
+    build: ./microfrontends/frontend-dashboard
     ports:
       - "3002:80"
     volumes:
-      - ./frontend/main-menu/src:/app/src
-      - ./frontend/main-menu/static:/app/static
-      - ./frontend/main-menu/dist:/app/dist
+      - ./microfrontends/frontend-dashboard/src:/app/src
+      - ./microfrontends/frontend-dashboard/static:/app/static
+      - ./microfrontends/frontend-dashboard/dist:/app/dist
 
   3d-engine:
     build: ./frontend/3d-engine
@@ -29,18 +29,18 @@ services:
       - ./frontend/3d-engine/dist:/app/dist
 
   auth-service:
-    build: ./backend/auth-service
+    build: ./backend-auth
     ports:
       - "8001:8000"
     volumes:
-      - ./backend/auth-service:/app
+      - ./backend-auth:/app
 
   data-service:
-    build: ./backend/data-service
+    build: ./backend-data
     ports:
       - "8002:8000"
     volumes:
-      - ./backend/data-service:/app
+      - ./backend-data:/app
 
   gateway:
     build: ./gateway
