@@ -1,83 +1,160 @@
-use yew::prelude::*;
-use yew::virtual_dom::VNode;
+/**
+ * This file is the entry point of the VoxelSpace application.
+ * It defines the VoxelServer and Voxel structures, which manage the state and communication of voxels in the system.
+ * The application simulates event-driven communication between voxels.
+ * 
+ * Configuration options:
+ * - VoxelId: Type alias for voxel identifier.
+ * - Voxel: Represents a voxel in the system.
+ * - VoxelState: Represents the state of a voxel.
+ * - VoxelEvent: Represents an event that can occur in a voxel.
+ * - VoxelServer: Manages voxels and their communication.
+ * - id: Unique identifier of the voxel.
+ * - neighbors: List of neighboring voxel identifiers.
+ * - state: Shared state of the voxel.
+ * - data: Data stored in the voxel.
+ * - event: The event to handle.
+ * - voxels: Map of voxel identifiers to voxels.
+ * - new_data: New data to update in the voxel.
+ */
 
-struct ThreeDEngine;
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::Duration;
 
-impl Component for ThreeDEngine {
-    type Message = ();
-    type Properties = ();
+/// Type alias for voxel identifier
+type VoxelId = (i32, i32, i32);
 
-    fn create(ctx: &Context<Self>) -> Self {
-        Self
+/// Represents a voxel in the system
+#[derive(Clone)]
+struct Voxel {
+    /// Unique identifier of the voxel
+    id: VoxelId,
+    /// List of neighboring voxel identifiers
+    neighbors: Vec<VoxelId>,
+    /// Shared state of the voxel
+    state: Arc<Mutex<VoxelState>>,
+}
+
+/// Represents the state of a voxel
+#[derive(Clone)]
+struct VoxelState {
+    /// Data stored in the voxel
+    data: String,
+}
+
+impl Voxel {
+    /// Creates a new voxel with the given identifier
+    /// 
+    /// # Parameters
+    /// - `id`: The unique identifier of the voxel
+    fn new(id: VoxelId) -> Self {
+        Voxel {
+            id,
+            neighbors: Vec::new(),
+            state: Arc::new(Mutex::new(VoxelState { data: String::new() })),
+        }
     }
 
-    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
-        false
+    /// Adds a neighboring voxel identifier to the voxel
+    /// 
+    /// # Parameters
+    /// - `neighbor_id`: The identifier of the neighboring voxel
+    fn add_neighbor(&mut self, neighbor_id: VoxelId) {
+        self.neighbors.push(neighbor_id);
     }
 
-    fn change(&mut self, ctx: &Context<Self>, _: Self::Properties) -> bool {
-        false
-    }
-
-    fn view(&self, ctx: &Context<Self>) -> Html {
-        html! {
-            <div>
-                <h1>{"3D Engine"}</h1>
-                <canvas id="3d-canvas"></canvas>
-                { self.render_navbar() }
-                { self.render_main_menu() }
-            </div>
+    /// Handles an event for the voxel
+    /// 
+    /// # Parameters
+    /// - `event`: The event to handle
+    fn handle_event(&self, event: VoxelEvent) {
+        let mut state = self.state.lock().unwrap();
+        match event {
+            VoxelEvent::UpdateData(new_data) => {
+                state.data = new_data;
+            }
         }
     }
 }
 
-impl ThreeDEngine {
-    fn render_navbar(&self) -> Html {
-        html! {
-            <Suspense fallback={html! { <div>{"Loading Navbar..."}</div> }}>
-                <Navbar />
-            </Suspense>
+/// Represents an event that can occur in a voxel
+enum VoxelEvent {
+    /// Event to update the data in a voxel
+    UpdateData(String),
+}
+
+/// Represents the voxel server that manages voxels
+struct VoxelServer {
+    /// Map of voxel identifiers to voxels
+    voxels: HashMap<VoxelId, Voxel>,
+}
+
+impl VoxelServer {
+    /// Creates a new voxel server
+    fn new() -> Self {
+        VoxelServer {
+            voxels: HashMap::new(),
         }
     }
 
-    fn render_main_menu(&self) -> Html {
-        html! {
-            <Suspense fallback={html! { <div>{"Loading Main Menu..."}</div> }}>
-                <MainMenu />
-            </Suspense>
+    /// Adds a voxel to the server
+    /// 
+    /// # Parameters
+    /// - `voxel`: The voxel to add
+    fn add_voxel(&mut self, voxel: Voxel) {
+        self.voxels.insert(voxel.id, voxel);
+    }
+
+    /// Retrieves a voxel by its identifier
+    /// 
+    /// # Parameters
+    /// - `id`: The identifier of the voxel
+    /// 
+    /// # Returns
+    /// An option containing the voxel if found, or None if not found
+    fn get_voxel(&self, id: &VoxelId) -> Option<&Voxel> {
+        self.voxels.get(id)
+    }
+
+    /// Sends an event to a voxel
+    /// 
+    /// # Parameters
+    /// - `id`: The identifier of the voxel
+    /// - `event`: The event to send
+    fn send_event(&self, id: &VoxelId, event: VoxelEvent) {
+        if let Some(voxel) = self.get_voxel(id) {
+            voxel.handle_event(event);
         }
     }
-}
 
-#[function_component(Navbar)]
-fn navbar() -> Html {
-    html! {
-        <div>
-            <nav>
-                <ul>
-                    <li><a href="#home">{"Home"}</a></li>
-                    <li><a href="#about">{"About"}</a></li>
-                    <li><a href="#contact">{"Contact"}</a></li>
-                </ul>
-            </nav>
-        </div>
-    }
-}
-
-#[function_component(MainMenu)]
-fn main_menu() -> Html {
-    html! {
-        <div>
-            <h1>{"Main Menu"}</h1>
-            <ul>
-                <li><a href="#start">{"Start Game"}</a></li>
-                <li><a href="#settings">{"Settings"}</a></li>
-                <li><a href="#exit">{"Exit"}</a></li>
-            </ul>
-        </div>
+    /// Runs the voxel server, simulating event-driven communication
+    fn run(&self) {
+        loop {
+            // Simulate event-driven communication
+            for voxel in self.voxels.values() {
+                for neighbor_id in &voxel.neighbors {
+                    if let Some(neighbor) = self.get_voxel(neighbor_id) {
+                        neighbor.handle_event(VoxelEvent::UpdateData("New data".to_string()));
+                    }
+                }
+            }
+            thread::sleep(Duration::from_secs(1));
+        }
     }
 }
 
 fn main() {
-    yew::start_app::<ThreeDEngine>();
+    let mut server = VoxelServer::new();
+
+    let mut voxel1 = Voxel::new((0, 0, 0));
+    let voxel2 = Voxel::new((1, 0, 0));
+
+    voxel1.add_neighbor((1, 0, 0));
+
+    server.add_voxel(voxel1);
+    server.add_voxel(voxel2);
+
+    server.run();
 }
