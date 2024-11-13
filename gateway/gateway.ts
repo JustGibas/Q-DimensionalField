@@ -4,7 +4,7 @@ const app = new Application();
 const router = new Router();
 
 router
-  .get("/auth", async (ctx) => {
+  .all("/auth(.*)", async (ctx) => {
     const response = await fetch("http://auth-service:8000" + ctx.request.url.pathname, {
       method: ctx.request.method,
       headers: ctx.request.headers,
@@ -13,7 +13,7 @@ router
     ctx.response.status = response.status;
     ctx.response.body = await response.text();
   })
-  .get("/data", async (ctx) => {
+  .all("/data(.*)", async (ctx) => {
     const response = await fetch("http://data-service:8000" + ctx.request.url.pathname, {
       method: ctx.request.method,
       headers: ctx.request.headers,
