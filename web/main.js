@@ -1,7 +1,7 @@
 /**
  * This file contains the main JavaScript code for the application.
  * It initializes the WebGPU context, sets up the rendering pipeline, and handles the main rendering loop.
- * Additionally, it sets up a simple HTTP server using Deno and initializes a Vue.js app.
+ * Additionally, it sets up a simple HTTP server using Deno.
  */
 
 import { mat4, vec3 } from 'gl-matrix';
@@ -131,15 +131,4 @@ main();
 serve((req) => {
     const body = new TextEncoder().encode("Hello from Deno!");
     return new Response(body, { status: 200 });
-});
-
-// Initialize a Vue.js app
-new Vue({
-    el: '#app',
-    data: {
-        message: 'Hello Vue!'
-    },
-    mounted() {
-        main();
-    }
 });
