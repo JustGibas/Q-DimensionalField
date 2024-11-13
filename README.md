@@ -2,14 +2,12 @@
 
 ## Project Overview
 
-<!-- P5719 -->
 VoxelSpace is a VR/AR/XR game that uses voxel chunks to create a global server. Each voxel acts as a server, and users interact with voxel clones. Voxels communicate through events and only with neighboring voxels. The starting point is at coordinates (0, 0, 0), and each voxel extends 5 units in all directions, making it a 10-unit size voxel.
 
 Vue.js is now integrated into the project for frontend development. 🖥️
 
 ## Project Structure
 
-<!-- P5719 -->
 The project has a clear directory structure with separate directories for Rust code, WebGPU setup, and Wasm modules:
 
 - `src`: Contains the main Rust code for the voxel server and game logic.
@@ -18,7 +16,6 @@ The project has a clear directory structure with separate directories for Rust c
 
 ## Setup Instructions
 
-<!-- P5719 -->
 1. Clone the repository:
    ```sh
    git clone https://github.com/JustGibas/VoxelSpace.git
@@ -107,17 +104,14 @@ The project has a clear directory structure with separate directories for Rust c
 
 ## Event-Driven Architecture and Microservices
 
-<!-- P5719 -->
 The project uses an event-driven architecture and microservices approach to ensure modularity and scalability. Each voxel acts as a server, handling its own state and communication with neighboring voxels. The communication is event-driven, allowing for real-time updates and interactions.
 
 ### Microservices with Wasm
 
-<!-- P5719 -->
 Microservices are implemented using Wasm modules in the `wasm` directory. Each microservice handles a specific aspect of the game, such as physics, AI, or user interactions. The event-driven architecture allows microservices to communicate with the main voxel server and other microservices by subscribing to relevant events and publishing events as needed.
 
 ## To-Do List
 
-<!-- P5719 -->
 - Add detailed comments and explanations to each function and class in the code to help students understand the purpose and functionality of the code. 📝
 - Include comments explaining the parameters and return values of functions, as well as any important logic or algorithms used. 💡
 - Add comments to explain the purpose of each file and how it fits into the overall project structure. 📂
@@ -136,7 +130,6 @@ Microservices are implemented using Wasm modules in the `wasm` directory. Each m
 
 ### Docker
 
-<!-- P5719 -->
 1. Create a `Dockerfile` in the root directory with the following content:
    ```Dockerfile
    # Use the official Rust image as the base image
@@ -179,7 +172,6 @@ Microservices are implemented using Wasm modules in the `wasm` directory. Each m
 
 ### Kubernetes
 
-<!-- P5719 -->
 1. Create a `deployment.yaml` file in the root directory with the following content:
    ```yaml
    apiVersion: apps/v1
@@ -231,7 +223,6 @@ Microservices are implemented using Wasm modules in the `wasm` directory. Each m
 
 ## Serverless Functions with Vercel
 
-<!-- P5719 -->
 1. Create a `vercel.json` file in the root directory with the following content:
    ```json
    {
@@ -258,14 +249,12 @@ Microservices are implemented using Wasm modules in the `wasm` directory. Each m
 
 ### Benefits of Serverless Functions
 
-<!-- P5719 -->
 - Scalability: Serverless functions automatically scale with the number of requests, ensuring that the application can handle high traffic without manual intervention.
 - Cost-efficiency: With serverless functions, you only pay for the actual usage, reducing costs compared to traditional server-based architectures.
 - Simplified deployment: Serverless functions can be deployed independently, allowing for faster and more frequent updates.
 
 ### Guidelines for Prioritizing Serverless Functions
 
-<!-- P5719 -->
 1. Identify functions that can benefit from serverless architecture, such as those with variable workloads or high scalability requirements.
 2. Design functions to be stateless and idempotent, ensuring that they can be executed independently and repeatedly without side effects.
 3. Use environment variables and configuration files to manage settings and secrets, avoiding hardcoding sensitive information in the code.
@@ -274,12 +263,10 @@ Microservices are implemented using Wasm modules in the `wasm` directory. Each m
 
 ## Configuration Options
 
-<!-- Pe4aa -->
 This section provides detailed explanations of the configuration options used in the project. Each configuration option is explained to help students understand its purpose and how to use it.
 
 ### Deno Configuration
 
-<!-- Pe4aa -->
 The `deno.json` file contains the configuration options for the Deno runtime. It includes tasks, import maps, compiler options, linting rules, formatting options, testing options, and more.
 
 - `tasks`: Defines tasks that can be run using the `deno task` command.
@@ -352,7 +339,6 @@ The `deno.json` file contains the configuration options for the Deno runtime. It
 
 ### Vercel Configuration
 
-<!-- Pe4aa -->
 The `vercel.json` file contains the configuration options for deploying the VoxelSpace project on Vercel. It includes build and routing configurations.
 
 - `builds`: Specifies the build configuration.
@@ -364,7 +350,6 @@ The `vercel.json` file contains the configuration options for deploying the Voxe
 
 ### Package Configuration
 
-<!-- Pe4aa -->
 The `package.json` file contains the configuration options for the VoxelSpace project. It includes scripts for building, serving, and testing the project, as well as dependencies and devDependencies.
 
 - `name`: The name of the project.
@@ -385,3 +370,79 @@ The `package.json` file contains the configuration options for the VoxelSpace pr
   - `deno`: Deno is a secure runtime for JavaScript and TypeScript.
 - `author`: The author of the project.
 - `license`: The license of the project.
+
+## Microfrontend Architecture
+
+The project has been refactored into a microfrontend architecture using Rust (Yew) for microfrontends and Deno for microservices. Each feature (e.g., Navbar, Main Menu, 3D Engine) is a self-contained module.
+
+### Project Structure
+
+The new project structure is as follows:
+
+```
+/frontend
+  /navbar
+    /src
+    /static
+    /dist
+    Cargo.toml
+    Dockerfile
+  /main-menu
+    /src
+    /static
+    /dist
+    Cargo.toml
+    Dockerfile
+  /3d-engine
+    /src
+    /static
+    /dist
+    Cargo.toml
+    Dockerfile
+/backend
+  /auth-service
+    server.ts
+    deno.json
+    import_map.json
+    Dockerfile
+  /data-service
+    server.ts
+    deno.json
+    import_map.json
+    Dockerfile
+/gateway
+  gateway.ts
+  deno.json
+  Dockerfile
+```
+
+### Container App
+
+A container app or shell is set up to dynamically load microfrontends. You can use either:
+- **Iframes** for embedding separate microfrontends into a single layout.
+- **Dynamic imports** to load components at runtime.
+
+### Gateway Service
+
+A gateway service is created in `/gateway` to handle API routing. Example routes:
+- `/auth` → `auth-service`
+- `/data` → `data-service`.
+
+### Docker Compose
+
+A `docker-compose.yml` file is added to orchestrate and run all services (frontends, backends, and gateway) together.
+
+### Running the Docker Containers
+
+1. Build and start the Docker containers:
+   ```sh
+   docker-compose up --build
+   ```
+
+2. Access the services:
+   - Navbar: `http://localhost:3001`
+   - Main Menu: `http://localhost:3002`
+   - 3D Engine: `http://localhost:3003`
+   - Auth Service: `http://localhost:8001`
+   - Data Service: `http://localhost:8002`
+   - Gateway: `http://localhost:8000`
