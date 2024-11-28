@@ -9,6 +9,7 @@ services:
       - ./apps/frontend/src:/app/src
       - ./apps/frontend/public:/app/public
       - ./apps/frontend/dist:/app/dist
+    command: deno task start
 
   backend:
     build: ./apps/backend
@@ -16,8 +17,6 @@ services:
       - "8000:8000"
     volumes:
       - ./apps/backend:/app
-    environment:
-      - DENO_ENV=production
 
   shared-ui:
     build: ./apps/shared-ui
@@ -26,6 +25,7 @@ services:
     volumes:
       - ./apps/shared-ui/src:/app/src
       - ./apps/shared-ui/dist:/app/dist
+    command: deno task start
 
   shared-utils:
     build: ./apps/shared-utils
@@ -34,6 +34,7 @@ services:
     volumes:
       - ./apps/shared-utils/src:/app/src
       - ./apps/shared-utils/dist:/app/dist
+    command: deno task start
 
   gateway:
     build: ./gateway
@@ -41,5 +42,3 @@ services:
       - "8001:8000"
     volumes:
       - ./gateway:/app
-    environment:
-      - DENO_ENV=production

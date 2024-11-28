@@ -79,12 +79,12 @@ To get started with the project, follow these steps:
 
 2. Install dependencies:
    ```sh
-   npm install
+   deno task install
    ```
 
 3. Start the development server:
    ```sh
-   npm run dev
+   deno task dev
    ```
 
 4. Open your browser and navigate to `http://localhost:3000`.
@@ -95,12 +95,12 @@ To build and deploy the project, follow these steps:
 
 1. Build the project:
    ```sh
-   npm run build
+   deno task build
    ```
 
 2. Deploy the project:
    ```sh
-   npm run deploy
+   deno task deploy
    ```
 
 ## Running Tests
@@ -109,7 +109,21 @@ To run the tests, follow these steps:
 
 1. Run the tests:
    ```sh
-   npm run test
+   deno task test
+   ```
+
+## Compiling to WebAssembly and JavaScript
+
+To compile the project to WebAssembly and JavaScript, follow these steps:
+
+1. Compile to WebAssembly:
+   ```sh
+   deno task build:wasm
+   ```
+
+2. Compile to JavaScript:
+   ```sh
+   deno task build:js
    ```
 
 ## Contributing
