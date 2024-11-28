@@ -31,9 +31,6 @@ deno_dir/
 # Ignore TypeScript build files
 *.tsbuildinfo
 
-# Ignore Vite build files
-.vite
-
 # Ignore test coverage files
 coverage/
 
