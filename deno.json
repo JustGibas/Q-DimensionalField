@@ -2,7 +2,24 @@
   "tasks": {
     "start": "deno run --allow-net --allow-read --allow-env server.ts",
     "fmt": "deno fmt",
-    "lint": "deno lint"
+    "lint": "deno lint",
+    "test": "deno test",
+    "coverage": "deno coverage",
+    "doc": "deno doc",
+    "bundle": "deno bundle",
+    "upgrade": "deno upgrade",
+    "lock": "deno lock",
+    "vendor": "deno vendor",
+    "info": "deno info",
+    "install": "deno install",
+    "uninstall": "deno uninstall",
+    "update": "deno update",
+    "clean": "deno clean",
+    "build": "deno build",
+    "serve": "deno serve",
+    "deploy": "deno deploy",
+    "watch": "deno watch",
+    "run": "deno run"
   },
   "importMap": "./import_map.json",
   "compilerOptions": {
