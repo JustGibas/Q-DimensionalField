@@ -8,7 +8,7 @@
  * - err: The error object that occurred during request processing.
  */
 
-import { Context } from "@oakserver/oak";
+import { Context } from "oak/mod.ts";
 
 // This middleware function handles errors that occur during request processing
 export async function errorMiddleware(ctx: Context, next: () => Promise<void>) {

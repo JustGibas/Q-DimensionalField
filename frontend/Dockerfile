@@ -1,14 +1,20 @@
 # Build stage
-FROM rust:1.72 as builder
+FROM node:14 as builder
 
-# Install Trunk and dependencies for building Yew
-RUN cargo install trunk
-
+# Set working directory
 WORKDIR /app
+
+# Copy package.json and package-lock.json
+COPY package.json package-lock.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy the rest of the application code
 COPY . .
 
-# Build the Yew app
-RUN trunk build --release
+# Build the application
+RUN npm run build
 
 # Serve stage
 FROM nginx:alpine
