@@ -13,7 +13,7 @@
  */
 
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
-import { createUser, getUserById, updateUser, deleteUser } from "./userService.ts";
+import { createUser, getUserById, updateUser, deleteUser } from "../services/userService.ts";
 
 // Create a new Oak application instance
 const app = new Application();
@@ -90,6 +90,6 @@ app.use(router.routes());
 app.use(router.allowedMethods());
 
 // Start the server and listen on the specified port
-const PORT = 8000;
+const PORT = parseInt(Deno.env.get("PORT") || "8000");
 console.log(`Server is running on port ${PORT}`);
 await app.listen({ port: PORT });

@@ -50,6 +50,6 @@ app.use(router.routes());
 app.use(router.allowedMethods());
 
 // Start the server
-const PORT = 8000;
+const PORT = parseInt(Deno.env.get("PORT") || "8000");
 console.log(`Server is running on port ${PORT}`);
 await app.listen({ port: PORT });

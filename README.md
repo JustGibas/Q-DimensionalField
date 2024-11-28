@@ -28,9 +28,9 @@ root/
   │   │   ├── models/               # Database models or schemas
   │   │   ├── middlewares/          # Backend middlewares
   │   │   ├── routes/               # Main router
-  │   │   ├── main.rs               # Backend entry point
-  │   │   ├── Cargo.toml            # Rust configuration for the backend
-  │   │   └── Dockerfile            # Dockerfile for backend service
+  │   │   ├── main.ts               # Backend entry point
+  │   │   ├── deno.json             # Deno configuration file
+  │   │   ├── Dockerfile            # Dockerfile for backend service
   │   ├── shared-ui/                # Shared UI components (used across micro-frontends)
   │   │   ├── src/                  # Source code for shared components
   │   │   ├── lib.rs                # Entry point for shared UI library

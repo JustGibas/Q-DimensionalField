@@ -1,5 +1,5 @@
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
-import { createUser, getUserById, updateUser, deleteUser } from "./userService.ts";
+import { createUser, getUserById, updateUser, deleteUser } from "../services/userService.ts";
 
 const app = new Application();
 const router = new Router();
