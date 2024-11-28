@@ -136,6 +136,49 @@ If you would like to contribute to the project, please follow these steps:
 4. Push your changes to your fork.
 5. Create a pull request.
 
+## Detailed Instructions for Contributors
+
+### Setup
+
+1. Ensure you have Deno installed. If not, you can install it from [here](https://deno.land/#installation).
+2. Clone the repository:
+   ```sh
+   git clone https://github.com/JustGibas/VoxelSpace.git
+   cd VoxelSpace
+   ```
+3. Install dependencies:
+   ```sh
+   deno task install
+   ```
+
+### Build
+
+To build the project, run:
+```sh
+deno task build
+```
+
+### Test
+
+To run the tests, use:
+```sh
+deno task test
+```
+
+### Run Locally
+
+To run the project locally, use:
+```sh
+deno task dev
+```
+
+### Deploy
+
+To deploy the project, use:
+```sh
+deno task deploy
+```
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

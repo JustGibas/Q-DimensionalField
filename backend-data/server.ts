@@ -40,15 +40,25 @@ router
   // Route to get all data
   // This route handles GET requests to /data and retrieves all data from the database
   .get("/data", async (context) => {
-    const result = await client.queryArray("SELECT * FROM data");
-    context.response.body = result.rows;
+    try {
+      const result = await client.queryArray("SELECT * FROM data");
+      context.response.body = result.rows;
+    } catch (error) {
+      context.response.status = 500;
+      context.response.body = { message: "Failed to fetch data", error: error.message };
+    }
   })
   // Route to insert new data
   // This route handles POST requests to /data and inserts new data into the database
   .post("/data", async (context) => {
-    const body = await context.request.body().value;
-    await client.queryArray("INSERT INTO data (name, value) VALUES ($1, $2)", body.name, body.value);
-    context.response.status = 201;
+    try {
+      const body = await context.request.body().value;
+      await client.queryArray("INSERT INTO data (name, value) VALUES ($1, $2)", body.name, body.value);
+      context.response.status = 201;
+    } catch (error) {
+      context.response.status = 500;
+      context.response.body = { message: "Failed to insert data", error: error.message };
+    }
   });
 
 // Use the router middleware
