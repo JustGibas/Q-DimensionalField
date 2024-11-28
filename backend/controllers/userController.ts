@@ -8,7 +8,7 @@
  * - request: The request object containing the user data.
  */
 
-import { Request, Response } from "oak/mod.ts";
+import { Request, Response, Context } from "oak/mod.ts";
 import { getUserById, createUser, updateUser, deleteUser } from "../services/userService.ts";
 
 /**

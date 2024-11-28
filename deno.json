@@ -14,7 +14,7 @@
   "lint": {
     "rules": {
       "tags": ["recommended"],
-      "include": ["src/", "tests/"],
+      "include": ["src/", "tests/", "backend/", "shared-ui/"],
       "exclude": ["node_modules/"]
     }
   },

@@ -12,6 +12,8 @@
  */
 
 import { Context } from "oak/mod.ts";
+import { verifyJwt } from "https://deno.land/x/djwt/verify.ts";
+import { getJwtSecret } from "../config.ts";
 
 // This middleware function handles authentication for incoming requests
 export async function authMiddleware(ctx: Context, next: () => Promise<void>) {
@@ -34,7 +36,7 @@ export async function authMiddleware(ctx: Context, next: () => Promise<void>) {
   }
 
   try {
-    // Verify the token (this is a placeholder, replace with actual verification logic)
+    // Verify the token
     const isValid = await verifyToken(token);
 
     // If the token is not valid, respond with 401 Unauthorized
@@ -53,8 +55,14 @@ export async function authMiddleware(ctx: Context, next: () => Promise<void>) {
   }
 }
 
-// Placeholder function to verify the token, replace with actual token verification logic
+// Function to verify the token
 async function verifyToken(token: string): Promise<boolean> {
-  // This is a placeholder implementation, replace with actual token verification logic
-  return token === "valid-token";
+  try {
+    const jwtSecret = getJwtSecret();
+    const payload = await verifyJwt(token, jwtSecret, { isThrowing: false });
+    return !!payload;
+  } catch (error) {
+    console.error("Token verification error:", error);
+    return false;
+  }
 }
