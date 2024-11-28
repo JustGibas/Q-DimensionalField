@@ -1,6 +1,6 @@
 /**
- * This file sets up the Oak application, configures middleware, and defines routes for user-related operations.
- * The application listens on a specified port and handles incoming HTTP requests.
+ * This file sets up the Oak application, configures routes for user-related operations,
+ * and starts the server to listen for incoming HTTP requests.
  * 
  * Configuration options:
  * - Application: The Oak application instance.
@@ -17,15 +17,16 @@ import { createUser, getUserById, updateUser, deleteUser } from "./userService.t
 
 // Create a new Oak application instance
 const app = new Application();
+
 // Create a new router instance
 const router = new Router();
 
-// Define the routes and their corresponding controller functions
+// Define the routes and their corresponding handler functions
 router
   // Route to register a new user
   // This route handles POST requests to /register and calls the createUser function
   .post("/register", async (ctx) => {
-    const { value } = await ctx.request.body().value;
+    const { value } = await ctx.request.body();
     const user = await createUser(value);
     ctx.response.body = user;
   })
@@ -43,7 +44,7 @@ router
   // Route to update an existing user
   // This route handles PUT requests to /user/:id and calls the updateUser function
   .put("/user/:id", async (ctx) => {
-    const { value } = await ctx.request.body().value;
+    const { value } = await ctx.request.body();
     const updatedUser = await updateUser(ctx.params.id, value);
     if (updatedUser) {
       ctx.response.body = updatedUser;
@@ -68,7 +69,7 @@ router
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-// Start the server
+// Start the server and listen on the specified port
 const PORT = 8000;
 console.log(`Server is running on port ${PORT}`);
 await app.listen({ port: PORT });

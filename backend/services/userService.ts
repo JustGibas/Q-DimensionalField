@@ -12,7 +12,7 @@
 import { User } from "../models/userModel.ts";
 
 // In-memory storage for users (replace with a database in a real application)
-const users: User[] = [];
+const users: Map<string, User> = new Map();
 
 /**
  * Get a user by ID
@@ -20,7 +20,7 @@ const users: User[] = [];
  * @returns The user object if found, otherwise null
  */
 export const getUserById = (id: string): User | null => {
-  return users.find(user => user.id === id) || null;
+  return users.get(id) || null;
 };
 
 /**
@@ -29,7 +29,7 @@ export const getUserById = (id: string): User | null => {
  * @returns The created user object
  */
 export const createUser = (user: User): User => {
-  users.push(user);
+  users.set(user.id, user);
   return user;
 };
 
@@ -40,9 +40,8 @@ export const createUser = (user: User): User => {
  * @returns The updated user object if found, otherwise null
  */
 export const updateUser = (id: string, updatedUser: User): User | null => {
-  const index = users.findIndex(user => user.id === id);
-  if (index !== -1) {
-    users[index] = updatedUser;
+  if (users.has(id)) {
+    users.set(id, updatedUser);
     return updatedUser;
   }
   return null;
@@ -54,10 +53,9 @@ export const updateUser = (id: string, updatedUser: User): User | null => {
  * @returns The deleted user object if found, otherwise null
  */
 export const deleteUser = (id: string): User | null => {
-  const index = users.findIndex(user => user.id === id);
-  if (index !== -1) {
-    const deletedUser = users.splice(index, 1)[0];
-    return deletedUser;
+  const user = users.get(id) || null;
+  if (user) {
+    users.delete(id);
   }
-  return null;
+  return user;
 };

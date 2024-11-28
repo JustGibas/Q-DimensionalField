@@ -13,14 +13,14 @@ import { Product } from "../models/productModel.ts";
 
 // The ProductService class handles the business logic related to products
 export class ProductService {
-  private products: Product[] = [];
+  private products: Map<string, Product> = new Map();
 
   /**
    * Get all products
    * @returns An array of all products
    */
   async getAllProducts(): Promise<Product[]> {
-    return this.products;
+    return Array.from(this.products.values());
   }
 
   /**
@@ -29,8 +29,7 @@ export class ProductService {
    * @returns The product with the specified ID, or null if not found
    */
   async getProductById(id: string): Promise<Product | null> {
-    const product = this.products.find((product) => product.id === id);
-    return product || null;
+    return this.products.get(id) || null;
   }
 
   /**
@@ -39,7 +38,7 @@ export class ProductService {
    * @returns The created product
    */
   async createProduct(product: Product): Promise<Product> {
-    this.products.push(product);
+    this.products.set(product.id, product);
     return product;
   }
 
@@ -50,9 +49,8 @@ export class ProductService {
    * @returns The updated product, or null if not found
    */
   async updateProduct(id: string, updatedProduct: Product): Promise<Product | null> {
-    const index = this.products.findIndex((product) => product.id === id);
-    if (index !== -1) {
-      this.products[index] = updatedProduct;
+    if (this.products.has(id)) {
+      this.products.set(id, updatedProduct);
       return updatedProduct;
     }
     return null;
@@ -64,11 +62,6 @@ export class ProductService {
    * @returns A boolean indicating whether the product was deleted
    */
   async deleteProduct(id: string): Promise<boolean> {
-    const index = this.products.findIndex((product) => product.id === id);
-    if (index !== -1) {
-      this.products.splice(index, 1);
-      return true;
-    }
-    return false;
+    return this.products.delete(id);
   }
 }
