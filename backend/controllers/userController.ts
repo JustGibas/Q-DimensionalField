@@ -10,9 +10,10 @@
 
 import { Request, Response } from "oak/mod.ts";
 import { getUserById, createUser, updateUser, deleteUser } from "../services/userService.ts";
+import { BaseController } from "./baseController.ts";
 
 // The UserController class handles the HTTP requests related to users
-export class UserController {
+export class UserController extends BaseController {
   /**
    * Get a user by ID
    * @param params - The parameters object containing the user ID
@@ -22,16 +23,12 @@ export class UserController {
     try {
       const user = await getUserById(params.id);
       if (user) {
-        response.status = 200;
-        response.body = user;
+        this.sendJsonResponse(response, 200, user);
       } else {
-        response.status = 404;
-        response.body = { message: "User not found" };
+        this.sendJsonResponse(response, 404, { message: "User not found" });
       }
     } catch (error) {
-      // Handle error
-      response.status = 500;
-      response.body = { message: "Failed to fetch user", error: error.message };
+      this.handleError(response, error);
     }
   }
 
@@ -44,12 +41,9 @@ export class UserController {
     try {
       const body = await request.body();
       const user = await createUser(body.value);
-      response.status = 201;
-      response.body = user;
+      this.sendJsonResponse(response, 201, user);
     } catch (error) {
-      // Handle error
-      response.status = 500;
-      response.body = { message: "Failed to add user", error: error.message };
+      this.handleError(response, error);
     }
   }
 
@@ -64,16 +58,12 @@ export class UserController {
       const body = await request.body();
       const updatedUser = await updateUser(params.id, body.value);
       if (updatedUser) {
-        response.status = 200;
-        response.body = updatedUser;
+        this.sendJsonResponse(response, 200, updatedUser);
       } else {
-        response.status = 404;
-        response.body = { message: "User not found" };
+        this.sendJsonResponse(response, 404, { message: "User not found" });
       }
     } catch (error) {
-      // Handle error
-      response.status = 500;
-      response.body = { message: "Failed to update user", error: error.message };
+      this.handleError(response, error);
     }
   }
 
@@ -86,16 +76,12 @@ export class UserController {
     try {
       const deletedUser = await deleteUser(params.id);
       if (deletedUser) {
-        response.status = 200;
-        response.body = { message: "User deleted" };
+        this.sendJsonResponse(response, 200, { message: "User deleted" });
       } else {
-        response.status = 404;
-        response.body = { message: "User not found" };
+        this.sendJsonResponse(response, 404, { message: "User not found" });
       }
     } catch (error) {
-      // Handle error
-      response.status = 500;
-      response.body = { message: "Failed to delete user", error: error.message };
+      this.handleError(response, error);
     }
   }
 }

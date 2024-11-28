@@ -1,9 +1,10 @@
 use yew::prelude::*;
 use yew::virtual_dom::VNode;
+use crate::shared_components::{Navbar, ThreeDEngine, MainMenu};
 
-struct Navbar;
+struct NavbarComponent;
 
-impl Component for Navbar {
+impl Component for NavbarComponent {
     type Message = ();
     type Properties = ();
 
@@ -36,7 +37,7 @@ impl Component for Navbar {
     }
 }
 
-impl Navbar {
+impl NavbarComponent {
     fn render_main_menu(&self) -> Html {
         html! {
             <Suspense fallback={html! { <div>{"Loading Main Menu..."}</div> }}>
@@ -54,30 +55,6 @@ impl Navbar {
     }
 }
 
-#[function_component(MainMenu)]
-fn main_menu() -> Html {
-    html! {
-        <div>
-            <h1>{"Main Menu"}</h1>
-            <ul>
-                <li><a href="#start">{"Start Game"}</a></li>
-                <li><a href="#settings">{"Settings"}</a></li>
-                <li><a href="#exit">{"Exit"}</a></li>
-            </ul>
-        </div>
-    }
-}
-
-#[function_component(ThreeDEngine)]
-fn three_d_engine() -> Html {
-    html! {
-        <div>
-            <h1>{"3D Engine"}</h1>
-            <canvas id="3d-canvas"></canvas>
-        </div>
-    }
-}
-
 fn main() {
-    yew::start_app::<Navbar>();
+    yew::start_app::<NavbarComponent>();
 }

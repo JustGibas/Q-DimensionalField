@@ -10,17 +10,31 @@
  */
 
 import { User } from "../models/userModel.ts";
+import { Client } from "https://deno.land/x/postgres/mod.ts";
 
-// In-memory storage for users (replace with a database in a real application)
-const users: Map<string, User> = new Map();
+// PostgreSQL client configuration
+const client = new Client({
+  user: "your_user",
+  database: "your_database",
+  hostname: "localhost",
+  password: "your_password",
+  port: 5432,
+});
+
+// Connect to the database
+await client.connect();
 
 /**
  * Get a user by ID
  * @param id - The unique identifier of the user
  * @returns The user object if found, otherwise null
  */
-export const getUserById = (id: string): User | null => {
-  return users.get(id) || null;
+export const getUserById = async (id: string): Promise<User | null> => {
+  const result = await client.queryObject<User>(
+    "SELECT * FROM users WHERE id = $1",
+    id,
+  );
+  return result.rows.length ? result.rows[0] : null;
 };
 
 /**
@@ -28,8 +42,14 @@ export const getUserById = (id: string): User | null => {
  * @param user - The user object containing the user data
  * @returns The created user object
  */
-export const createUser = (user: User): User => {
-  users.set(user.id, user);
+export const createUser = async (user: User): Promise<User> => {
+  await client.queryObject(
+    "INSERT INTO users (id, name, email, password) VALUES ($1, $2, $3, $4)",
+    user.id,
+    user.name,
+    user.email,
+    user.password,
+  );
   return user;
 };
 
@@ -39,12 +59,15 @@ export const createUser = (user: User): User => {
  * @param updatedUser - The updated user object containing the new data
  * @returns The updated user object if found, otherwise null
  */
-export const updateUser = (id: string, updatedUser: User): User | null => {
-  if (users.has(id)) {
-    users.set(id, updatedUser);
-    return updatedUser;
-  }
-  return null;
+export const updateUser = async (id: string, updatedUser: User): Promise<User | null> => {
+  const result = await client.queryObject(
+    "UPDATE users SET name = $1, email = $2, password = $3 WHERE id = $4 RETURNING *",
+    updatedUser.name,
+    updatedUser.email,
+    updatedUser.password,
+    id,
+  );
+  return result.rows.length ? result.rows[0] : null;
 };
 
 /**
@@ -52,10 +75,10 @@ export const updateUser = (id: string, updatedUser: User): User | null => {
  * @param id - The unique identifier of the user
  * @returns The deleted user object if found, otherwise null
  */
-export const deleteUser = (id: string): User | null => {
-  const user = users.get(id) || null;
-  if (user) {
-    users.delete(id);
-  }
-  return user;
+export const deleteUser = async (id: string): Promise<User | null> => {
+  const result = await client.queryObject<User>(
+    "DELETE FROM users WHERE id = $1 RETURNING *",
+    id,
+  );
+  return result.rows.length ? result.rows[0] : null;
 };

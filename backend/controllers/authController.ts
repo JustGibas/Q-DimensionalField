@@ -14,6 +14,7 @@
 
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { createUser, getUserById, updateUser, deleteUser } from "../services/userService.ts";
+import { BaseController } from "./baseController.ts";
 
 // Create a new Oak application instance
 const app = new Application();
@@ -29,10 +30,9 @@ router
     try {
       const { value } = await ctx.request.body();
       const user = await createUser(value);
-      ctx.response.body = user;
+      BaseController.sendJsonResponse(ctx, 201, user);
     } catch (error) {
-      ctx.response.status = 500;
-      ctx.response.body = { message: "Failed to create user", error: error.message };
+      BaseController.handleError(ctx, error);
     }
   })
   // Route to get a user by ID
@@ -41,14 +41,12 @@ router
     try {
       const user = await getUserById(ctx.params.id);
       if (user) {
-        ctx.response.body = user;
+        BaseController.sendJsonResponse(ctx, 200, user);
       } else {
-        ctx.response.status = 404;
-        ctx.response.body = { message: "User not found" };
+        BaseController.sendJsonResponse(ctx, 404, { message: "User not found" });
       }
     } catch (error) {
-      ctx.response.status = 500;
-      ctx.response.body = { message: "Failed to fetch user", error: error.message };
+      BaseController.handleError(ctx, error);
     }
   })
   // Route to update an existing user
@@ -58,14 +56,12 @@ router
       const { value } = await ctx.request.body();
       const updatedUser = await updateUser(ctx.params.id, value);
       if (updatedUser) {
-        ctx.response.body = updatedUser;
+        BaseController.sendJsonResponse(ctx, 200, updatedUser);
       } else {
-        ctx.response.status = 404;
-        ctx.response.body = { message: "User not found" };
+        BaseController.sendJsonResponse(ctx, 404, { message: "User not found" });
       }
     } catch (error) {
-      ctx.response.status = 500;
-      ctx.response.body = { message: "Failed to update user", error: error.message };
+      BaseController.handleError(ctx, error);
     }
   })
   // Route to delete a user by ID
@@ -74,14 +70,12 @@ router
     try {
       const deletedUser = await deleteUser(ctx.params.id);
       if (deletedUser) {
-        ctx.response.body = { message: "User deleted" };
+        BaseController.sendJsonResponse(ctx, 200, { message: "User deleted" });
       } else {
-        ctx.response.status = 404;
-        ctx.response.body = { message: "User not found" };
+        BaseController.sendJsonResponse(ctx, 404, { message: "User not found" });
       }
     } catch (error) {
-      ctx.response.status = 500;
-      ctx.response.body = { message: "Failed to delete user", error: error.message };
+      BaseController.handleError(ctx, error);
     }
   });
 

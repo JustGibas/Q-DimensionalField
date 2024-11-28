@@ -1,5 +1,6 @@
 use yew::prelude::*;
 use yew::virtual_dom::VNode;
+use crate::shared_components::{Navbar, ThreeDEngine};
 
 struct MainMenu;
 
@@ -50,31 +51,6 @@ impl MainMenu {
                 <ThreeDEngine />
             </Suspense>
         }
-    }
-}
-
-#[function_component(Navbar)]
-fn navbar() -> Html {
-    html! {
-        <div>
-            <nav>
-                <ul>
-                    <li><a href="#home">{"Home"}</a></li>
-                    <li><a href="#about">{"About"}</a></li>
-                    <li><a href="#contact">{"Contact"}</a></li>
-                </ul>
-            </nav>
-        </div>
-    }
-}
-
-#[function_component(ThreeDEngine)]
-fn three_d_engine() -> Html {
-    html! {
-        <div>
-            <h1>{"3D Engine"}</h1>
-            <canvas id="3d-canvas"></canvas>
-        </div>
     }
 }
 
