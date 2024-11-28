@@ -126,6 +126,28 @@ To compile the project to WebAssembly and JavaScript, follow these steps:
    deno task build:js
    ```
 
+## Automated Maintenance Tasks
+
+Regular maintenance tasks are automated to ensure code quality and consistency. These tasks include dependency updates, code formatting, and linting.
+
+### Dependency Updates
+
+We use GitHub Actions to automate dependency updates. The workflow is defined in `.github/workflows/maintenance.yml`.
+
+### Code Formatting
+
+We use Prettier for code formatting. To run Prettier, use the following command:
+```sh
+deno task fmt
+```
+
+### Linting
+
+We use ESLint for linting. To run ESLint, use the following command:
+```sh
+deno task lint
+```
+
 ## Contributing
 
 If you would like to contribute to the project, please follow these steps:
