@@ -12,8 +12,7 @@
  */
 
 import { Context } from "oak/mod.ts";
-import { verifyJwt } from "https://deno.land/x/djwt/verify.ts";
-import { getJwtSecret } from "../config.ts";
+import { verify } from "https://deno.land/x/djwt@v2.4/mod.ts";
 
 // This middleware function handles authentication for incoming requests
 export async function authMiddleware(ctx: Context, next: () => Promise<void>) {
@@ -36,7 +35,7 @@ export async function authMiddleware(ctx: Context, next: () => Promise<void>) {
   }
 
   try {
-    // Verify the token
+    // Verify the token using djwt library
     const isValid = await verifyToken(token);
 
     // If the token is not valid, respond with 401 Unauthorized
@@ -55,14 +54,14 @@ export async function authMiddleware(ctx: Context, next: () => Promise<void>) {
   }
 }
 
-// Function to verify the token
+// Function to verify the token using djwt library
 async function verifyToken(token: string): Promise<boolean> {
   try {
-    const jwtSecret = getJwtSecret();
-    const payload = await verifyJwt(token, jwtSecret, { isThrowing: false });
+    const key = Deno.env.get("JWT_SECRET") || "your-secret-key";
+    const payload = await verify(token, key, "HS256");
     return !!payload;
   } catch (error) {
-    console.error("Token verification error:", error);
+    console.error("Token verification failed:", error);
     return false;
   }
 }

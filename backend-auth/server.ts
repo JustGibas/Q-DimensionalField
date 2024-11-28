@@ -1,5 +1,6 @@
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { createUser, getUserById, updateUser, deleteUser } from "./userService.ts";
+import { validate, sanitize } from "https://deno.land/x/validator/mod.ts";
 
 const app = new Application();
 const router = new Router();
@@ -7,11 +8,18 @@ const router = new Router();
 router
   .post("/register", async (ctx) => {
     const { value } = await ctx.request.body();
-    const user = await createUser(value);
+    const sanitizedValue = sanitize(value);
+    const user = await createUser(sanitizedValue);
     ctx.response.body = user;
   })
   .get("/user/:id", async (ctx) => {
-    const user = await getUserById(ctx.params.id);
+    const userId = ctx.params.id;
+    if (!validate(userId, { isUUID: true })) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Invalid user ID" };
+      return;
+    }
+    const user = await getUserById(userId);
     if (user) {
       ctx.response.body = user;
     } else {
@@ -20,8 +28,15 @@ router
     }
   })
   .put("/user/:id", async (ctx) => {
+    const userId = ctx.params.id;
+    if (!validate(userId, { isUUID: true })) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Invalid user ID" };
+      return;
+    }
     const { value } = await ctx.request.body();
-    const updatedUser = await updateUser(ctx.params.id, value);
+    const sanitizedValue = sanitize(value);
+    const updatedUser = await updateUser(userId, sanitizedValue);
     if (updatedUser) {
       ctx.response.body = updatedUser;
     } else {
@@ -30,7 +45,13 @@ router
     }
   })
   .delete("/user/:id", async (ctx) => {
-    const deletedUser = await deleteUser(ctx.params.id);
+    const userId = ctx.params.id;
+    if (!validate(userId, { isUUID: true })) {
+      ctx.response.status = 400;
+      ctx.response.body = { message: "Invalid user ID" };
+      return;
+    }
+    const deletedUser = await deleteUser(userId);
     if (deletedUser) {
       ctx.response.body = { message: "User deleted" };
     } else {
@@ -42,5 +63,4 @@ router
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-const PORT = parseInt(Deno.env.get("PORT") || "8000");
-await app.listen({ port: PORT });
+await app.listen({ port: 8000 });
