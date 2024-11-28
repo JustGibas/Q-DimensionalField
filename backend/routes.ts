@@ -1,3 +1,9 @@
+/**
+ * This file defines the main router for the backend.
+ * It imports and uses the user and product routes.
+ * The router is then exported for use in the server setup.
+ */
+
 import { Router } from "@oakserver/oak";
 import userRoutes from "./routes/userRoutes.ts";
 import productRoutes from "./routes/productRoutes.ts";
