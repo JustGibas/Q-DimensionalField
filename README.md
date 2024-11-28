@@ -103,6 +103,25 @@ To build and deploy the project, follow these steps:
    deno task deploy
    ```
 
+### Deploying to Vercel
+
+To deploy the project to Vercel, follow these steps:
+
+1. Install the Vercel CLI:
+   ```sh
+   npm install -g vercel
+   ```
+
+2. Log in to your Vercel account:
+   ```sh
+   vercel login
+   ```
+
+3. Deploy the project:
+   ```sh
+   vercel
+   ```
+
 ## Running Tests
 
 To run the tests, follow these steps:

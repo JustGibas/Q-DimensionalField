@@ -36,3 +36,6 @@ coverage/
 
 # Ignore platform-specific configuration files
 platform-configs/
+
+# Ignore Vercel directory
+.vercel/
