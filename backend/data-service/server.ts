@@ -1,31 +1,55 @@
+/**
+ * This file sets up the Oak application, configures middleware, and defines routes for data-related operations.
+ * The application listens on a specified port and handles incoming HTTP requests.
+ * 
+ * Configuration options:
+ * - Application: The Oak application instance.
+ * - Router: The Oak router instance.
+ * - Client: The PostgreSQL client instance.
+ * - PORT: The port number on which the server listens.
+ */
+
 import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { Client } from "https://deno.land/x/postgres/mod.ts";
 
+// Create a new Oak application instance
 const app = new Application();
+// Create a new router instance
 const router = new Router();
 
+// Create a new PostgreSQL client instance
 const client = new Client({
-  user: Deno.env.get("DB_USER") || "user",
-  database: Deno.env.get("DB_NAME") || "database",
-  hostname: Deno.env.get("DB_HOST") || "localhost",
-  password: Deno.env.get("DB_PASSWORD") || "password",
-  port: parseInt(Deno.env.get("DB_PORT") || "5432"),
+  user: "user",
+  database: "database",
+  hostname: "localhost",
+  password: "password",
+  port: 5432,
 });
 
+// Connect to the PostgreSQL database
 await client.connect();
 
+// Define the routes and their corresponding controller functions
 router
-  .get("/data", async (context) => {
+  // Route to get all data
+  // This route handles GET requests to /data and retrieves all data from the database
+  .get("/data", async (ctx) => {
     const result = await client.queryArray("SELECT * FROM data");
-    context.response.body = result.rows;
+    ctx.response.body = result.rows;
   })
-  .post("/data", async (context) => {
-    const body = await context.request.body().value;
-    await client.queryArray("INSERT INTO data (name, value) VALUES ($1, $2)", body.name, body.value);
-    context.response.status = 201;
+  // Route to insert new data
+  // This route handles POST requests to /data and inserts new data into the database
+  .post("/data", async (ctx) => {
+    const { value } = await ctx.request.body().value;
+    await client.queryArray("INSERT INTO data (name, value) VALUES ($1, $2)", value.name, value.value);
+    ctx.response.status = 201;
   });
 
+// Use the router middleware
 app.use(router.routes());
 app.use(router.allowedMethods());
 
-await app.listen({ port: parseInt(Deno.env.get("PORT") || "8000") });
+// Start the server
+const PORT = 8000;
+console.log(`Server is running on port ${PORT}`);
+await app.listen({ port: PORT });

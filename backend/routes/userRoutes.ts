@@ -20,15 +20,15 @@ const router = new Router();
 router
   // Route to get a user by ID
   // This route handles GET requests to /users/:id and calls the getUser function of the userController
-  .get("/users/:id", getUser)
+  .get("/users/:id", async (ctx) => await getUser(ctx))
   // Route to add a new user
   // This route handles POST requests to /users and calls the addUser function of the userController
-  .post("/users", addUser)
+  .post("/users", async (ctx) => await addUser(ctx))
   // Route to update an existing user
   // This route handles PUT requests to /users/:id and calls the updateUser function of the userController
-  .put("/users/:id", updateUser)
+  .put("/users/:id", async (ctx) => await updateUser(ctx))
   // Route to delete a user by ID
   // This route handles DELETE requests to /users/:id and calls the deleteUser function of the userController
-  .delete("/users/:id", deleteUser);
+  .delete("/users/:id", async (ctx) => await deleteUser(ctx));
 
 export { router as userRouter };

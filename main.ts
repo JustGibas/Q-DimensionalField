@@ -13,7 +13,6 @@
  * - PORT: The port number on which the server listens.
  */
 
-//import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { Application, Router } from "@oakserver/oak";
 
 // The Application class is used to create a new Oak application
@@ -23,6 +22,7 @@ import { productRouter } from "./routes/productRoutes.ts";
 import { authMiddleware } from "./middlewares/authMiddleware.ts";
 import { errorMiddleware } from "./middlewares/errorMiddleware.ts";
 
+// Create a new Oak application instance
 const app = new Application();
 
 // Middleware setup

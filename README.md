@@ -27,7 +27,7 @@ root/
   │   │   ├── services/            # Business logic and services
   │   │   ├── models/              # Database models or schemas
   │   │   ├── middlewares/         # Backend middlewares
-  │   │   ├── routes.ts            # Main router
+  │   │   ├── routes/              # Main router
   │   │   ├── server.ts            # Backend entry point
   │   │   ├── deps.ts              # Dependency imports
   │   │   └── Dockerfile           # Dockerfile for backend service
@@ -60,11 +60,6 @@ root/
   │   ├── terraform/               # Terraform configurations
   │   ├── nginx/                   # NGINX or reverse proxy configurations
   │   └── certs/                   # SSL certificates (if needed)
-  ├── .github/                     # GitHub Actions workflows
-  │   ├── workflows/               # CI/CD workflow files
-  │   │   ├── build.yml            # Workflow for building Docker images
-  │   │   ├── test.yml             # Workflow for running tests
-  │   │   └── deploy.yml           # Workflow for deploying to Kubernetes
   ├── package.json                 # Optional (npm dependencies for monorepo management)
   ├── deno.json                    # Deno configuration
   ├── tsconfig.json                # Global TypeScript configuration
@@ -117,34 +112,6 @@ To run the tests, follow these steps:
    ```sh
    npm run test
    ```
-
-## CI/CD Workflows
-
-The project uses GitHub Actions for CI/CD workflows. The workflows are defined in the `.github/workflows` directory.
-
-### Build Workflow
-
-The build workflow is defined in `build.yml`. It builds the Docker images for the services.
-
-### Test Workflow
-
-The test workflow is defined in `test.yml`. It runs the tests for the services.
-
-### Deploy Workflow
-
-The deploy workflow is defined in `deploy.yml`. It deploys the services to Kubernetes.
-
-## Docker and Kubernetes Integration
-
-The project uses Docker and Kubernetes for containerization and orchestration.
-
-### Docker
-
-The project includes Dockerfiles for the services. The Dockerfiles are located in the respective service directories.
-
-### Kubernetes
-
-The project includes Kubernetes deployment files. The deployment files are located in the `infra/k8s` directory.
 
 ## Contributing
 
