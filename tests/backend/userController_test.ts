@@ -1,0 +1,42 @@
+import { assertEquals, assertNotEquals } from "https://deno.land/std@0.205.0/testing/asserts.ts";
+import { getUser, addUser, updateUser, deleteUser } from "../../backend/controllers/userController.ts";
+import { User } from "../../backend/models/userModel.ts";
+import { createUser, getUserById, updateUser as updateUserService, deleteUser as deleteUserService } from "../../backend/services/userService.ts";
+
+Deno.test("getUser should return the correct user", async () => {
+  const user: User = { id: "1", name: "John Doe", email: "john@example.com", password: "password" };
+  createUser(user);
+  const response = { status: 0, body: {} };
+  await getUser({ params: { id: "1" }, response });
+  assertEquals(response.status, 200);
+  assertEquals(response.body, user);
+});
+
+Deno.test("addUser should add a new user", async () => {
+  const user: User = { id: "2", name: "Jane Doe", email: "jane@example.com", password: "password" };
+  const request = { body: () => ({ value: user }) };
+  const response = { status: 0, body: {} };
+  await addUser({ request, response });
+  assertEquals(response.status, 201);
+  assertEquals(response.body, user);
+});
+
+Deno.test("updateUser should update the user details", async () => {
+  const user: User = { id: "3", name: "Alice", email: "alice@example.com", password: "password" };
+  createUser(user);
+  const updatedUser: User = { id: "3", name: "Alice Updated", email: "alice.updated@example.com", password: "newpassword" };
+  const request = { body: () => ({ value: updatedUser }) };
+  const response = { status: 0, body: {} };
+  await updateUser({ params: { id: "3" }, request, response });
+  assertEquals(response.status, 200);
+  assertEquals(response.body, updatedUser);
+});
+
+Deno.test("deleteUser should remove the user", async () => {
+  const user: User = { id: "4", name: "Bob", email: "bob@example.com", password: "password" };
+  createUser(user);
+  const response = { status: 0, body: {} };
+  await deleteUser({ params: { id: "4" }, response });
+  assertEquals(response.status, 200);
+  assertEquals(response.body.message, "User deleted");
+});

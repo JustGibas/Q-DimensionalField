@@ -91,3 +91,41 @@ Deno.test("DELETE /products/:id", async () => {
       assertEquals(res.body.message, "Product deleted");
     });
 });
+
+Deno.test("GET /auth", async () => {
+  const request = await superoak(app);
+  await request.get("/auth")
+    .expect(401)
+    .expect("Content-Type", /json/)
+    .expect((res) => {
+      assertEquals(res.body.message, "Unauthorized");
+    });
+});
+
+Deno.test("GET /auth with valid token", async () => {
+  const request = await superoak(app);
+  await request.get("/auth")
+    .set("Authorization", "Bearer valid-token")
+    .expect(200);
+});
+
+Deno.test("GET /auth with invalid token", async () => {
+  const request = await superoak(app);
+  await request.get("/auth")
+    .set("Authorization", "Bearer invalid-token")
+    .expect(401)
+    .expect("Content-Type", /json/)
+    .expect((res) => {
+      assertEquals(res.body.message, "Unauthorized");
+    });
+});
+
+Deno.test("GET /error", async () => {
+  const request = await superoak(app);
+  await request.get("/error")
+    .expect(500)
+    .expect("Content-Type", /json/)
+    .expect((res) => {
+      assertEquals(res.body.message, "Internal Server Error");
+    });
+});
