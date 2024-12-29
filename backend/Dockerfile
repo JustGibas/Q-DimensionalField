@@ -11,3 +11,6 @@ EXPOSE 8000
 
 # Run the Deno server
 CMD ["deno", "task", "start"]
+
+# Vercel-specific configurations
+RUN apk add --no-cache bash

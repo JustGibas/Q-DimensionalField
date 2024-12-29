@@ -22,4 +22,7 @@ COPY src/index.html /usr/share/nginx/html/index.html
 # Expose the default HTTP port
 EXPOSE 80
 
+# Vercel-specific configurations
+RUN apk add --no-cache bash
+
 CMD ["deno", "task", "start"]
