@@ -7,7 +7,7 @@
     }
   ],
   "functions": {
-    "api/**/*.[jt]s": {
+    "backend/**/*.ts": {
       "runtime": "vercel-deno@3.1.0"
     }
   }
