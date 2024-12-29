@@ -74,3 +74,40 @@ Deno.test("authMiddleware: Valid Token", async () => {
   assertEquals(ctx.response.status, 200);
   assertEquals(ctx.response.body, { message: "Authorized" });
 });
+
+// Add tests for new functions in backend/middlewares/authMiddleware.ts
+Deno.test("authMiddleware: Expired Token", async () => {
+  const ctx = {
+    request: {
+      headers: new Headers({
+        "Authorization": "Bearer expired-token",
+      }),
+    },
+    response: {
+      status: null,
+      body: null,
+    },
+  } as unknown as Context;
+
+  await authMiddleware(ctx, async () => {});
+  assertEquals(ctx.response.status, 401);
+  assertEquals(ctx.response.body, { message: "Unauthorized" });
+});
+
+Deno.test("authMiddleware: Token with Invalid Signature", async () => {
+  const ctx = {
+    request: {
+      headers: new Headers({
+        "Authorization": "Bearer invalid-signature-token",
+      }),
+    },
+    response: {
+      status: null,
+      body: null,
+    },
+  } as unknown as Context;
+
+  await authMiddleware(ctx, async () => {});
+  assertEquals(ctx.response.status, 401);
+  assertEquals(ctx.response.body, { message: "Unauthorized" });
+});

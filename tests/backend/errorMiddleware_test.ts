@@ -32,3 +32,38 @@ Deno.test("errorMiddleware: Handle Error", async () => {
   assertEquals(ctx.response.status, 500);
   assertEquals(ctx.response.body, { message: "Test Error" });
 });
+
+// Add tests for new functions in backend/middlewares/errorMiddleware.ts
+Deno.test("errorMiddleware: Handle Not Found Error", async () => {
+  const ctx = {
+    response: {
+      status: null,
+      body: null,
+    },
+  } as unknown as Context;
+
+  await errorMiddleware(ctx, async () => {
+    const error = new Error("Not Found");
+    error.status = 404;
+    throw error;
+  });
+  assertEquals(ctx.response.status, 404);
+  assertEquals(ctx.response.body, { message: "Not Found" });
+});
+
+Deno.test("errorMiddleware: Handle Unauthorized Error", async () => {
+  const ctx = {
+    response: {
+      status: null,
+      body: null,
+    },
+  } as unknown as Context;
+
+  await errorMiddleware(ctx, async () => {
+    const error = new Error("Unauthorized");
+    error.status = 401;
+    throw error;
+  });
+  assertEquals(ctx.response.status, 401);
+  assertEquals(ctx.response.body, { message: "Unauthorized" });
+});
