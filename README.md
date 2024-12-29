@@ -122,6 +122,22 @@ To deploy the project to Vercel, follow these steps:
    vercel
    ```
 
+4. Update the `vercel.json` file to include both configurations for `api/**/*.ts` and `backend/**/*.ts`:
+   ```json
+   {
+     "version": 2,
+     "routes": [
+       {
+         "src": "/(.*)",
+         "dest": "backend/$1"
+       }
+     ],
+     "functions": {
+       "api/**/*.ts": {
+         "runtime": "vercel-deno@2.0.0"
+       },
+       "backend/**/*.ts": {
+=======
 ### Integrating Deno with Vercel
 
 To integrate Deno with Vercel, follow these steps:
@@ -143,12 +159,6 @@ To integrate Deno with Vercel, follow these steps:
      }
    }
    ```
-
-3. Deploy to Vercel: Use the Vercel CLI to deploy your project:
-   ```sh
-   vercel
-   ```
-
 ## Running Tests
 
 To run the tests, follow these steps:
