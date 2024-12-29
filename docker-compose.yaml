@@ -9,6 +9,7 @@ services:
       - ./apps/frontend/src:/app/src
       - ./apps/frontend/public:/app/public
       - ./apps/frontend/dist:/app/dist
+      - ./apps/frontend/src/index.html:/usr/share/nginx/html/index.html
 
   backend:
     build: ./apps/backend
