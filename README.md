@@ -122,6 +122,33 @@ To deploy the project to Vercel, follow these steps:
    vercel
    ```
 
+### Integrating Deno with Vercel
+
+To integrate Deno with Vercel, follow these steps:
+
+1. Create a Serverless Function: In your project, add a file like `api/hello.ts` with the following content:
+   ```typescript
+   export default (req: Request) => {
+     return new Response(`Hello, from Deno v${Deno.version.deno}!`);
+   };
+   ```
+
+2. Configure Vercel: In your `vercel.json` file, specify the Deno runtime for your functions:
+   ```json
+   {
+     "functions": {
+       "api/**/*.[jt]s": {
+         "runtime": "vercel-deno@3.1.0"
+       }
+     }
+   }
+   ```
+
+3. Deploy to Vercel: Use the Vercel CLI to deploy your project:
+   ```sh
+   vercel
+   ```
+
 ## Running Tests
 
 To run the tests, follow these steps:

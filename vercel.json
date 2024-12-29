@@ -4,6 +4,10 @@
     {
       "src": "backend/**/*.ts",
       "use": "@vercel/deno"
+    },
+    {
+      "src": "api/**/*.ts",
+      "use": "@vercel/deno"
     }
   ],
   "routes": [
@@ -11,5 +15,10 @@
       "src": "/(.*)",
       "dest": "backend/$1"
     }
-  ]
+  ],
+  "functions": {
+    "api/**/*.[jt]s": {
+      "runtime": "vercel-deno@3.1.0"
+    }
+  }
 }
