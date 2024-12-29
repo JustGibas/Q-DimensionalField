@@ -60,3 +60,38 @@ Deno.test("ProductService: Delete Product", async () => {
   const fetchedProduct = await productService.getProductById("1");
   assertEquals(fetchedProduct, null);
 });
+
+// Add tests for new functions in backend/services/productService.ts
+Deno.test("ProductService: Get All Products", async () => {
+  const productService = new ProductService();
+
+  const products = await productService.getAllProducts();
+  assertEquals(products.length, 0);
+});
+
+Deno.test("ProductService: Get Product By ID - Not Found", async () => {
+  const productService = new ProductService();
+
+  const product = await productService.getProductById("nonexistent");
+  assertEquals(product, null);
+});
+
+Deno.test("ProductService: Update Product - Not Found", async () => {
+  const productService = new ProductService();
+  const updatedProduct: Product = {
+    id: "nonexistent",
+    name: "Nonexistent Product",
+    price: 0,
+    description: "This product does not exist",
+  };
+
+  const result = await productService.updateProduct("nonexistent", updatedProduct);
+  assertEquals(result, null);
+});
+
+Deno.test("ProductService: Delete Product - Not Found", async () => {
+  const productService = new ProductService();
+
+  const deleteResult = await productService.deleteProduct("nonexistent");
+  assertEquals(deleteResult, false);
+});

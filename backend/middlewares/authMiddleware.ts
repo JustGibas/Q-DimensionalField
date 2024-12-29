@@ -11,7 +11,7 @@
  * - isValid: A boolean indicating whether the token is valid.
  */
 
-import { Context } from "oak/mod.ts";
+import { Context } from "https://deno.land/x/oak/mod.ts";
 import { verify } from "https://deno.land/x/djwt@v2.4/mod.ts";
 
 // This middleware function handles authentication for incoming requests

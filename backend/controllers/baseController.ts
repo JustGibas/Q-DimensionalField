@@ -9,7 +9,7 @@
  * - body: The response body to send.
  */
 
-import { Context } from "oak/mod.ts";
+import { Context } from "https://deno.land/x/oak/mod.ts";
 
 // The BaseController class provides common functionalities for handling HTTP requests and responses
 export class BaseController {

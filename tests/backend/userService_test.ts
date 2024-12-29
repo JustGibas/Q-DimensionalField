@@ -31,3 +31,20 @@ Deno.test("deleteUser should remove the user", () => {
   const fetchedUser = getUserById("4");
   assertEquals(fetchedUser, null);
 });
+
+// Add tests for new functions in backend/services/userService.ts
+Deno.test("getUserById should return null if user not found", () => {
+  const fetchedUser = getUserById("nonexistent");
+  assertEquals(fetchedUser, null);
+});
+
+Deno.test("updateUser should return null if user not found", () => {
+  const updatedUser: User = { id: "nonexistent", name: "Nonexistent User", email: "nonexistent@example.com", password: "password" };
+  const result = updateUser("nonexistent", updatedUser);
+  assertEquals(result, null);
+});
+
+Deno.test("deleteUser should return null if user not found", () => {
+  const deletedUser = deleteUser("nonexistent");
+  assertEquals(deletedUser, null);
+});

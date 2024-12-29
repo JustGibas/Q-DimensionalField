@@ -129,3 +129,61 @@ Deno.test("ProductController: Delete Product", async () => {
   await productController.deleteProduct(ctx);
   assertEquals(ctx.response.status, 204);
 });
+
+// Add tests for new functions in backend/controllers/productController.ts
+Deno.test("ProductController: Get Product By ID - Not Found", async () => {
+  const productController = new ProductController();
+
+  const ctx = {
+    params: { id: "nonexistent" },
+    response: {
+      body: null,
+      status: null,
+    },
+  };
+
+  await productController.getProductById(ctx);
+  assertEquals(ctx.response.status, 404);
+  assertEquals(ctx.response.body.message, "Product not found");
+});
+
+Deno.test("ProductController: Update Product - Not Found", async () => {
+  const productController = new ProductController();
+
+  const ctx = {
+    params: { id: "nonexistent" },
+    request: {
+      body: async () => ({
+        value: {
+          name: "Nonexistent Product",
+          price: 0,
+          description: "This product does not exist",
+        },
+      }),
+    },
+    response: {
+      body: null,
+      status: null,
+    },
+  };
+
+  await productController.updateProduct(ctx);
+  assertEquals(ctx.response.status, 404);
+  assertEquals(ctx.response.body.message, "Product not found");
+});
+
+Deno.test("ProductController: Delete Product - Not Found", async () => {
+  const productController = new ProductController();
+
+  const ctx = {
+    params: { id: "nonexistent" },
+    response: {
+      body: null,
+      status: null,
+    },
+  };
+
+  await productController.deleteProduct(ctx);
+  assertEquals(ctx.response.status, 404);
+  assertEquals(ctx.response.body.message, "Product not found");
+});

@@ -40,3 +40,27 @@ Deno.test("deleteUser should remove the user", async () => {
   assertEquals(response.status, 200);
   assertEquals(response.body.message, "User deleted");
 });
+
+// Add tests for new functions in backend/controllers/userController.ts
+Deno.test("getUser should return 404 if user not found", async () => {
+  const response = { status: 0, body: {} };
+  await getUser({ params: { id: "nonexistent" }, response });
+  assertEquals(response.status, 404);
+  assertEquals(response.body.message, "User not found");
+});
+
+Deno.test("updateUser should return 404 if user not found", async () => {
+  const updatedUser: User = { id: "nonexistent", name: "Nonexistent User", email: "nonexistent@example.com", password: "password" };
+  const request = { body: () => ({ value: updatedUser }) };
+  const response = { status: 0, body: {} };
+  await updateUser({ params: { id: "nonexistent" }, request, response });
+  assertEquals(response.status, 404);
+  assertEquals(response.body.message, "User not found");
+});
+
+Deno.test("deleteUser should return 404 if user not found", async () => {
+  const response = { status: 0, body: {} };
+  await deleteUser({ params: { id: "nonexistent" }, response });
+  assertEquals(response.status, 404);
+  assertEquals(response.body.message, "User not found");
+});
