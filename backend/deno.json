@@ -94,5 +94,12 @@
   "run": {
     "include": ["src/"],
     "exclude": ["tests/"]
+  },
+  "vercel": {
+    "functions": {
+      "api/**/*.[jt]s": {
+        "runtime": "vercel-deno@3.1.0"
+      }
+    }
   }
 }
