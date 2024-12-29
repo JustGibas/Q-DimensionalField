@@ -11,5 +11,10 @@
       "src": "/(.*)",
       "dest": "backend/$1"
     }
-  ]
+  ],
+  "functions": {
+    "api/**/*.ts": {
+      "runtime": "vercel-deno@2.0.0"
+    }
+  }
 }
