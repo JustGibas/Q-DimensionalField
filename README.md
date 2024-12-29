@@ -122,6 +122,27 @@ To deploy the project to Vercel, follow these steps:
    vercel
    ```
 
+4. Update the `vercel.json` file to include both configurations for `api/**/*.ts` and `backend/**/*.ts`:
+   ```json
+   {
+     "version": 2,
+     "routes": [
+       {
+         "src": "/(.*)",
+         "dest": "backend/$1"
+       }
+     ],
+     "functions": {
+       "api/**/*.ts": {
+         "runtime": "vercel-deno@2.0.0"
+       },
+       "backend/**/*.ts": {
+         "runtime": "vercel-deno@3.1.0"
+       }
+     }
+   }
+   ```
+
 ## Running Tests
 
 To run the tests, follow these steps:

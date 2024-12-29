@@ -1,11 +1,5 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "backend/**/*.ts",
-      "use": "@vercel/deno"
-    }
-  ],
   "routes": [
     {
       "src": "/(.*)",
@@ -15,6 +9,9 @@
   "functions": {
     "api/**/*.ts": {
       "runtime": "vercel-deno@2.0.0"
+    },
+    "backend/**/*.ts": {
+      "runtime": "vercel-deno@3.1.0"
     }
   }
 }
