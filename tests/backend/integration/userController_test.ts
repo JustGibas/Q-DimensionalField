@@ -1,5 +1,5 @@
 import { superoak } from "https://deno.land/x/superoak@4.0.0/mod.ts";
-import { app } from "../../../backend/controllers/userController.ts";
+import { app } from "../../../backend/routes.ts";
 
 Deno.test("GET /users/:id - should get a user by ID", async () => {
   const request = await superoak(app);
