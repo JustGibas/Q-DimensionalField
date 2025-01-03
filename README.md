@@ -137,7 +137,12 @@ To deploy the project to Vercel, follow these steps:
          "runtime": "vercel-deno@2.0.0"
        },
        "backend/**/*.ts": {
-=======
+         "runtime": "vercel-deno@2.0.0"
+       }
+     }
+   }
+   ```
+
 ### Integrating Deno with Vercel
 
 To integrate Deno with Vercel, follow these steps:
@@ -159,6 +164,7 @@ To integrate Deno with Vercel, follow these steps:
      }
    }
    ```
+
 ## Running Tests
 
 To run the tests, follow these steps:
@@ -256,6 +262,10 @@ To deploy the project, use:
 ```sh
 deno task deploy
 ```
+
+## API Documentation
+
+The API documentation provides detailed information about the available endpoints, request/response formats, and example usage. You can access the API documentation at `http://localhost:3000/api-docs`.
 
 ## License
 

@@ -14,15 +14,13 @@
  * - PORT: The port number on which the server listens.
  */
 
-import { Application, Router } from "https://deno.land/x/oak/mod.ts";
+import { Application } from "https://deno.land/x/oak/mod.ts";
 import { Client } from "https://deno.land/x/postgres/mod.ts";
 import { BaseController } from "./baseController.ts";
+import router from "../routes.ts";
 
 // Create a new Oak application instance
 const app = new Application();
-
-// Create a new router instance
-const router = new Router();
 
 // Create a new PostgreSQL client instance
 const client = new Client({
@@ -35,19 +33,6 @@ const client = new Client({
 
 // Connect to the PostgreSQL database
 await client.connect();
-
-// Define the routes and their corresponding handler functions
-router
-  // Route to get all data
-  // This route handles GET requests to /data and retrieves all data from the database
-  .get("/data", async (ctx) => {
-    await handleRequest(ctx, getAllData);
-  })
-  // Route to insert new data
-  // This route handles POST requests to /data and inserts new data into the database
-  .post("/data", async (ctx) => {
-    await handleRequest(ctx, insertData);
-  });
 
 // Use the router middleware
 app.use(router.routes());
