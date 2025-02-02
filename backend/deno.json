@@ -75,15 +75,7 @@
     "include": ["src/"],
     "exclude": ["tests/"]
   },
-  "build": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
   "serve": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
-  "deploy": {
     "include": ["src/"],
     "exclude": ["tests/"]
   },

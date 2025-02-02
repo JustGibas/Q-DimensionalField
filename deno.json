@@ -15,9 +15,7 @@
     "uninstall": "deno uninstall",
     "update": "deno update",
     "clean": "deno clean",
-    "build": "deno build",
     "serve": "deno serve",
-    "deploy": "deno deploy",
     "watch": "deno watch",
     "run": "deno run"
   },
@@ -91,18 +89,6 @@
     "exclude": ["tests/"]
   },
   "clean": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
-  "build": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
-  "serve": {
-    "include": ["src/"],
-    "exclude": ["tests/"]
-  },
-  "deploy": {
     "include": ["src/"],
     "exclude": ["tests/"]
   },
