@@ -26,6 +26,3 @@ Thumbs.db
 
 # Ignore platform-specific configuration files
 platform-configs/
-
-# Ignore Vercel directory
-.vercel/

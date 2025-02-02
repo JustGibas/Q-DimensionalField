@@ -179,10 +179,6 @@ To deploy the project to GitHub Pages, use:
 npm run deploy
 ```
 
-## API Documentation
-
-The API documentation provides detailed information about the available endpoints, request/response formats, and example usage. You can access the API documentation at `http://localhost:3000/api-docs`.
-
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
