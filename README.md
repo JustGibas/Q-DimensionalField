@@ -1,6 +1,6 @@
-# VoxelSpace
+# Q-DimensionalField
 
-VoxelSpace is a VR/AR/XR game that uses voxel chunks to create a global server.
+Q-DimensionalField is a VR/AR/XR game that uses voxel chunks to create a global server.
 
 ## Directory Structure
 
@@ -45,8 +45,8 @@ To get started with the project, follow these steps:
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/JustGibas/VoxelSpace.git
-   cd VoxelSpace
+   git clone https://github.com/JustGibas/Q-DimensionalField.git
+   cd Q-DimensionalField
    ```
 
 2. Install dependencies:
@@ -137,8 +137,8 @@ If you would like to contribute to the project, please follow these steps:
 1. Ensure you have Deno installed. If not, you can install it from [here](https://deno.land/#installation).
 2. Clone the repository:
    ```sh
-   git clone https://github.com/JustGibas/VoxelSpace.git
-   cd VoxelSpace
+   git clone https://github.com/JustGibas/Q-DimensionalField.git
+   cd Q-DimensionalField
    ```
 3. Install dependencies:
    ```sh
