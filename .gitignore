@@ -21,14 +21,8 @@ Thumbs.db
 *.tmp
 *.swp
 
-# Ignore Docker-related files
-.dockerignore
-
 # Ignore TypeScript build files
 *.tsbuildinfo
-
-# Ignore test coverage files
-coverage/
 
 # Ignore platform-specific configuration files
 platform-configs/
