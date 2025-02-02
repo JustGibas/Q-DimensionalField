@@ -11,9 +11,10 @@
  */
 
 import { ProductService } from "../services/productService.ts";
+import { BaseController } from "./baseController.ts";
 
 // The ProductController class handles the HTTP requests related to products
-export class ProductController {
+export class ProductController extends BaseController {
   private productService: ProductService;
 
   /**
@@ -21,6 +22,7 @@ export class ProductController {
    * Initializes the ProductService instance
    */
   constructor() {
+    super();
     this.productService = new ProductService();
   }
 
@@ -31,11 +33,9 @@ export class ProductController {
   async getAllProducts(ctx: any) {
     try {
       const products = await this.productService.getAllProducts();
-      ctx.response.body = products;
+      this.sendJsonResponse(ctx, 200, products);
     } catch (error) {
-      // Handle error
-      ctx.response.status = 500;
-      ctx.response.body = { message: "Failed to fetch products", error: error.message };
+      this.handleError(ctx, error);
     }
   }
 
@@ -48,15 +48,12 @@ export class ProductController {
       const id = ctx.params.id;
       const product = await this.productService.getProductById(id);
       if (product) {
-        ctx.response.body = product;
+        this.sendJsonResponse(ctx, 200, product);
       } else {
-        ctx.response.status = 404;
-        ctx.response.body = { message: "Product not found" };
+        this.sendJsonResponse(ctx, 404, { message: "Product not found" });
       }
     } catch (error) {
-      // Handle error
-      ctx.response.status = 500;
-      ctx.response.body = { message: "Failed to fetch product", error: error.message };
+      this.handleError(ctx, error);
     }
   }
 
@@ -68,12 +65,9 @@ export class ProductController {
     try {
       const { name, price, description } = await ctx.request.body().value;
       const newProduct = await this.productService.createProduct({ name, price, description });
-      ctx.response.status = 201;
-      ctx.response.body = newProduct;
+      this.sendJsonResponse(ctx, 201, newProduct);
     } catch (error) {
-      // Handle error
-      ctx.response.status = 500;
-      ctx.response.body = { message: "Failed to create product", error: error.message };
+      this.handleError(ctx, error);
     }
   }
 
@@ -87,15 +81,12 @@ export class ProductController {
       const { name, price, description } = await ctx.request.body().value;
       const updatedProduct = await this.productService.updateProduct(id, { name, price, description });
       if (updatedProduct) {
-        ctx.response.body = updatedProduct;
+        this.sendJsonResponse(ctx, 200, updatedProduct);
       } else {
-        ctx.response.status = 404;
-        ctx.response.body = { message: "Product not found" };
+        this.sendJsonResponse(ctx, 404, { message: "Product not found" });
       }
     } catch (error) {
-      // Handle error
-      ctx.response.status = 500;
-      ctx.response.body = { message: "Failed to update product", error: error.message };
+      this.handleError(ctx, error);
     }
   }
 
@@ -110,13 +101,10 @@ export class ProductController {
       if (deleted) {
         ctx.response.status = 204;
       } else {
-        ctx.response.status = 404;
-        ctx.response.body = { message: "Product not found" };
+        this.sendJsonResponse(ctx, 404, { message: "Product not found" });
       }
     } catch (error) {
-      // Handle error
-      ctx.response.status = 500;
-      ctx.response.body = { message: "Failed to delete product", error: error.message };
+      this.handleError(ctx, error);
     }
   }
 }

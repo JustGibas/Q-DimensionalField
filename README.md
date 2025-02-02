@@ -180,3 +180,28 @@ The API documentation provides detailed information about the available endpoint
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## GitHub Actions Workflows
+
+We use GitHub Actions for continuous integration and deployment. The workflows are defined in the `.github/workflows` directory.
+
+### CI Workflow
+
+The CI workflow is defined in `.github/workflows/ci.yml`. It runs on every push and pull request to the `main` branch. The workflow includes the following steps:
+
+1. Checkout the code.
+2. Set up Deno.
+3. Install dependencies.
+4. Run linting.
+5. Run tests.
+6. Build the project.
+
+### Deployment Workflow
+
+The deployment workflow is defined in `.github/workflows/deploy.yml`. It runs on every push to the `main` branch. The workflow includes the following steps:
+
+1. Checkout the code.
+2. Set up Node.js.
+3. Install dependencies.
+4. Build the project.
+5. Deploy to GitHub Pages.
