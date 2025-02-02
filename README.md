@@ -61,6 +61,12 @@ To get started with the project, follow these steps:
 
 4. Open your browser and navigate to `http://localhost:3000`.
 
+5. To run the project locally using GitHub Pages, follow these steps:
+   ```sh
+   npm run build
+   npm run deploy
+   ```
+
 ## Building and Deploying
 
 To build and deploy the project, follow these steps:
