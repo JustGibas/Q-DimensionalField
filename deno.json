@@ -17,7 +17,8 @@
     "clean": "deno clean",
     "serve": "deno serve",
     "watch": "deno watch",
-    "run": "deno run"
+    "run": "deno run",
+    "deploy:gh-pages": "deno run --allow-net --allow-read --allow-env deploy.ts"
   },
   "importMap": "./import_map.json",
   "compilerOptions": {

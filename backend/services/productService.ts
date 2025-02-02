@@ -10,19 +10,7 @@
  */
 
 import { Product } from "../models/productModel.ts";
-import { Client } from "https://deno.land/x/postgres/mod.ts";
-
-// PostgreSQL client configuration
-const client = new Client({
-  user: Deno.env.get("DB_USER") || "your_user",
-  database: Deno.env.get("DB_NAME") || "your_database",
-  hostname: Deno.env.get("DB_HOST") || "localhost",
-  password: Deno.env.get("DB_PASSWORD") || "your_password",
-  port: parseInt(Deno.env.get("DB_PORT") || "5432"),
-});
-
-// Connect to the database
-await client.connect();
+import { client } from "../utils/postgresClient.ts";
 
 // The ProductService class handles the business logic related to products
 export class ProductService {
