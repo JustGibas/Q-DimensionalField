@@ -24,10 +24,6 @@ Thumbs.db
 # Ignore Docker-related files
 .dockerignore
 
-# Ignore Deno-related files
-deno.lock
-deno_dir/
-
 # Ignore TypeScript build files
 *.tsbuildinfo
 

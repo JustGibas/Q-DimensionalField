@@ -51,12 +51,12 @@ To get started with the project, follow these steps:
 
 2. Install dependencies:
    ```sh
-   deno task install
+   npm install
    ```
 
 3. Start the development server:
    ```sh
-   deno task dev
+   npm run dev
    ```
 
 4. Open your browser and navigate to `http://localhost:3000`.
@@ -67,12 +67,12 @@ To build and deploy the project, follow these steps:
 
 1. Build the project:
    ```sh
-   deno task build
+   npm run build
    ```
 
 2. Deploy the project to GitHub Pages:
    ```sh
-   deno task deploy:gh-pages
+   npm run deploy
    ```
 
 ## Running Tests
@@ -81,7 +81,7 @@ To run the tests, follow these steps:
 
 1. Run the tests:
    ```sh
-   deno task test
+   npm test
    ```
 
 ## Compiling to WebAssembly and JavaScript
@@ -90,12 +90,12 @@ To compile the project to WebAssembly and JavaScript, follow these steps:
 
 1. Compile to WebAssembly:
    ```sh
-   deno task build:wasm
+   npm run build:wasm
    ```
 
 2. Compile to JavaScript:
    ```sh
-   deno task build:js
+   npm run build:js
    ```
 
 ## Automated Maintenance Tasks
@@ -110,14 +110,14 @@ We use GitHub Actions to automate dependency updates. The workflow is defined in
 
 We use Prettier for code formatting. To run Prettier, use the following command:
 ```sh
-deno task fmt
+npm run fmt
 ```
 
 ### Linting
 
 We use ESLint for linting. To run ESLint, use the following command:
 ```sh
-deno task lint
+npm run lint
 ```
 
 ## Contributing
@@ -134,7 +134,7 @@ If you would like to contribute to the project, please follow these steps:
 
 ### Setup
 
-1. Ensure you have Deno installed. If not, you can install it from [here](https://deno.land/#installation).
+1. Ensure you have Node.js installed. If not, you can install it from [here](https://nodejs.org/).
 2. Clone the repository:
    ```sh
    git clone https://github.com/JustGibas/Q-DimensionalField.git
@@ -142,35 +142,35 @@ If you would like to contribute to the project, please follow these steps:
    ```
 3. Install dependencies:
    ```sh
-   deno task install
+   npm install
    ```
 
 ### Build
 
 To build the project, run:
 ```sh
-deno task build
+npm run build
 ```
 
 ### Test
 
 To run the tests, use:
 ```sh
-deno task test
+npm test
 ```
 
 ### Run Locally
 
 To run the project locally, use:
 ```sh
-deno task dev
+npm run dev
 ```
 
 ### Deploy
 
 To deploy the project to GitHub Pages, use:
 ```sh
-deno task deploy:gh-pages
+npm run deploy
 ```
 
 ## API Documentation
@@ -190,7 +190,7 @@ We use GitHub Actions for continuous integration and deployment. The workflows a
 The CI workflow is defined in `.github/workflows/ci.yml`. It runs on every push and pull request to the `main` branch. The workflow includes the following steps:
 
 1. Checkout the code.
-2. Set up Deno.
+2. Set up Node.js.
 3. Install dependencies.
 4. Run linting.
 5. Run tests.
