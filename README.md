@@ -1,6 +1,17 @@
 # Q-DimensionalField
 
-Q-DimensionalField is a VR/AR/XR game that uses voxel chunks to create a global server.
+Q-DimensionalField is a VR game that uses voxel chunks to create a global server.
+
+## Project Direction
+
+* The project will be a VR game 🎮
+* It will be hosted on GitHub Pages 🌐
+* It will use Vercel APIs and Supabase for now 🔧
+* The project will heavily use AI LLMs and generative AI for textures and 3D assets 🤖
+* LLMs will act as guides within the game 🧭
+* The main idea is that space will be divided into cubes, starting from the 000 point. The chunk `z0y0x0` is in the center and expands for example for 5 units in all axes, making a 10x10x10 cube. This is our base cube. We will have bigger parsecs that are for other logic. In the future, we will add more axes to our chunks, making it multidimensional. Entering in and out of a chunk could lead to a different place 🌌
+* Document the project and prepare for GitHub Pages structure 📄
+* This is a project in really early development, pre-MVP 🚀
 
 ## Directory Structure
 
@@ -8,12 +19,10 @@ The project is organized into the following directory structure:
 
 ```
 root/
-  ├── frontend/                 # Main frontend application
-  │   ├── static/               # Static assets (HTML, CSS, images)
-  │   ├── src/                  # Core frontend source code
-  │   │   ├── components/       # Shared components for the host
-  │   │   ├── pages/            # Routes/pages for the frontend
-  │   │   └── index.html        # Base HTML
+  ├── src/                      # Core frontend source code
+  │   ├── components/           # Shared components for the host
+  │   ├── pages/                # Routes/pages for the frontend
+  │   └── index.html            # Base HTML
   ├── shared-ui/                # Shared UI components
   │   ├── src/                  # Source code for shared components
   ├── shared-utils/             # Shared utilities (types, helpers)
