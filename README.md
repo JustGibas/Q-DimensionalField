@@ -277,6 +277,25 @@ To use the marching cubes algorithm, follow these steps:
    updateMarchingCubes();
    ```
 
+## Including and Using Taichi.js
+
+To include and use Taichi.js in your project, follow these steps:
+
+1. Add the Taichi.js library to your `index.html` file:
+   ```html
+   <script src="https://cdn.jsdelivr.net/npm/@taichi.js/taichi.min.js"></script>
+   ```
+
+2. Initialize Taichi.js in your main JavaScript file:
+   ```js
+   // Initialize Taichi.js
+   taichi.init().then(() => {
+     console.log('Taichi.js initialized');
+   });
+   ```
+
+3. Use Taichi.js for your computations and simulations as needed in your project.
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
