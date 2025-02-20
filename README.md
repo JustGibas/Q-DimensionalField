@@ -132,15 +132,15 @@ World
 
 2. **Blocks**  
    - Size: 1 unit  
-   - Contains: 8x8x8 voxels  
+   - Contains: 10x10x10 voxels  
    - Features: Textures, collision, interaction
 
 3. **Chunks**  
-   - Size: 16x16x16 blocks  
+   - Size: 10x10x10 blocks  
    - Tasks: Loading, unloading, persistence, LOD, culling
 
 4. **World**  
-   - Organization: 64x64x64 chunks  
+   - Organization: infinite chunks generatiom  
    - Tasks: Generation, persistence, interaction, networking
 
 #### Implementation Details

@@ -1,4 +1,4 @@
-import chunkManager from '../world/chunk-manager.js';
+import chunkManager from './managers.js';
 
 AFRAME.registerComponent('player-controls', {
     init: function() {

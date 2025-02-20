@@ -1,6 +1,6 @@
-import TextureManager from '../utils/texture-manager.js';
-import TextureGenerator from '../utils/texture-generator.js';
-import { BlockTypes } from '../blocks/block-types.js';
+import TextureManager from './generators.js';
+import TextureGenerator from './generators.js';
+import { BlockTypes } from './managers.js';
 
 AFRAME.registerComponent('chunk', {
     schema: {
@@ -132,5 +132,83 @@ AFRAME.registerComponent('chunk', {
 
         // Log the completion of the plane addition process
         if (loggingEnabled) console.log('Plane added to chunk');
+    }
+});
+
+AFRAME.registerComponent('loading-screen', {
+    init: function() {
+        // Logging flag to enable/disable logging
+        const loggingEnabled = true;
+
+        if (loggingEnabled) console.log('Initializing loading screen component');
+        this.loadingScreen = document.querySelector('#loading-screen');
+        this.loadingText = this.loadingScreen.querySelector('.loader');
+        this.setupLoadingManager();
+    },
+
+    setupLoadingManager: function() {
+        // Log the setup of the loading manager
+        if (loggingEnabled) console.log('Setting up loading manager');
+
+        THREE.DefaultLoadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+            const progress = (itemsLoaded / itemsTotal * 100).toFixed(0);
+            this.loadingText.textContent = `Loading textures... ${progress}%`;
+
+            // Log the loading progress
+            if (loggingEnabled) console.log(`Loading progress: ${progress}%`);
+        };
+
+        THREE.DefaultLoadingManager.onLoad = () => {
+            // Log the completion of loading
+            if (loggingEnabled) console.log('Loading complete');
+
+            setTimeout(() => {
+                this.loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    this.loadingScreen.style.display = 'none';
+                }, 500);
+            }, 1000);
+        };
+    }
+});
+
+AFRAME.registerComponent('voxel', {
+    schema: {
+        size: { type: 'number', default: 0.125 },
+        typeId: { type: 'number', default: 1 }
+    },
+
+    init: function() {
+        this.blockType = getBlockType(this.data.typeId);
+        this.createVoxel();
+    },
+
+    createVoxel: function() {
+        const geometry = new THREE.BoxGeometry(
+            this.data.size,
+            this.data.size,
+            this.data.size
+        );
+        
+        const material = new THREE.MeshStandardMaterial({
+            color: this.getVoxelColor(),
+            roughness: 0.7,
+            metalness: 0.2
+        });
+
+        this.mesh = new THREE.Mesh(geometry, material);
+        this.el.setObject3D('mesh', this.mesh);
+    },
+
+    getVoxelColor: function() {
+        const blockType = getBlockType(this.data.typeId);
+        return blockType.color || '#ffffff';
+    },
+
+    updateType: function(newTypeId) {
+        this.data.typeId = newTypeId;
+        this.blockType = getBlockType(newTypeId);
+        this.mesh.material.color.set(this.getVoxelColor());
+        this.mesh.material.transparent = this.blockType.transparent || false;
     }
 });

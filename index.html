@@ -5,23 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Voxel VR</title>
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <script type="module" src="./src/world/chunk-generator.js"></script>
-  <script type="module" src="./src/world/chunk-manager.js"></script>
-  <script type="module" src="./src/components/chunk-component.js"></script>
-  <script type="module" src="./src/components/loading-screen.js"></script>
-  <script type="module" src="./src/components/player-controls.js"></script>
-  <style>
-    #debug-ui {
-      position: fixed;
-      top: 95vh;
-      left: 10px;
-      background: rgba(0,0,0,0.7);
-      color: white;
-      padding: 10px;
-      font-family: monospace;
-      z-index: 1000;
-    }
-  </style>
+  <script type="module" src="./src/game.js"></script>
+  <script type="module" src="./src/player.js"></script>
+  <script type="module" src="./src/managers.js"></script>
+  <script type="module" src="./src/components.js"></script>
+  <script type="module" src="./src/generators.js"></script>
+  <link rel="stylesheet" href="./src/styles.css">
 </head>
 <body>
   <div id="loading-screen">

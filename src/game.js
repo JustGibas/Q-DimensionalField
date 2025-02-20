@@ -1,4 +1,7 @@
 import * as THREE from 'https://unpkg.com/three@0.149.0/build/three.module.js';
+import chunkManager from './managers.js';
+import WorldManager from './managers.js';
+import ChunkGenerator from './generators.js';
 
 // Register chunk component with proper naming
 AFRAME.registerComponent('chunk', {
