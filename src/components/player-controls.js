@@ -53,6 +53,12 @@ AFRAME.registerComponent('player-controls', {
         if (playerRig) {
             const playerPosition = playerRig.getAttribute('position');
             chunkManager.updateChunksAroundPlayer(playerPosition);
+
+            // Update the debug box with the player's current coordinate position
+            const playerPositionElement = document.getElementById('player-position');
+            if (playerPositionElement) {
+                playerPositionElement.textContent = `${playerPosition.x.toFixed(2)}, ${playerPosition.y.toFixed(2)}, ${playerPosition.z.toFixed(2)}`;
+            }
         }
     }
 });
