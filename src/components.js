@@ -3,7 +3,7 @@ import { TextureManager, TextureGenerator, blockTypeGenerator } from './generato
 AFRAME.registerComponent('chunk', {
     schema: {
         position: { type: 'vec3' },
-        size: { type: 'number', default: 16 },
+        size: { type: 'number', default: CONFIG.SIZES.CHUNK },
         chunkData: { type: 'array' }
     },
 
@@ -190,7 +190,7 @@ AFRAME.registerComponent('loading-screen', {
 
 AFRAME.registerComponent('voxel', {
     schema: {
-        size: { type: 'number', default: 0.125 },
+        size: { type: 'number', default: CONFIG.SIZES.VOXEL },
         typeId: { type: 'number', default: 1 }
     },
 

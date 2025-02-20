@@ -83,9 +83,9 @@ World
 // Example encoding structure
 {
   red: heightData,    // 0-255 for height
-  green: typeData,    // 0-255 for block types
-  blue: variantData,  // 0-255 for variations
-  alpha: metaData     // Additional information
+  green: withData,    // 0-255 for
+  blue: depthData,  // 0-255 for 
+  alpha: typeData     // 0-255 for block types
 }
 ```
 

@@ -244,11 +244,13 @@ class ChunkGenerator {
         this.noise = new SimplexNoise();
         this.scale = 0.1;
         this.blockTypeGenerator = new BlockTypeGenerator();
+        this.CHUNK_SIZE = CONFIG.SIZES.CHUNK;
+        this.BLOCK_SIZE = CONFIG.SIZES.BLOCK;
     }
 
     generateChunkData(position) {
         Logger.logStep('ChunkGenerator', 'Generating chunk data', { position });
-        const size = CONFIG.CHUNK_SIZE || 16;
+        const size = this.CHUNK_SIZE;
         const data = new Array(size * size * size);
         
         for (let x = 0; x < size; x++) {

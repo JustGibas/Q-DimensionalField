@@ -5,7 +5,8 @@ class ChunkManager {
     constructor() {
         Logger.info('ChunkManager', 'Initializing', { version: CONFIG.VERSIONS.CHUNK_MANAGER });
         this.chunks = new Map();
-        this.CHUNK_SIZE = 10; // 10x10x10 blocks per chunk
+        this.CHUNK_SIZE = CONFIG.SIZES.CHUNK;
+        this.BLOCK_SIZE = CONFIG.SIZES.BLOCK;
         this.container = document.querySelector('#world-container');
         if (!this.container) {
             console.error('Could not find world-container element!');
@@ -174,18 +175,18 @@ class ChunkManager {
 
     getChunkPosition(worldPos) {
         return {
-            x: Math.floor(worldPos.x / (this.CHUNK_SIZE * 16)),
-            y: Math.floor(worldPos.y / (this.CHUNK_SIZE * 16)),
-            z: Math.floor(worldPos.z / (this.CHUNK_SIZE * 16))
+            x: Math.floor(worldPos.x / (this.CHUNK_SIZE * this.BLOCK_SIZE)),
+            y: Math.floor(worldPos.y / (this.CHUNK_SIZE * this.BLOCK_SIZE)),
+            z: Math.floor(worldPos.z / (this.CHUNK_SIZE * this.BLOCK_SIZE))
         };
     }
 }
 
 class VoxelManager {
-    constructor(blockSize = 1) {
+    constructor() {
         Logger.info('VoxelManager', `Initializing version ${CONFIG.VERSIONS.VOXEL_MANAGER}`);
-        this.voxelsPerBlock = 8; // 8x8x8 voxels per block
-        this.voxelSize = blockSize / this.voxelsPerBlock;
+        this.voxelSize = CONFIG.SIZES.VOXEL;
+        this.blocksPerVoxel = CONFIG.SIZES.BLOCK / CONFIG.SIZES.VOXEL;
         this.voxels = new Map();
     }
 
@@ -235,4 +236,147 @@ export class TaichiManager {
 }
 */
 
-export { ChunkManager, VoxelManager, WorldManager };
+class UIManager {
+    constructor() {
+        this.DEBUG = CONFIG.DEBUG;
+        this.inventoryVisible = false;
+        this.debugVisible = false;
+        this.activeHotbarSlot = 0;
+        this.inventory = new Array(32).fill(null);
+        this.hotbar = new Array(8).fill(null);
+        
+        this.initializeUI();
+        this.setupEventListeners();
+    }
+
+    initializeUI() {
+        // Generate inventory slots
+        const inventoryGrid = document.getElementById('inventory-grid');
+        for (let i = 0; i < 32; i++) {
+            const slot = document.createElement('div');
+            slot.className = 'inventory-slot';
+            slot.setAttribute('data-slot', i);
+            slot.addEventListener('click', () => this.handleSlotClick(i));
+            inventoryGrid.appendChild(slot);
+        }
+
+        // Generate hotbar slots
+        const hotbar = document.getElementById('hotbar');
+        for (let i = 0; i < 8; i++) {
+            const slot = document.createElement('div');
+            slot.className = 'hotbar-slot';
+            slot.setAttribute('data-slot', i);
+            slot.addEventListener('click', () => this.selectHotbarSlot(i));
+            hotbar.appendChild(slot);
+        }
+    }
+
+    setupEventListeners() {
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                this.toggleInventory();
+            }
+            if (e.key === '`') {
+                e.preventDefault();
+                this.toggleDebug();
+            }
+            if (e.key >= '1' && e.key <= '8') {
+                this.selectHotbarSlot(parseInt(e.key) - 1);
+            }
+        });
+    }
+
+    toggleInventory() {
+        this.inventoryVisible = !this.inventoryVisible;
+        document.getElementById('inventory-panel').classList.toggle('visible');
+    }
+
+    toggleDebug() {
+        this.debugVisible = !this.debugVisible;
+        document.getElementById('debug-panel').classList.toggle('visible');
+    }
+
+    selectHotbarSlot(index) {
+        const slots = document.querySelectorAll('.hotbar-slot');
+        slots.forEach(slot => slot.classList.remove('active'));
+        slots[index].classList.add('active');
+        this.activeHotbarSlot = index;
+        this.updateHotbarSelection();
+    }
+
+    handleSlotClick(index) {
+        // Handle inventory slot interaction
+        if (this.inventory[index]) {
+            this.moveItemToHotbar(index);
+        }
+    }
+
+    moveItemToHotbar(fromSlot) {
+        const item = this.inventory[fromSlot];
+        const hotbarSlot = this.activeHotbarSlot;
+        
+        // Swap items between inventory and hotbar
+        this.hotbar[hotbarSlot] = item;
+        this.inventory[fromSlot] = null;
+        
+        this.updateInventoryDisplay();
+        this.updateHotbarDisplay();
+    }
+
+    updateInventoryDisplay() {
+        const slots = document.querySelectorAll('.inventory-slot');
+        this.inventory.forEach((item, i) => {
+            if (item) {
+                slots[i].style.backgroundColor = item.color || 'rgba(255, 255, 255, 0.1)';
+                slots[i].textContent = item.count || '';
+            } else {
+                slots[i].style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                slots[i].textContent = '';
+            }
+        });
+    }
+
+    updateHotbarDisplay() {
+        const slots = document.querySelectorAll('.hotbar-slot');
+        this.hotbar.forEach((item, i) => {
+            if (item) {
+                slots[i].style.backgroundColor = item.color || 'rgba(255, 255, 255, 0.1)';
+                slots[i].textContent = item.count || '';
+            } else {
+                slots[i].style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                slots[i].textContent = '';
+            }
+        });
+    }
+
+    updateHotbarSelection() {
+        if (this.DEBUG) {
+            console.log(`Selected hotbar slot: ${this.activeHotbarSlot}`);
+        }
+    }
+
+    addItemToInventory(item) {
+        const emptySlot = this.inventory.findIndex(slot => slot === null);
+        if (emptySlot !== -1) {
+            this.inventory[emptySlot] = item;
+            this.updateInventoryDisplay();
+            return true;
+        }
+        return false;
+    }
+
+    updateDebugInfo(data) {
+        if (!this.DEBUG) return;
+        
+        const debugContent = document.getElementById('debug-content');
+        for (const [key, value] of Object.entries(data)) {
+            const element = debugContent.querySelector(`#debug-${key}`);
+            if (element) {
+                element.textContent = value;
+            }
+        }
+    }
+}
+
+export { ChunkManager, VoxelManager, WorldManager, UIManager };

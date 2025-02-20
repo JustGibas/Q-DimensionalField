@@ -30,6 +30,12 @@ export const CONFIG = {
             showTiming: true,
             showMemory: true
         }
+    },
+    SIZES: {
+        CHUNK: 10,        // 10x10x10 units
+        BLOCK: 1,         // 1x1x1 units
+        VOXEL: 0.1,      // 0.1x0.1x0.1 units
+        RENDER_DISTANCE: 2 // Number of chunks to render in each direction
     }
 };
 
