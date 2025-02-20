@@ -27,6 +27,89 @@
     <div class="loader">Loading...</div>
   </div>
 
+  <div class="game-ui">
+    <div class="ui-window settings-panel" id="settings-panel">
+        <div class="window-header">
+            <span class="window-title">Settings</span>
+            <button class="action-button" onclick="toggleWindow('settings-panel')">×</button>
+        </div>
+        <div class="settings-group">
+            <div class="settings-group-title">Debug Options</div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggle-debug-window">
+                <span class="toggle-slider"></span>
+                Show Debug Window
+            </label>
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggle-performance-window">
+                <span class="toggle-slider"></span>
+                Show Performance
+            </label>
+        </div>
+        <div class="settings-group">
+            <div class="settings-group-title">Rendering</div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggle-wireframe">
+                <span class="toggle-slider"></span>
+                Wireframe Mode
+            </label>
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggle-chunk-bounds">
+                <span class="toggle-slider"></span>
+                Show Chunk Bounds
+            </label>
+        </div>
+    </div>
+
+    <div class="ui-window debug-window" id="debug-window">
+        <div class="window-header">
+            <span class="window-title">Debug Info</span>
+            <button class="action-button" onclick="toggleWindow('debug-window')">×</button>
+        </div>
+        <div class="performance-metric">
+            <span class="metric-label">Active Chunks</span>
+            <span class="metric-value" id="active-chunks">0</span>
+        </div>
+        <div class="performance-metric">
+            <span class="metric-label">Total Blocks</span>
+            <span class="metric-value" id="total-blocks">0</span>
+        </div>
+        <div class="performance-metric">
+            <span class="metric-label">Player Position</span>
+            <span class="metric-value" id="player-pos">0, 0, 0</span>
+        </div>
+        <div class="quick-actions">
+            <button class="action-button" onclick="refreshWorld()">Refresh World</button>
+            <button class="action-button" onclick="clearChunks()">Clear Chunks</button>
+        </div>
+    </div>
+
+    <div class="ui-window performance-window" id="performance-window">
+        <div class="window-header">
+            <span class="window-title">Performance</span>
+            <button class="action-button" onclick="toggleWindow('performance-window')">×</button>
+        </div>
+        <div class="performance-metric">
+            <span class="metric-label">FPS</span>
+            <span class="metric-value" id="fps-counter">60</span>
+            <div class="progress-bar">
+                <div class="progress-fill" id="fps-bar" style="width: 100%"></div>
+            </div>
+        </div>
+        <div class="performance-metric">
+            <span class="metric-label">Memory</span>
+            <span class="metric-value" id="memory-usage">0 MB</span>
+            <div class="progress-bar">
+                <div class="progress-fill" id="memory-bar" style="width: 0%"></div>
+            </div>
+        </div>
+        <div class="performance-metric">
+            <span class="metric-label">Draw Calls</span>
+            <span class="metric-value" id="draw-calls">0</span>
+        </div>
+    </div>
+  </div>
+
   <div id="debug-panel" class="ui-panel debug">
     <div class="ui-header">
       <span>Debug Information</span>
@@ -36,6 +119,41 @@
       <div>Chunks: <span class="ui-value" id="chunk-count">0</span></div>
       <div>Position: <span class="ui-value" id="player-position">0, 0, 0</span></div>
       <div>Last Chunk: <span class="ui-value" id="last-chunk-name">None</span></div>
+    </div>
+    <div class="debug-flags">
+        <h3>Debug Flags</h3>
+        <div>
+            <label>
+                <input type="checkbox" id="flag-blocks" onchange="toggleFlag('ENABLE_BLOCK_GENERATION')">
+                Enable Blocks
+            </label>
+        </div>
+        <div>
+            <label>
+                <input type="checkbox" id="flag-chunks" onchange="toggleFlag('ENABLE_CHUNK_GENERATION')" checked>
+                Enable Chunks
+            </label>
+        </div>
+        <div>
+            <label>
+                <input type="checkbox" id="flag-wireframe" onchange="toggleFlag('WIREFRAME_MODE')" checked>
+                Wireframe Mode
+            </label>
+        </div>
+        <div>
+            <label>
+                <input type="checkbox" id="flag-bounds" onchange="toggleFlag('SHOW_CHUNK_BOUNDS')" checked>
+                Show Bounds
+            </label>
+        </div>
+    </div>
+    <div class="debug-options">
+        <h3>Test Mode</h3>
+        <select id="test-mode" onchange="setTestMode(this.value)">
+            <option value="EMPTY">Empty</option>
+            <option value="SINGLE_BLOCK">Single Block</option>
+            <option value="FULL">Full Generation</option>
+        </select>
     </div>
   </div>
 
@@ -94,85 +212,22 @@
   <footer>
     <p>&copy; 2025 Q-DimensionalField. All rights reserved.</p>
   </footer>
-  <script>
-    const loggingEnabled = true;
-
-    function toggleDebugPanel() {
-      document.getElementById('debug-panel').classList.toggle('visible');
-    }
-
-    function toggleInventory() {
-      document.getElementById('inventory-panel').classList.toggle('visible');
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      if (loggingEnabled) console.log('DOM loaded, initializing debug monitors');
-      
-      const scene = document.querySelector('a-scene');
-      scene.addEventListener('loaded', () => {
-        if (loggingEnabled) console.log('A-Frame scene loaded');
-        setTimeout(() => {
-          const container = document.querySelector('#world-container');
-          if (loggingEnabled) console.log('World container status:', {
-            childCount: container.children.length,
-            children: Array.from(container.children).map(c => c.getAttribute('chunk'))
-          });
-        }, 1000);
-      });
-
-      const inventoryGrid = document.getElementById('inventory-grid');
-      for (let i = 0; i < 32; i++) {
-        const slot = document.createElement('div');
-        slot.className = 'inventory-slot';
-        slot.setAttribute('data-slot', i);
-        inventoryGrid.appendChild(slot);
-      }
-
-      const hotbar = document.getElementById('hotbar');
-      for (let i = 0; i < 8; i++) {
-        const slot = document.createElement('div');
-        slot.className = 'hotbar-slot';
-        slot.setAttribute('data-slot', i);
-        hotbar.appendChild(slot);
-      }
-
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Tab') {
-          e.preventDefault();
-          toggleInventory();
-        }
-        if (e.key === '`') {
-          e.preventDefault();
-          toggleDebugPanel();
-        }
-        if (e.key >= '1' && e.key <= '8') {
-          const slots = document.querySelectorAll('.hotbar-slot');
-          slots.forEach(slot => slot.classList.remove('active'));
-          slots[parseInt(e.key) - 1].classList.add('active');
-        }
-      });
-    });
-
+  <script type="module">
+    import { UIManager } from './src/managers.js';
+    
+    // Initialize UI manager
+    const uiManager = new UIManager();
+    
+    // Expose UI manager globally for debug purposes
+    window.uiManager = uiManager;
+    
+    // Error handling
     window.addEventListener('error', (event) => {
-      console.error('Global error:', event.error);
-      // Show user-friendly error message
-      const feedback = document.getElementById('feedback-popup');
-      feedback.textContent = 'An error occurred. Please refresh the page.';
-      feedback.classList.add('visible');
+        console.error('Global error:', event.error);
+        const feedback = document.getElementById('feedback-popup');
+        feedback.textContent = 'An error occurred. Please refresh the page.';
+        feedback.classList.add('visible');
     });
-
-    // Add performance monitoring
-    let lastFrameTime = performance.now();
-    function checkFrameTime() {
-      const now = performance.now();
-      const frameDuration = now - lastFrameTime;
-      if (frameDuration > 50) { // More than 20fps
-        console.warn('Frame time warning:', frameDuration.toFixed(2), 'ms');
-      }
-      lastFrameTime = now;
-      requestAnimationFrame(checkFrameTime);
-    }
-    requestAnimationFrame(checkFrameTime);
   </script>
 </body>
 </html>

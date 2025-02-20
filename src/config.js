@@ -9,6 +9,25 @@ export const CONFIG = {
         THREE: '0.149.0',
         AFRAME: '1.4.0'
     },
+    FLAGS: {
+        ENABLE_BLOCK_GENERATION: false,    // Toggle block mesh generation
+        ENABLE_CHUNK_GENERATION: true,     // Toggle chunk creation
+        ENABLE_CHUNK_UPDATES: true,        // Toggle dynamic chunk updates
+        ENABLE_TEXTURES: false,            // Toggle texture loading
+        ENABLE_PHYSICS: false,             // Toggle physics
+        ENABLE_COLLISIONS: false,          // Toggle collision detection
+        WIREFRAME_MODE: true,              // Show wireframe instead of solid blocks
+        SHOW_CHUNK_BOUNDS: true,          // Show chunk boundary boxes
+        SIMPLE_GEOMETRY: true,            // Use simple geometry for testing
+    },
+    DEBUG_OPTIONS: {
+        LOG_CHUNK_CREATION: true,
+        LOG_BLOCK_CREATION: false,
+        LOG_PERFORMANCE: true,
+        CHUNK_CREATION_DELAY: 0,          // Delay in ms between chunk creation
+        MAX_CHUNKS: 10,                   // Maximum number of chunks to generate
+        TEST_MODE: 'EMPTY',               // 'EMPTY', 'SINGLE_BLOCK', 'FULL'
+    },
     LOGGING: {
         enabled: true,
         level: 'debug', // 'debug' | 'info' | 'warn' | 'error'

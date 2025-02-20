@@ -1,6 +1,6 @@
 import * as THREE from 'https://unpkg.com/three@0.149.0/build/three.module.js';
 import { CONFIG, Logger } from './config.js';
-import { WorldManager, ChunkManager } from './managers.js';
+import { WorldManager, ChunkManager, UIManager } from './managers.js';
 import { blockTypeGenerator } from './generators.js';
 
 // Log initialization
@@ -11,16 +11,97 @@ Logger.info('Game', `Using A-Frame ${CONFIG.VERSIONS.AFRAME}`);
 AFRAME.registerComponent('chunk', {
     schema: {
         chunkId: { type: 'string', default: 'X0Y0Z0' },
-        size: { type: 'number', default: 16 }
+        size: { type: 'number', default: CONFIG.SIZES.CHUNK }
     },
 
     init: function() {
-        Logger.debug('ChunkComponent', `Initializing chunk ${this.data.chunkId}`, {
-            version: CONFIG.VERSIONS.CHUNK_COMPONENT,
-            size: this.data.size
-        });
+        if (!CONFIG.FLAGS.ENABLE_CHUNK_GENERATION) {
+            Logger.info('ChunkComponent', 'Chunk generation disabled by flag');
+            return;
+        }
+
         this.blocks = new Map();
-        this.generateBlocks();
+        this.generateDebugGeometry();
+    },
+
+    generateDebugGeometry: function() {
+        if (CONFIG.FLAGS.SHOW_CHUNK_BOUNDS) {
+            // Create wireframe box to show chunk bounds
+            const geometry = new THREE.BoxGeometry(
+                this.data.size, 
+                this.data.size, 
+                this.data.size
+            );
+            const material = new THREE.MeshBasicMaterial({
+                wireframe: true,
+                color: 0x00ff00
+            });
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(
+                this.data.size/2, 
+                this.data.size/2, 
+                this.data.size/2
+            );
+            const group = new THREE.Group();
+            group.add(mesh);
+            this.el.setObject3D('mesh', group);
+            return;
+        }
+
+        if (CONFIG.DEBUG_OPTIONS.TEST_MODE === 'EMPTY') {
+            return;
+        }
+
+        if (CONFIG.DEBUG_OPTIONS.TEST_MODE === 'SINGLE_BLOCK') {
+            this.generateSingleBlock();
+            return;
+        }
+
+        if (CONFIG.FLAGS.SIMPLE_GEOMETRY) {
+            this.generateSimpleGeometry();
+            return;
+        }
+
+        // Only generate blocks if explicitly enabled
+        if (CONFIG.FLAGS.ENABLE_BLOCK_GENERATION) {
+            this.generateBlocks();
+        }
+    },
+
+    generateSingleBlock: function() {
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const material = new THREE.MeshBasicMaterial({
+            color: 0xff0000,
+            wireframe: CONFIG.FLAGS.WIREFRAME_MODE
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(0, 0, 0);
+        const group = new THREE.Group();
+        group.add(mesh);
+        this.el.setObject3D('mesh', group);
+    },
+
+    generateSimpleGeometry: function() {
+        const geometry = new THREE.BoxGeometry(
+            this.data.size, 
+            this.data.size, 
+            this.data.size
+        );
+        const material = new THREE.MeshBasicMaterial({
+            color: 0x808080,
+            wireframe: CONFIG.FLAGS.WIREFRAME_MODE,
+            transparent: true,
+            opacity: 0.5
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(
+            this.data.size/2, 
+            this.data.size/2, 
+            this.data.size/2
+        );
+        const group = new THREE.Group();
+        group.add(mesh);
+        this.el.setObject3D('mesh', group);
     },
 
     generateBlocks: function() {
@@ -128,17 +209,22 @@ if (CONFIG.LOGGING.performance) {
 document.querySelector('a-scene').addEventListener('loaded', () => {
     Logger.info('Game', 'A-Frame scene loaded');
     
-    // Initialize world immediately after scene loads
+    // Initialize managers
+    const worldManager = new WorldManager();
+    const uiManager = new UIManager();
+    
+    // Initialize world
     initializeWorld();
     
     // Start chunk generation
-    const worldManager = new WorldManager();
     const initialChunk = worldManager.chunkManager.spawnInitialChunk();
     
     if (initialChunk) {
         Logger.info('Game', 'Initial chunk created successfully');
-    } else {
-        Logger.error('Game', 'Failed to create initial chunk');
+        uiManager.updateDebugInfo({
+            'chunk-count': '1',
+            'last-chunk-name': 'Initial Chunk'
+        });
     }
 
     // Force immediate chunk updates

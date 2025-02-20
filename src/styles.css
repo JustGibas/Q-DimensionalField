@@ -196,3 +196,230 @@
         height: 40px;
     }
 }
+
+/* Modern UI Framework */
+.game-ui {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    --primary: #4CAF50;
+    --background: rgba(16, 16, 24, 0.95);
+    --border: rgba(255, 255, 255, 0.1);
+    --text: #ffffff;
+    --accent: #2196F3;
+    --warning: #FFC107;
+    --error: #F44336;
+}
+
+/* UI Windows Base */
+.ui-window {
+    position: fixed;
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    color: var(--text);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: none;
+}
+
+.ui-window.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+}
+
+/* Settings Panel */
+.settings-panel {
+    top: 20px;
+    right: 20px;
+    width: 300px;
+    padding: 20px;
+    z-index: 1000;
+}
+
+/* Debug Window */
+.debug-window {
+    bottom: 20px;
+    left: 20px;
+    width: 380px;
+    padding: 16px;
+    z-index: 1000;
+}
+
+/* Performance Window */
+.performance-window {
+    top: 20px;
+    left: 20px;
+    width: 320px;
+    padding: 16px;
+    z-index: 1000;
+}
+
+/* Window Headers */
+.window-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.window-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* Settings Groups */
+.settings-group {
+    margin-bottom: 20px;
+}
+
+.settings-group-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+}
+
+/* Toggle Switches */
+.toggle-switch {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    cursor: pointer;
+}
+
+.toggle-switch input[type="checkbox"] {
+    display: none;
+}
+
+.toggle-slider {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background: var(--border);
+    border-radius: 12px;
+    margin-right: 12px;
+    transition: background 0.3s;
+}
+
+.toggle-slider:before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s;
+}
+
+.toggle-switch input[type="checkbox"]:checked + .toggle-slider {
+    background: var(--primary);
+}
+
+.toggle-switch input[type="checkbox"]:checked + .toggle-slider:before {
+    transform: translateX(20px);
+}
+
+/* Performance Metrics */
+.performance-metric {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.metric-label {
+    font-size: 14px;
+    color: var(--text);
+}
+
+.metric-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--primary);
+}
+
+/* Progress Bars */
+.progress-bar {
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 4px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 2px;
+    transition: width 0.3s;
+}
+
+/* Warning States */
+.warning .metric-value {
+    color: var(--warning);
+}
+
+.error .metric-value {
+    color: var(--error);
+}
+
+/* Quick Actions */
+.quick-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.action-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    background: var(--border);
+    color: var(--text);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-button:hover {
+    background: var(--primary);
+}
+
+/* Tooltips */
+[data-tooltip] {
+    position: relative;
+}
+
+[data-tooltip]:before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 8px;
+    background: var(--background);
+    border-radius: 4px;
+    font-size: 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+[data-tooltip]:hover:before {
+    opacity: 1;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .ui-window {
+        width: calc(100% - 40px) !important;
+    }
+}

@@ -4,11 +4,18 @@ import { CONFIG, Logger } from './config.js';
 
 class ChunkManager {
     constructor() {
+        if (!CONFIG.FLAGS.ENABLE_CHUNK_GENERATION) {
+            Logger.info('ChunkManager', 'Chunk management disabled by flag');
+            return;
+        }
+
         const startTime = performance.now();
         Logger.info('ChunkManager', 'Initializing', { version: CONFIG.VERSIONS.CHUNK_MANAGER });
         
         try {
             this.chunks = new Map();
+            this.chunksToLoad = [];
+            this.chunkCount = 0;
             this.CHUNK_SIZE = CONFIG.SIZES.CHUNK;
             this.BLOCK_SIZE = CONFIG.SIZES.BLOCK;
             this.container = document.querySelector('#world-container');
@@ -21,6 +28,10 @@ class ChunkManager {
             this.spawnInitialChunk();
             this.initializePlane();
             
+            if (CONFIG.DEBUG_OPTIONS.LOG_CHUNK_CREATION) {
+                Logger.info('ChunkManager', 'Initialized with debug options', CONFIG.DEBUG_OPTIONS);
+            }
+
             Logger.performance('ChunkManager', 'initialization', startTime);
         } catch (error) {
             Logger.error('ChunkManager', CONFIG.ERROR_CODES.WORLD_INIT, error);
@@ -126,6 +137,23 @@ class ChunkManager {
     }
 
     createChunk(position) {
+        if (this.chunkCount >= CONFIG.DEBUG_OPTIONS.MAX_CHUNKS) {
+            Logger.warn('ChunkManager', 'Max chunk limit reached');
+            return null;
+        }
+
+        // Add delay if specified
+        if (CONFIG.DEBUG_OPTIONS.CHUNK_CREATION_DELAY > 0) {
+            setTimeout(() => {
+                this._createChunkInternal(position);
+            }, CONFIG.DEBUG_OPTIONS.CHUNK_CREATION_DELAY);
+            return null;
+        }
+
+        return this._createChunkInternal(position);
+    }
+
+    _createChunkInternal(position) {
         const startTime = performance.now();
         try {
             Logger.logStep('ChunkManager', 'Creating new chunk', { position });
@@ -296,18 +324,47 @@ class TaichiManager {
 class UIManager {
     constructor() {
         this.DEBUG = CONFIG.DEBUG;
+        this.windows = new Map();
+        this.metrics = new Map();
+        this.lastFrameTime = performance.now();
+        this.frameCount = 0;
+        this.lastFPS = 60;
+        
+        // Inventory state
         this.inventoryVisible = false;
         this.debugVisible = false;
         this.activeHotbarSlot = 0;
         this.inventory = new Array(32).fill(null);
         this.hotbar = new Array(8).fill(null);
-        
+
         this.initializeUI();
         this.setupEventListeners();
+        this.startPerformanceMonitoring();
     }
 
     initializeUI() {
+        // Initialize all UI windows
+        ['settings-panel', 'debug-window', 'performance-window'].forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                this.windows.set(id, {
+                    element,
+                    visible: false
+                });
+            }
+        });
+
+        // Initialize toggle states
+        this.setToggleState('toggle-debug-window', CONFIG.DEBUG);
+        this.setToggleState('toggle-wireframe', CONFIG.FLAGS.WIREFRAME_MODE);
+        this.setToggleState('toggle-chunk-bounds', CONFIG.FLAGS.SHOW_CHUNK_BOUNDS);
+
         // Generate inventory slots
+        this.initializeInventory();
+        this.initializeHotbar();
+    }
+
+    initializeInventory() {
         const inventoryGrid = document.getElementById('inventory-grid');
         for (let i = 0; i < 32; i++) {
             const slot = document.createElement('div');
@@ -316,8 +373,9 @@ class UIManager {
             slot.addEventListener('click', () => this.handleSlotClick(i));
             inventoryGrid.appendChild(slot);
         }
+    }
 
-        // Generate hotbar slots
+    initializeHotbar() {
         const hotbar = document.getElementById('hotbar');
         for (let i = 0; i < 8; i++) {
             const slot = document.createElement('div');
@@ -329,19 +387,106 @@ class UIManager {
     }
 
     setupEventListeners() {
-        document.addEventListener('keydown', (e) => {
+        // Window toggle listeners
+        document.getElementById('toggle-debug-window')?.addEventListener('change', (e) => {
+            this.toggleWindow('debug-window', e.target.checked);
+        });
+
+        document.getElementById('toggle-performance-window')?.addEventListener('change', (e) => {
+            this.toggleWindow('performance-window', e.target.checked);
+        });
+
+        // Debug flag listeners
+        document.getElementById('toggle-wireframe')?.addEventListener('change', (e) => {
+            CONFIG.FLAGS.WIREFRAME_MODE = e.target.checked;
+            this.refreshWorld();
+        });
+
+        document.getElementById('toggle-chunk-bounds')?.addEventListener('change', (e) => {
+            CONFIG.FLAGS.SHOW_CHUNK_BOUNDS = e.target.checked;
+            this.refreshWorld();
+        });
+
+        // Keyboard shortcuts
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'F3') {
+                this.toggleWindow('debug-window');
+            }
+            if (e.key === 'F4') {
+                this.toggleWindow('performance-window');
+            }
+            if (e.key === 'F10') {
+                this.toggleWindow('settings-panel');
+            }
             if (e.key === 'Tab') {
                 e.preventDefault();
                 this.toggleInventory();
-            }
-            if (e.key === '`') {
-                e.preventDefault();
-                this.toggleDebug();
             }
             if (e.key >= '1' && e.key <= '8') {
                 this.selectHotbarSlot(parseInt(e.key) - 1);
             }
         });
+    }
+
+    toggleWindow(windowId, force) {
+        const window = this.windows.get(windowId);
+        if (window) {
+            const newState = force !== undefined ? force : !window.visible;
+            window.visible = newState;
+            window.element.classList.toggle('visible', newState);
+        }
+    }
+
+    startPerformanceMonitoring() {
+        const updateMetrics = () => {
+            this.updateFPS();
+            this.updateMemory();
+            this.updateDrawCalls();
+            requestAnimationFrame(updateMetrics);
+        };
+        requestAnimationFrame(updateMetrics);
+    }
+
+    updateFPS() {
+        const now = performance.now();
+        const delta = now - this.lastFrameTime;
+        this.frameCount++;
+        if (delta >= 1000) {
+            this.lastFPS = (this.frameCount / delta) * 1000;
+            this.frameCount = 0;
+            this.lastFrameTime = now;
+            this.updateMetric('fps', this.lastFPS.toFixed(1));
+        }
+    }
+
+    updateMemory() {
+        if (performance.memory) {
+            const usedJSHeapSize = performance.memory.usedJSHeapSize / 1048576; // Convert to MB
+            this.updateMetric('memory', usedJSHeapSize.toFixed(2));
+        }
+    }
+
+    updateDrawCalls() {
+        // Assuming you have a way to get the number of draw calls
+        const drawCalls = this.getDrawCalls();
+        this.updateMetric('drawCalls', drawCalls);
+    }
+
+    updateMetric(name, value) {
+        this.metrics.set(name, value);
+        const element = document.getElementById(`metric-${name}`);
+        if (element) {
+            element.textContent = value;
+        }
+    }
+
+    getDrawCalls() {
+        // Placeholder for actual draw call count retrieval
+        return Math.floor(Math.random() * 100);
+    }
+
+    refreshWorld() {
+        document.dispatchEvent(new CustomEvent('refreshWorld'));
     }
 
     toggleInventory() {
