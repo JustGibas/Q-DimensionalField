@@ -1,3 +1,5 @@
+import chunkManager from '../world/chunk-manager.js';
+
 AFRAME.registerComponent('player-controls', {
     init: function() {
         // Logging flag to enable/disable logging
@@ -6,6 +8,12 @@ AFRAME.registerComponent('player-controls', {
         if (loggingEnabled) console.log('Initializing player controls component');
         this.setupVRControls();
         this.setupKeyboardControls();
+
+        // Initialize chunkManager before calling updateChunksAroundPlayer
+        if (!chunkManager) {
+            console.error('chunkManager is not defined');
+            return;
+        }
 
         // Update chunks around the player
         this.updateChunksAroundPlayer();
