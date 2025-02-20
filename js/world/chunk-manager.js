@@ -3,7 +3,27 @@ class ChunkManager {
         this.chunks = new Map();
         this.container = document.querySelector('#world-container');
         this.setupEventListeners();
-        this.generateInitialWorld();
+        this.loadSavedState();
+    }
+
+    loadSavedState() {
+        const savedState = localStorage.getItem('worldState');
+        if (savedState) {
+            const state = JSON.parse(savedState);
+            state.chunks.forEach(chunk => this.createChunk(chunk));
+        } else {
+            this.generateInitialWorld();
+        }
+    }
+
+    saveState() {
+        const state = {
+            chunks: Array.from(this.chunks.values()).map(chunk => ({
+                position: chunk.getAttribute('position'),
+                type: chunk.getAttribute('voxel-chunk').type
+            }))
+        };
+        localStorage.setItem('worldState', JSON.stringify(state));
     }
 
     generateInitialWorld() {
@@ -20,12 +40,12 @@ class ChunkManager {
 
     createChunk({ position, type = 'default' }) {
         const chunk = document.createElement('a-entity');
-        const chunkSize = 1;
+        const chunkData = typeof type === 'string' ? { type } : type;
         
         chunk.setAttribute('voxel-chunk', {
             position: position,
-            size: chunkSize,
-            type: type
+            size: 1,
+            type: chunkData.type
         });
         
         chunk.setAttribute('position', `${position.x} ${position.y} ${position.z}`);
@@ -33,6 +53,7 @@ class ChunkManager {
         const key = this.getChunkKey(position);
         this.chunks.set(key, chunk);
         this.container.appendChild(chunk);
+        this.saveState();
     }
 
     getChunkKey(position) {
@@ -40,7 +61,12 @@ class ChunkManager {
     }
 
     getRandomType() {
-        const types = ['grass', 'stone', 'water'];
+        const types = [
+            { type: 'grass' },
+            { type: 'stone' },
+            { type: 'metal' },
+            { type: 'glass' }
+        ];
         return types[Math.floor(Math.random() * types.length)];
     }
 
