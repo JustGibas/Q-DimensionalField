@@ -1,6 +1,4 @@
-import TextureManager from './generators.js';
-import TextureGenerator from './generators.js';
-import { BlockTypes } from './managers.js';
+import { TextureManager, TextureGenerator, blockTypeGenerator } from './generators.js';
 
 AFRAME.registerComponent('chunk', {
     schema: {
@@ -197,7 +195,7 @@ AFRAME.registerComponent('voxel', {
     },
 
     init: function() {
-        this.blockType = getBlockType(this.data.typeId);
+        this.blockType = blockTypeGenerator.getBlockType(this.data.typeId);
         this.createVoxel();
     },
 
@@ -219,13 +217,13 @@ AFRAME.registerComponent('voxel', {
     },
 
     getVoxelColor: function() {
-        const blockType = getBlockType(this.data.typeId);
+        const blockType = blockTypeGenerator.getBlockType(this.data.typeId);
         return blockType.color || '#ffffff';
     },
 
     updateType: function(newTypeId) {
         this.data.typeId = newTypeId;
-        this.blockType = getBlockType(newTypeId);
+        this.blockType = blockTypeGenerator.getBlockType(newTypeId);
         this.mesh.material.color.set(this.getVoxelColor());
         this.mesh.material.transparent = this.blockType.transparent || false;
     }

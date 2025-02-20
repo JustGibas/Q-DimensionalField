@@ -1,4 +1,4 @@
-import { TextureManager, TextureGenerator } from './generators.js';
+import { TextureManager, TextureGenerator, chunkGenerator } from './generators.js';
 import { CONFIG, Logger } from './config.js';
 
 class ChunkManager {
@@ -18,7 +18,7 @@ class ChunkManager {
     }
 
     spawnInitialChunk() {
-        const chunkData = ChunkGenerator.generateChunkData({ x: 0, y: 0, z: 0 });
+        const chunkData = chunkGenerator.generateChunkData({ x: 0, y: 0, z: 0 });
         const chunk = document.createElement('a-entity');
         chunk.setAttribute('chunk', {
             position: { x: 0, y: 0, z: 0 },
@@ -119,7 +119,7 @@ class ChunkManager {
         const startTime = performance.now();
         Logger.logStep('ChunkManager', 'Creating new chunk', { position });
 
-        const chunkData = ChunkGenerator.generateChunkData(position);
+        const chunkData = chunkGenerator.generateChunkData(position);
         Logger.logStep('ChunkManager', 'Generated chunk data', { 
             dataSize: chunkData.length,
             position 

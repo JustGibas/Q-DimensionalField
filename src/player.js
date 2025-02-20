@@ -1,4 +1,4 @@
-import chunkManager from './managers.js';
+import { ChunkManager } from './managers.js';
 
 AFRAME.registerComponent('player-controls', {
     init: function() {
@@ -10,10 +10,7 @@ AFRAME.registerComponent('player-controls', {
         this.setupKeyboardControls();
 
         // Initialize chunkManager before calling updateChunksAroundPlayer
-        if (!chunkManager) {
-            console.error('chunkManager is not defined');
-            return;
-        }
+        this.chunkManager = new ChunkManager();
 
         // Update chunks around the player
         this.updateChunksAroundPlayer();
@@ -60,7 +57,7 @@ AFRAME.registerComponent('player-controls', {
         const playerRig = document.querySelector('#player-rig');
         if (playerRig) {
             const playerPosition = playerRig.getAttribute('position');
-            chunkManager.updateChunksAroundPlayer(playerPosition);
+            this.chunkManager.updateChunksAroundPlayer(playerPosition);
 
             // Update the debug box with the player's current coordinate position
             const playerPositionElement = document.getElementById('player-position');

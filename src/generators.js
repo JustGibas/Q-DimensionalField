@@ -1,3 +1,144 @@
+import { CONFIG, Logger } from './config.js';
+import SimplexNoise from 'https://cdn.skypack.dev/simplex-noise';
+
+// Move block type definitions here and make them dynamic
+class BlockTypeGenerator {
+    constructor() {
+        this.noise = new SimplexNoise();
+        this.blockTypes = new Map();
+        this.generateBaseBlockTypes();
+    }
+
+    generateBaseBlockTypes() {
+        // Add base block types
+        this.addBlockType('AIR', {
+            id: 0,
+            name: 'air',
+            transparent: true,
+            color: '#ffffff'
+        });
+
+        // Generate variations of basic materials
+        this.generateTerrainTypes();
+        this.generateMineralTypes();
+        this.generateSpecialTypes();
+    }
+
+    generateTerrainTypes() {
+        // Generate different types of terrain blocks with varying properties
+        const dirtVariations = this.generateColorVariations('#8B4513', 5);
+        const grassVariations = this.generateColorVariations('#567D46', 5);
+        const stoneVariations = this.generateColorVariations('#808080', 5);
+
+        dirtVariations.forEach((color, i) => {
+            this.addBlockType(`DIRT_${i}`, {
+                id: 1 + i,
+                name: `dirt_${i}`,
+                color: color,
+                hardness: 0.5 + Math.random() * 0.5
+            });
+        });
+
+        grassVariations.forEach((color, i) => {
+            this.addBlockType(`GRASS_${i}`, {
+                id: 10 + i,
+                name: `grass_${i}`,
+                color: color,
+                hardness: 0.3 + Math.random() * 0.4
+            });
+        });
+
+        stoneVariations.forEach((color, i) => {
+            this.addBlockType(`STONE_${i}`, {
+                id: 20 + i,
+                name: `stone_${i}`,
+                color: color,
+                hardness: 1.0 + Math.random() * 0.5
+            });
+        });
+    }
+
+    generateMineralTypes() {
+        const mineralColors = [
+            '#FFD700', // Gold
+            '#C0C0C0', // Silver
+            '#B87333', // Copper
+            '#4A0404', // Iron
+            '#0000FF', // Sapphire
+            '#FF0000', // Ruby
+            '#50C878'  // Emerald
+        ];
+
+        mineralColors.forEach((baseColor, i) => {
+            const variations = this.generateColorVariations(baseColor, 3);
+            variations.forEach((color, j) => {
+                this.addBlockType(`MINERAL_${i}_${j}`, {
+                    id: 100 + (i * 10) + j,
+                    name: `mineral_${i}_${j}`,
+                    color: color,
+                    hardness: 2.0 + Math.random(),
+                    value: Math.random() * 100
+                });
+            });
+        });
+    }
+
+    generateSpecialTypes() {
+        // Generate special blocks with unique properties
+        const specialBlocks = [
+            { name: 'CRYSTAL', baseColor: '#00FFFF', transparent: true },
+            { name: 'LAVA', baseColor: '#FF4500', emissive: true },
+            { name: 'ICE', baseColor: '#ADD8E6', transparent: true },
+            { name: 'ANCIENT', baseColor: '#DEB887', glowing: true }
+        ];
+
+        specialBlocks.forEach((block, i) => {
+            this.addBlockType(block.name, {
+                id: 200 + i,
+                name: block.name.toLowerCase(),
+                color: block.baseColor,
+                transparent: block.transparent || false,
+                emissive: block.emissive || false,
+                glowing: block.glowing || false,
+                special: true
+            });
+        });
+    }
+
+    generateColorVariations(baseColor, count) {
+        const variations = [];
+        for (let i = 0; i < count; i++) {
+            variations.push(this.varyColor(baseColor, 20));
+        }
+        return variations;
+    }
+
+    varyColor(baseColor, range) {
+        const color = new THREE.Color(baseColor);
+        color.r += (Math.random() - 0.5) * (range / 255);
+        color.g += (Math.random() - 0.5) * (range / 255);
+        color.b += (Math.random() - 0.5) * (range / 255);
+        return '#' + color.getHexString();
+    }
+
+    addBlockType(key, properties) {
+        this.blockTypes.set(key, properties);
+    }
+
+    getBlockType(id) {
+        for (const [_, type] of this.blockTypes) {
+            if (type.id === id) return type;
+        }
+        return this.blockTypes.get('AIR');
+    }
+
+    getRandomBlockType(category) {
+        const types = Array.from(this.blockTypes.values())
+            .filter(type => type.name.startsWith(category.toLowerCase()));
+        return types[Math.floor(Math.random() * types.length)];
+    }
+}
+
 class TextureGenerator {
     constructor(resolution = 16) {
         this.resolution = resolution;
@@ -98,4 +239,67 @@ class TextureManager {
     }
 }
 
-export { TextureGenerator, TextureManager };
+class ChunkGenerator {
+    constructor() {
+        this.noise = new SimplexNoise();
+        this.scale = 0.1;
+        this.blockTypeGenerator = new BlockTypeGenerator();
+    }
+
+    generateChunkData(position) {
+        Logger.logStep('ChunkGenerator', 'Generating chunk data', { position });
+        const size = CONFIG.CHUNK_SIZE || 16;
+        const data = new Array(size * size * size);
+        
+        for (let x = 0; x < size; x++) {
+            for (let y = 0; y < size; y++) {
+                for (let z = 0; z < size; z++) {
+                    const worldX = position.x * size + x;
+                    const worldY = position.y * size + y;
+                    const worldZ = position.z * size + z;
+                    
+                    const value = this.generateVoxel(worldX, worldY, worldZ);
+                    let blockType;
+
+                    if (worldY < 0) {
+                        blockType = this.blockTypeGenerator.getRandomBlockType('STONE');
+                    } else if (worldY === 0) {
+                        blockType = this.blockTypeGenerator.getRandomBlockType('DIRT');
+                    } else if (worldY > 0) {
+                        blockType = this.blockTypeGenerator.getRandomBlockType('GRASS');
+                    }
+
+                    // Add random mineral veins
+                    if (Math.random() < 0.05) {
+                        blockType = this.blockTypeGenerator.getRandomBlockType('MINERAL');
+                    }
+
+                    // Add random special blocks
+                    if (Math.random() < 0.01) {
+                        const specialTypes = ['CRYSTAL', 'LAVA', 'ICE', 'ANCIENT'];
+                        const randomSpecial = specialTypes[Math.floor(Math.random() * specialTypes.length)];
+                        blockType = this.blockTypeGenerator.getBlockType(randomSpecial);
+                    }
+
+                    const index = x + y * size + z * size * size;
+                    data[index] = blockType.id;
+                }
+            }
+        }
+
+        return data;
+    }
+
+    generateVoxel(x, y, z) {
+        const height = this.noise.noise3D(
+            x * this.scale, 
+            y * this.scale, 
+            z * this.scale
+        );
+        return (height + 1) / 2; // Normalize to 0-1
+    }
+}
+
+export const blockTypeGenerator = new BlockTypeGenerator();
+export const chunkGenerator = new ChunkGenerator();
+export { TextureGenerator, TextureManager, ChunkGenerator, BlockTypeGenerator };

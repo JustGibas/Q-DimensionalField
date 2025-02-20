@@ -1,6 +1,7 @@
 import * as THREE from 'https://unpkg.com/three@0.149.0/build/three.module.js';
 import { CONFIG, Logger } from './config.js';
 import { WorldManager, ChunkManager } from './managers.js';
+import { blockTypeGenerator } from './generators.js';
 
 // Log initialization
 Logger.info('Game', `Initializing game version ${CONFIG.VERSIONS.GAME}`);
