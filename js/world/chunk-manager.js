@@ -1,3 +1,5 @@
+import ChunkGenerator from './chunk-generator.js';
+
 class ChunkManager {
     constructor() {
         console.log('Initializing ChunkManager');
@@ -8,37 +10,95 @@ class ChunkManager {
             console.error('Could not find world-container element!');
             return;
         }
+        this.renderDistance = 2; // Number of chunks to render in each direction
+        this.lastPlayerChunkPos = { x: 0, z: 0 };
         this.spawnInitialChunk();
+        this.initializePlane();
     }
 
     spawnInitialChunk() {
         console.log('Spawning initial chunk');
         const chunk = document.createElement('a-entity');
         chunk.setAttribute('chunk', {
-            chunkId: 'X0Y0Z0',
-            size: 16
+            position: { x: 0, y: 0, z: 0 },
+            size: this.CHUNK_SIZE
         });
         chunk.setAttribute('position', '0 0 0');
         chunk.setAttribute('visible', true);
         
         this.container.appendChild(chunk);
-        this.chunks.set('X0Y0Z0', chunk);
+        this.chunks.set('0,0,0', chunk);
         
         // Debug output
         console.log('Initial chunk created:', {
             position: chunk.getAttribute('position'),
-            chunkId: 'X0Y0Z0',
             containerChildren: this.container.children.length
         });
+    }
+
+    initializePlane() {
+        for (let x = -this.renderDistance; x <= this.renderDistance; x++) {
+            for (let z = -this.renderDistance; z <= this.renderDistance; z++) {
+                this.createChunk({ x, y: 0, z });
+            }
+        }
+    }
+
+    updateChunksAroundPlayer(playerPosition) {
+        const chunkPos = this.getChunkPosition(playerPosition);
+        
+        // Only update if player moved to a new chunk
+        if (chunkPos.x !== this.lastPlayerChunkPos.x || 
+            chunkPos.z !== this.lastPlayerChunkPos.z) {
+            
+            this.loadNewChunks(chunkPos);
+            this.unloadDistantChunks(chunkPos);
+            
+            this.lastPlayerChunkPos = { ...chunkPos };
+        }
+    }
+
+    loadNewChunks(centerChunkPos) {
+        for (let x = -this.renderDistance; x <= this.renderDistance; x++) {
+            for (let z = -this.renderDistance; z <= this.renderDistance; z++) {
+                const pos = {
+                    x: centerChunkPos.x + x,
+                    y: 0,
+                    z: centerChunkPos.z + z
+                };
+                const key = `${pos.x},${pos.y},${pos.z}`;
+                
+                if (!this.chunks.has(key)) {
+                    this.createChunk(pos);
+                }
+            }
+        }
+    }
+
+    unloadDistantChunks(centerChunkPos) {
+        for (const [key, chunk] of this.chunks) {
+            const [x, y, z] = key.split(',').map(Number);
+            const distance = Math.max(
+                Math.abs(x - centerChunkPos.x),
+                Math.abs(z - centerChunkPos.z)
+            );
+            
+            if (distance > this.renderDistance) {
+                this.container.removeChild(chunk);
+                this.chunks.delete(key);
+            }
+        }
     }
 
     createChunk(position) {
         const chunk = document.createElement('a-entity');
         const key = `${position.x},${position.y},${position.z}`;
 
+        const chunkData = ChunkGenerator.generateChunkData(position);
         chunk.setAttribute('chunk', {
             position: position,
-            size: this.CHUNK_SIZE
+            size: this.CHUNK_SIZE,
+            chunkData: chunkData
         });
 
         chunk.setAttribute('position', `${

@@ -3,9 +3,9 @@ import { BlockTypes } from '../blocks/block-types.js';
 
 AFRAME.registerComponent('chunk', {
     schema: {
-        chunkPosition: { type: 'vec3' },
+        position: { type: 'vec3' },
         size: { type: 'number', default: 16 },
-        blocks: { type: 'string', default: '{}' }
+        chunkData: { type: 'array' }
     },
 
     init: function() {
@@ -21,14 +21,19 @@ AFRAME.registerComponent('chunk', {
         this.chunkGroup = new THREE.Group();
         let blocksCreated = 0;
         
-        // Generate blocks within the chunk (16x16x16)
-        for(let x = 0; x < this.data.size; x++) {
-            for(let y = 0; y < this.data.size; y++) {
-                for(let z = 0; z < this.data.size; z++) {
-                    if(Math.random() < 0.2) { // 20% fill rate for testing
+        const size = this.data.size;
+        const chunkData = this.data.chunkData;
+        
+        for(let x = 0; x < size; x++) {
+            for(let y = 0; y < size; y++) {
+                for(let z = 0; z < size; z++) {
+                    const idx = x + y * size + z * size * size;
+                    const value = chunkData[idx];
+                    
+                    if(value > 0.5) { // Threshold for block creation
                         this.createBlock(x, y, z, { 
                             texture: 'default',
-                            color: this.getRandomColor() 
+                            color: this.getHeightBasedColor(y, value)
                         });
                         blocksCreated++;
                     }
@@ -43,9 +48,8 @@ AFRAME.registerComponent('chunk', {
 
     createBlock(x, y, z, blockType) {
         const geometry = new THREE.BoxGeometry(1, 1, 1);
-        // Temporary: Use basic material until texture system is fixed
         const material = new THREE.MeshStandardMaterial({
-            color: blockType.color || '#ffffff',
+            color: blockType.color,
             roughness: 0.7,
             metalness: 0.2
         });
@@ -60,6 +64,14 @@ AFRAME.registerComponent('chunk', {
     },
 
     getRandomColor: function() {
-        return `#${Math.floor(Math.random()*16777215).toString(16)}`;
+        // Generate proper 6-digit hex color
+        return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+    },
+
+    getHeightBasedColor: function(height, value) {
+        const hue = (height / this.data.size) * 120; // 0-120 degrees (red to green)
+        const saturation = value * 100;
+        const lightness = 50 + value * 20;
+        return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
     }
 });
