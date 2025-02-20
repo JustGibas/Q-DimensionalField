@@ -178,3 +178,22 @@ World
 - **Code Structure:** Modular components (e.g., `voxel-chunk`, `player-controls`, `chunk-manager`).
 - **Requirements:** Modern WebVR-capable browser and local HTTP server for module support.
 - **References:** A-Frame, Three.js, and Taichi.js documentation.
+
+## Logging Improvements
+
+### Overview
+Logging has been improved across all parts of the game to provide detailed insights into the game's flow and operations. This includes extensive explanations for each logging statement and a flag to enable or disable logging.
+
+### Logging Flag
+A logging flag has been added to enable or disable logging. This flag can be found in the script section of `index.html` and in the `init` functions of various components.
+
+### Enabling/Disabling Logging
+To enable logging, set the `loggingEnabled` flag to `true`. To disable logging, set the flag to `false`.
+
+### Examples of Logging Output
+- Initialization of the A-Frame scene: `console.log('A-Frame scene loaded')`
+- Loading of the world container: `console.log('World container status:', { childCount: container.children.length, children: Array.from(container.children).map(c => c.getAttribute('chunk')) })`
+- Player rig setup: `console.log('Player rig setup complete')`
+
+### Purpose of Logging
+The purpose of logging is to provide developers with detailed insights into the game's flow and operations. This helps in debugging and understanding the game's behavior, making it easier to identify and fix issues.

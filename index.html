@@ -79,17 +79,20 @@
     <p>&copy; 2023 Q-DimensionalField. All rights reserved.</p>
   </footer>
   <script>
+    // Logging flag to enable/disable logging
+    const loggingEnabled = true;
+
     // Debug monitoring
     document.addEventListener('DOMContentLoaded', () => {
-      console.log('DOM loaded, initializing debug monitors');
+      if (loggingEnabled) console.log('DOM loaded, initializing debug monitors');
       
       const scene = document.querySelector('a-scene');
       scene.addEventListener('loaded', () => {
-        console.log('A-Frame scene loaded');
+        if (loggingEnabled) console.log('A-Frame scene loaded');
         // Check if initial chunk was created
         setTimeout(() => {
           const container = document.querySelector('#world-container');
-          console.log('World container status:', {
+          if (loggingEnabled) console.log('World container status:', {
             childCount: container.children.length,
             children: Array.from(container.children).map(c => c.getAttribute('chunk'))
           });
