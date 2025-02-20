@@ -57,12 +57,12 @@
         <li>Cross-platform compatibility</li>
       </ul>
     </section>
-    <a-scene loading-screen stats debug>
+    <a-scene loading-screen stats debug embedded>
       <!-- Basic environment -->
       <a-sky color="#FFFFFF"></a-sky>
       
       <!-- Player rig -->
-      <a-entity id="player-rig" position="0 0 0" player-controls>
+      <a-entity id="player-rig" position="0 1 0" player-controls>
         <a-camera wasd-controls look-controls>
           <a-cursor raycaster="objects: .interactive"></a-cursor>
         </a-camera>
