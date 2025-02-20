@@ -39,6 +39,25 @@ class ChunkManager {
             position: chunk.getAttribute('position'),
             containerChildren: this.container.children.length
         });
+
+        // Spawn four neighboring chunks
+        this.spawnNeighboringChunks({ x: 0, y: 0, z: 0 });
+    }
+
+    spawnNeighboringChunks(centerChunkPos) {
+        const neighbors = [
+            { x: centerChunkPos.x + 1, y: centerChunkPos.y, z: centerChunkPos.z },
+            { x: centerChunkPos.x - 1, y: centerChunkPos.y, z: centerChunkPos.z },
+            { x: centerChunkPos.x, y: centerChunkPos.y, z: centerChunkPos.z + 1 },
+            { x: centerChunkPos.x, y: centerChunkPos.y, z: centerChunkPos.z - 1 }
+        ];
+
+        for (const pos of neighbors) {
+            const key = `${pos.x},${pos.y},${pos.z}`;
+            if (!this.chunks.has(key)) {
+                this.createChunk(pos);
+            }
+        }
     }
 
     initializePlane() {

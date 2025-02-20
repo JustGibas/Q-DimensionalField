@@ -6,6 +6,9 @@ AFRAME.registerComponent('player-controls', {
         if (loggingEnabled) console.log('Initializing player controls component');
         this.setupVRControls();
         this.setupKeyboardControls();
+
+        // Update chunks around the player
+        this.updateChunksAroundPlayer();
     },
 
     setupVRControls: function() {
@@ -42,6 +45,14 @@ AFRAME.registerComponent('player-controls', {
             const intersectedEl = cursor.components.raycaster.intersectedEls[0];
             if (loggingEnabled) console.log('Intersected element:', intersectedEl);
             intersectedEl.emit('click');
+        }
+    },
+
+    updateChunksAroundPlayer: function() {
+        const playerRig = document.querySelector('#player-rig');
+        if (playerRig) {
+            const playerPosition = playerRig.getAttribute('position');
+            chunkManager.updateChunksAroundPlayer(playerPosition);
         }
     }
 });
