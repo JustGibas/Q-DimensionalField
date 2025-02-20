@@ -23,10 +23,12 @@ class ChunkManager {
         // Log the start of the initial chunk spawning process
         if (loggingEnabled) console.log('Spawning initial chunk');
         
+        const chunkData = this.chunkGenerator.generateChunkData({ x: 0, y: 0, z: 0 });
         const chunk = document.createElement('a-entity');
         chunk.setAttribute('chunk', {
             position: { x: 0, y: 0, z: 0 },
-            size: 5
+            size: this.CHUNK_SIZE,
+            chunkData: chunkData
         });
         chunk.setAttribute('position', '0 0 0');
         chunk.setAttribute('visible', true);
@@ -121,10 +123,10 @@ class ChunkManager {
         // Log the creation of a chunk at the specified position
         if (loggingEnabled) console.log('Creating chunk at position:', position);
         
+        const chunkData = this.chunkGenerator.generateChunkData(position);
         const chunk = document.createElement('a-entity');
         const key = `${position.x},${position.y},${position.z}`;
 
-        const chunkData = ChunkGenerator.generateChunkData(position);
         chunk.setAttribute('chunk', {
             position: position,
             size: this.CHUNK_SIZE,
