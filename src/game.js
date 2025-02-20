@@ -1,9 +1,12 @@
 import * as THREE from 'https://unpkg.com/three@0.149.0/build/three.module.js';
-import chunkManager from './managers.js';
-import WorldManager from './managers.js';
-import ChunkGenerator from './generators.js';
+import { CONFIG, Logger } from './config.js';
+import { WorldManager, ChunkManager } from './managers.js';
 
-// Register chunk component with proper naming
+// Log initialization
+Logger.info('Game', `Initializing game version ${CONFIG.VERSIONS.GAME}`);
+Logger.info('Game', `Using Three.js ${CONFIG.VERSIONS.THREE}`);
+Logger.info('Game', `Using A-Frame ${CONFIG.VERSIONS.AFRAME}`);
+
 AFRAME.registerComponent('chunk', {
     schema: {
         chunkId: { type: 'string', default: 'X0Y0Z0' },
@@ -11,11 +14,16 @@ AFRAME.registerComponent('chunk', {
     },
 
     init: function() {
+        Logger.debug('ChunkComponent', `Initializing chunk ${this.data.chunkId}`, {
+            version: CONFIG.VERSIONS.CHUNK_COMPONENT,
+            size: this.data.size
+        });
         this.blocks = new Map();
         this.generateBlocks();
     },
 
     generateBlocks: function() {
+        Logger.debug('ChunkComponent', `Generating blocks for ${this.data.chunkId}`);
         const group = new THREE.Group();
         
         // Generate blocks within the chunk (16x16x16)
@@ -53,9 +61,11 @@ AFRAME.registerComponent('chunk', {
     }
 });
 
-// Update interaction component name
 AFRAME.registerComponent('chunk-interaction', {
     init: function() {
+        Logger.debug('InteractionComponent', 'Initializing', {
+            version: CONFIG.VERSIONS.INTERACTION_COMPONENT
+        });
         this.el.addEventListener('click', (e) => {
             const position = e.detail.intersection.point;
             this.createAdjacentChunk(position);
@@ -63,6 +73,7 @@ AFRAME.registerComponent('chunk-interaction', {
     },
 
     createAdjacentChunk: function(position) {
+        Logger.debug('InteractionComponent', 'Creating adjacent chunk', { position });
         const container = document.querySelector('#world-container');
         const chunk = document.createElement('a-entity');
         
@@ -77,23 +88,44 @@ AFRAME.registerComponent('chunk-interaction', {
     }
 });
 
-// Initialize world with X0Y0Z0 chunk
 function initializeWorld() {
-    const container = document.querySelector('#world-container');
-    const centerChunk = document.createElement('a-entity');
-    
-    centerChunk.setAttribute('chunk', {
-        chunkId: 'X0Y0Z0',
-        size: 16
-    });
-    
-    centerChunk.setAttribute('position', '0 0 0');
-    centerChunk.setAttribute('chunk-interaction', '');
-    container.appendChild(centerChunk);
+    Logger.info('Game', 'Initializing world');
+    try {
+        const container = document.querySelector('#world-container');
+        const centerChunk = document.createElement('a-entity');
+        
+        centerChunk.setAttribute('chunk', {
+            chunkId: 'X0Y0Z0',
+            size: 16
+        });
+        
+        centerChunk.setAttribute('position', '0 0 0');
+        centerChunk.setAttribute('chunk-interaction', '');
+        container.appendChild(centerChunk);
+        Logger.info('Game', 'World initialized successfully');
+    } catch (error) {
+        Logger.error('Game', 'Failed to initialize world', error);
+    }
 }
 
-// Initialize on scene load
+// Performance monitoring
+if (CONFIG.LOGGING.performance) {
+    const perfMonitor = {
+        start: (label) => {
+            performance.mark(`${label}-start`);
+        },
+        end: (label) => {
+            performance.mark(`${label}-end`);
+            performance.measure(label, `${label}-start`, `${label}-end`);
+            const measure = performance.getEntriesByName(label)[0];
+            Logger.debug('Performance', `${label}: ${measure.duration.toFixed(2)}ms`);
+        }
+    };
+    window.perfMonitor = perfMonitor;
+}
+
 document.querySelector('a-scene').addEventListener('loaded', () => {
+    Logger.info('Game', 'A-Frame scene loaded');
     initializeWorld();
 });
 

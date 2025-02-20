@@ -1,7 +1,9 @@
 import ChunkGenerator from './generators.js';
+import { CONFIG, Logger } from './config.js';
 
 class ChunkManager {
     constructor() {
+        Logger.info('ChunkManager', `Initializing version ${CONFIG.VERSIONS.CHUNK_MANAGER}`);
         this.chunks = new Map();
         this.CHUNK_SIZE = 10; // 10x10x10 blocks per chunk
         this.container = document.querySelector('#world-container');
@@ -162,6 +164,7 @@ class ChunkManager {
 
 class VoxelManager {
     constructor(blockSize = 1) {
+        Logger.info('VoxelManager', `Initializing version ${CONFIG.VERSIONS.VOXEL_MANAGER}`);
         this.voxelsPerBlock = 8; // 8x8x8 voxels per block
         this.voxelSize = blockSize / this.voxelsPerBlock;
         this.voxels = new Map();
@@ -196,4 +199,21 @@ class VoxelManager {
     }
 }
 
-export { ChunkManager, VoxelManager };
+class WorldManager {
+    constructor() {
+        Logger.info('WorldManager', `Initializing version ${CONFIG.VERSIONS.WORLD_MANAGER}`);
+        this.chunkManager = new ChunkManager();
+    }
+
+    // Add manager methods here
+}
+
+/* Taichi.js Integration Placeholder
+export class TaichiManager {
+    constructor() {
+        Logger.warn('TaichiManager', 'Taichi.js integration not implemented yet');
+    }
+}
+*/
+
+export { ChunkManager, VoxelManager, WorldManager };
