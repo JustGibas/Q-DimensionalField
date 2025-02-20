@@ -1,11 +1,7 @@
-import ChunkGenerator from './chunk-generator.js';
+import ChunkGenerator from './generators.js';
 
 class ChunkManager {
     constructor() {
-        // Logging flag to enable/disable logging
-        const loggingEnabled = true;
-
-        if (loggingEnabled) console.log('Initializing ChunkManager');
         this.chunks = new Map();
         this.CHUNK_SIZE = 10; // 10x10x10 blocks per chunk
         this.container = document.querySelector('#world-container');
@@ -20,10 +16,7 @@ class ChunkManager {
     }
 
     spawnInitialChunk() {
-        // Log the start of the initial chunk spawning process
-        if (loggingEnabled) console.log('Spawning initial chunk');
-        
-        const chunkData = this.chunkGenerator.generateChunkData({ x: 0, y: 0, z: 0 });
+        const chunkData = ChunkGenerator.generateChunkData({ x: 0, y: 0, z: 0 });
         const chunk = document.createElement('a-entity');
         chunk.setAttribute('chunk', {
             position: { x: 0, y: 0, z: 0 },
@@ -35,14 +28,7 @@ class ChunkManager {
         
         this.container.appendChild(chunk);
         this.chunks.set('0,0,0', chunk);
-        
-        // Log the details of the created initial chunk
-        if (loggingEnabled) console.log('Initial chunk created:', {
-            position: chunk.getAttribute('position'),
-            containerChildren: this.container.children.length
-        });
 
-        // Spawn four neighboring chunks
         this.spawnNeighboringChunks({ x: 0, y: 0, z: 0 });
     }
 
@@ -63,9 +49,6 @@ class ChunkManager {
     }
 
     initializePlane() {
-        // Log the start of the plane initialization process
-        if (loggingEnabled) console.log('Initializing plane with chunks');
-        
         for (let x = -this.renderDistance; x <= this.renderDistance; x++) {
             for (let z = -this.renderDistance; z <= this.renderDistance; z++) {
                 this.createChunk({ x, y: 0, z });
@@ -76,7 +59,6 @@ class ChunkManager {
     updateChunksAroundPlayer(playerPosition) {
         const chunkPos = this.getChunkPosition(playerPosition);
         
-        // Only update if player moved to a new chunk
         if (chunkPos.x !== this.lastPlayerChunkPos.x || 
             chunkPos.z !== this.lastPlayerChunkPos.z) {
             
@@ -120,10 +102,7 @@ class ChunkManager {
     }
 
     createChunk(position) {
-        // Log the creation of a chunk at the specified position
-        if (loggingEnabled) console.log('Creating chunk at position:', position);
-        
-        const chunkData = this.chunkGenerator.generateChunkData(position);
+        const chunkData = ChunkGenerator.generateChunkData(position);
         const chunk = document.createElement('a-entity');
         const key = `${position.x},${position.y},${position.z}`;
 
@@ -143,27 +122,17 @@ class ChunkManager {
 
         this.chunks.set(key, chunk);
         this.container.appendChild(chunk);
-        
-        // Log the details of the created chunk
-        if (loggingEnabled) console.log('Chunk created:', {
-            key: key,
-            position: chunk.getAttribute('position'),
-            containerChildren: this.container.children.length
-        });
 
-        // Update the debug box with the number of chunks spawned
         const chunkCountElement = document.getElementById('chunk-count');
         if (chunkCountElement) {
             chunkCountElement.textContent = this.chunks.size;
         }
 
-        // Update the debug box with the last chunk name
         const lastChunkNameElement = document.getElementById('last-chunk-name');
         if (lastChunkNameElement) {
             lastChunkNameElement.textContent = key;
         }
 
-        // Update the debug box with the position of the spawned chunk
         const lastChunkPosElement = document.getElementById('last-chunk-pos');
         if (lastChunkPosElement) {
             lastChunkPosElement.textContent = `${position.x}, ${position.y}, ${position.z}`;
@@ -191,6 +160,40 @@ class ChunkManager {
     }
 }
 
-// Create and export instance
-const chunkManager = new ChunkManager();
-export default chunkManager;
+class VoxelManager {
+    constructor(blockSize = 1) {
+        this.voxelsPerBlock = 8; // 8x8x8 voxels per block
+        this.voxelSize = blockSize / this.voxelsPerBlock;
+        this.voxels = new Map();
+    }
+
+    createVoxel(localPosition, type = 'solid') {
+        const voxel = document.createElement('a-entity');
+        voxel.setAttribute('voxel', {
+            size: this.voxelSize,
+            type: type
+        });
+        voxel.setAttribute('position', `${
+            localPosition.x * this.voxelSize
+        } ${
+            localPosition.y * this.voxelSize
+        } ${
+            localPosition.z * this.voxelSize
+        }`);
+        
+        const key = `${localPosition.x},${localPosition.y},${localPosition.z}`;
+        this.voxels.set(key, voxel);
+        return voxel;
+    }
+
+    removeVoxel(position) {
+        const key = `${position.x},${position.y},${position.z}`;
+        const voxel = this.voxels.get(key);
+        if (voxel) {
+            voxel.parentNode.removeChild(voxel);
+            this.voxels.delete(key);
+        }
+    }
+}
+
+export { ChunkManager, VoxelManager };

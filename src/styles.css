@@ -70,3 +70,32 @@
     color: white;
     text-shadow: 0 0 10px rgba(255,255,255,0.5);
 }
+
+#chunk-count {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    color: white;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+
+#position {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    color: white;
+    position: absolute;
+    top: 30px;
+    left: 10px;
+}
+
+#debug-ui {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+}
