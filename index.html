@@ -9,6 +9,18 @@
   <script type="module" src="./js/components/chunk-component.js"></script>
   <script type="module" src="./js/components/player-controls.js"></script>
   <script type="module" src="./js/world/chunk-manager.js"></script>
+  <style>
+    #debug-ui {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 10px;
+      font-family: monospace;
+      z-index: 1000;
+    }
+  </style>
 </head>
 <body>
   <div id="loading-screen">
@@ -17,6 +29,10 @@
   <div id="ui-overlay" class="ui-overlay">
     <div id="chunk-count">Chunks: 0</div>
     <div id="position"></div>
+  </div>
+  <div id="debug-ui">
+    <div>Chunks loaded: <span id="chunk-count">0</span></div>
+    <div>Last chunk position: <span id="last-chunk-pos">None</span></div>
   </div>
   <header>
     <h1>Welcome to Q-DimensionalField</h1>
@@ -41,15 +57,15 @@
         <li>Cross-platform compatibility</li>
       </ul>
     </section>
-    <a-scene loading-screen>
+    <a-scene loading-screen stats debug>
       <!-- Basic environment -->
       <a-sky color="#ECECEC"></a-sky>
-      <a-plane position="0 -1 0" rotation="-90 0 0" width="100" height="100" color="#7BC8A4"></a-plane>
+      <a-plane position="0 0 0" rotation="-90 0 0" width="100" height="100" color="#7BC8A4"></a-plane>
       
       <!-- Player rig -->
-      <a-entity id="player-rig" position="0 5 10" player-controls>
+      <a-entity id="player-rig" position="0 10 20" player-controls>
         <a-camera wasd-controls look-controls>
-          <a-cursor raycaster="objects: .clickable"></a-cursor>
+          <a-cursor raycaster="objects: .interactive"></a-cursor>
         </a-camera>
         <a-entity oculus-touch-controls="hand: left"></a-entity>
         <a-entity oculus-touch-controls="hand: right"></a-entity>
@@ -63,5 +79,24 @@
   <footer>
     <p>&copy; 2023 Q-DimensionalField. All rights reserved.</p>
   </footer>
+  <script>
+    // Debug monitoring
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOM loaded, initializing debug monitors');
+      
+      const scene = document.querySelector('a-scene');
+      scene.addEventListener('loaded', () => {
+        console.log('A-Frame scene loaded');
+        // Check if initial chunk was created
+        setTimeout(() => {
+          const container = document.querySelector('#world-container');
+          console.log('World container status:', {
+            childCount: container.children.length,
+            children: Array.from(container.children).map(c => c.getAttribute('chunk'))
+          });
+        }, 1000);
+      });
+    });
+  </script>
 </body>
 </html>

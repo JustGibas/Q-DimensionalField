@@ -9,6 +9,7 @@ AFRAME.registerComponent('chunk', {
     },
 
     init: function() {
+        console.log('Initializing chunk component:', this.data);
         this.textureManager = new TextureManager();
         this.blocks = new Map();
         this.blockMeshes = new Map();
@@ -16,30 +17,35 @@ AFRAME.registerComponent('chunk', {
     },
 
     generateChunk: function() {
+        console.log('Generating chunk at position:', this.el.getAttribute('position'));
         this.chunkGroup = new THREE.Group();
+        let blocksCreated = 0;
         
         // Generate blocks within the chunk (16x16x16)
         for(let x = 0; x < this.data.size; x++) {
             for(let y = 0; y < this.data.size; y++) {
                 for(let z = 0; z < this.data.size; z++) {
                     if(Math.random() < 0.2) { // 20% fill rate for testing
-                        this.createBlock(x, y, z, this.getRandomBlockType());
+                        this.createBlock(x, y, z, { 
+                            texture: 'default',
+                            color: this.getRandomColor() 
+                        });
+                        blocksCreated++;
                     }
                 }
             }
         }
 
+        console.log(`Created ${blocksCreated} blocks in chunk`);
         this.el.setObject3D('mesh', this.chunkGroup);
         this.el.classList.add('interactive');
     },
 
-    async createBlock(x, y, z, blockType) {
+    createBlock(x, y, z, blockType) {
         const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const texture = await this.textureManager.getTexture(blockType.texture);
-        
+        // Temporary: Use basic material until texture system is fixed
         const material = new THREE.MeshStandardMaterial({
-            map: texture,
-            transparent: blockType.transparent || false,
+            color: blockType.color || '#ffffff',
             roughness: 0.7,
             metalness: 0.2
         });
@@ -53,8 +59,7 @@ AFRAME.registerComponent('chunk', {
         this.chunkGroup.add(mesh);
     },
 
-    getRandomBlockType() {
-        const types = Object.values(BlockTypes).filter(type => type.id !== 0); // Exclude AIR
-        return types[Math.floor(Math.random() * types.length)];
+    getRandomColor: function() {
+        return `#${Math.floor(Math.random()*16777215).toString(16)}`;
     }
 });
