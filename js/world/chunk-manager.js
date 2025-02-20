@@ -3,6 +3,18 @@ class ChunkManager {
         this.chunks = new Map();
         this.CHUNK_SIZE = 16; // 16x16x16 blocks per chunk
         this.container = document.querySelector('#world-container');
+        this.spawnInitialChunk();
+    }
+
+    spawnInitialChunk() {
+        const chunk = document.createElement('a-entity');
+        chunk.setAttribute('chunk', {
+            chunkId: 'X0Y0Z0',
+            size: 16
+        });
+        chunk.setAttribute('position', '0 0 0');
+        this.container.appendChild(chunk);
+        this.chunks.set('X0Y0Z0', chunk);
     }
 
     createChunk(position) {

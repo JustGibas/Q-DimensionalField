@@ -7,6 +7,11 @@
 
 .interactive {
     cursor: pointer;
+    transition: transform 0.2s ease-out;
+}
+
+.interactive:hover {
+    transform: scale(1.02);
 }
 
 /* VR controller tooltips */
@@ -31,6 +36,7 @@
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    transition: opacity 0.5s ease-out;
 }
 
 .ui-overlay {
@@ -56,4 +62,11 @@
 
 .feedback-popup.visible {
     opacity: 1;
+}
+
+.loader {
+    font-family: Arial, sans-serif;
+    font-size: 20px;
+    color: white;
+    text-shadow: 0 0 10px rgba(255,255,255,0.5);
 }

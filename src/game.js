@@ -1,88 +1,110 @@
 import * as THREE from 'https://unpkg.com/three@0.149.0/build/three.module.js';
 
-// Register a custom A-Frame component for voxel chunks
-AFRAME.registerComponent('voxel-chunk', {
+// Register chunk component with proper naming
+AFRAME.registerComponent('chunk', {
     schema: {
-        position: { type: 'vec3' },
-        size: { type: 'number', default: 1 }
+        chunkId: { type: 'string', default: 'X0Y0Z0' },
+        size: { type: 'number', default: 16 }
     },
 
     init: function() {
-        this.createChunk();
+        this.blocks = new Map();
+        this.generateBlocks();
     },
 
-    createChunk: function() {
-        const size = this.data.size;
-        const geometry = new THREE.BoxGeometry(size, size, size);
+    generateBlocks: function() {
+        const group = new THREE.Group();
+        
+        // Generate blocks within the chunk (16x16x16)
+        for(let x = 0; x < this.data.size; x++) {
+            for(let y = 0; y < this.data.size; y++) {
+                for(let z = 0; z < this.data.size; z++) {
+                    if(Math.random() < 0.2) { // 20% fill rate for testing
+                        const block = this.createBlock(x, y, z);
+                        group.add(block);
+                        this.blocks.set(`${x},${y},${z}`, block);
+                    }
+                }
+            }
+        }
+
+        this.el.setObject3D('mesh', group);
+        this.el.classList.add('interactive');
+    },
+
+    createBlock: function(x, y, z) {
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
         const material = new THREE.MeshStandardMaterial({
-            color: '#' + Math.floor(Math.random()*16777215).toString(16),
+            color: this.getRandomColor(),
             roughness: 0.7,
             metalness: 0.2
         });
+        
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(x, y, z);
+        return mesh;
+    },
 
-        this.mesh = new THREE.Mesh(geometry, material);
-        this.el.setObject3D('mesh', this.mesh);
-        this.el.classList.add('interactive');
+    getRandomColor: function() {
+        return `#${Math.floor(Math.random()*16777215).toString(16)}`;
     }
 });
 
-// Register interaction component
+// Update interaction component name
 AFRAME.registerComponent('chunk-interaction', {
     init: function() {
         this.el.addEventListener('click', (e) => {
             const position = e.detail.intersection.point;
-            createNewChunk(position);
+            this.createAdjacentChunk(position);
         });
+    },
+
+    createAdjacentChunk: function(position) {
+        const container = document.querySelector('#world-container');
+        const chunk = document.createElement('a-entity');
+        
+        chunk.setAttribute('chunk', {
+            chunkId: `X${position.x}Y${position.y}Z${position.z}`,
+            size: 16
+        });
+        
+        chunk.setAttribute('position', position);
+        chunk.setAttribute('chunk-interaction', '');
+        container.appendChild(chunk);
     }
 });
 
-// Create initial voxel grid
-function createInitialGrid() {
-    const container = document.querySelector('#game-container');
+// Initialize world with X0Y0Z0 chunk
+function initializeWorld() {
+    const container = document.querySelector('#world-container');
+    const centerChunk = document.createElement('a-entity');
     
-    for (let x = -2; x <= 2; x++) {
-        for (let y = 0; y <= 4; y++) {
-            for (let z = -2; z <= 2; z++) {
-                const chunk = document.createElement('a-entity');
-                chunk.setAttribute('voxel-chunk', {
-                    position: { x: x, y: y, z: z },
-                    size: 0.5
-                });
-                chunk.setAttribute('position', `${x} ${y} ${z}`);
-                chunk.setAttribute('chunk-interaction', '');
-                container.appendChild(chunk);
-            }
-        }
-    }
-}
-
-// Function to create new chunks when clicking
-function createNewChunk(position) {
-    const container = document.querySelector('#game-container');
-    const chunk = document.createElement('a-entity');
-    chunk.setAttribute('voxel-chunk', {
-        position: position,
-        size: 0.5
+    centerChunk.setAttribute('chunk', {
+        chunkId: 'X0Y0Z0',
+        size: 16
     });
-    chunk.setAttribute('position', position);
-    chunk.setAttribute('chunk-interaction', '');
-    container.appendChild(chunk);
+    
+    centerChunk.setAttribute('position', '0 0 0');
+    centerChunk.setAttribute('chunk-interaction', '');
+    container.appendChild(centerChunk);
 }
 
-// Initialize the game when the scene is loaded
+// Initialize on scene load
 document.querySelector('a-scene').addEventListener('loaded', () => {
-    createInitialGrid();
+    initializeWorld();
 });
 
-// Add VR specific interactions
+// VR controller integration
 AFRAME.registerComponent('controller-interaction', {
     init: function() {
         this.el.addEventListener('triggerdown', function() {
-            // Trigger VR controller interaction
             const raycaster = this.components.raycaster;
             if (raycaster.intersections.length > 0) {
                 const intersection = raycaster.intersections[0];
-                createNewChunk(intersection.point);
+                const chunkInteraction = intersection.object.el.components['chunk-interaction'];
+                if (chunkInteraction) {
+                    chunkInteraction.createAdjacentChunk(intersection.point);
+                }
             }
         });
     }
