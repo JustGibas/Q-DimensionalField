@@ -17,8 +17,8 @@ class WorldManager {
     setupWorldHierarchy() {
         // Hierarchy: World -> Chunks -> Blocks -> Voxels
         this.worldSize = {
-            chunks: { x: 64, y: 64, z: 64 },    // 64x64x64 chunks
-            blocksPerChunk: 16,                  // 16x16x16 blocks per chunk
+            chunks: { x: 10, y: 10, z: 10 },    // 10x10x10 chunks
+            blocksPerChunk: 10,                  // 10x10x10 blocks per chunk
             voxelsPerBlock: 8                    // 8x8x8 voxels per block
         };
     }

@@ -7,7 +7,7 @@ class ChunkManager {
 
         if (loggingEnabled) console.log('Initializing ChunkManager');
         this.chunks = new Map();
-        this.CHUNK_SIZE = 16; // 16x16x16 blocks per chunk
+        this.CHUNK_SIZE = 10; // 10x10x10 blocks per chunk
         this.container = document.querySelector('#world-container');
         if (!this.container) {
             console.error('Could not find world-container element!');
@@ -26,7 +26,7 @@ class ChunkManager {
         const chunk = document.createElement('a-entity');
         chunk.setAttribute('chunk', {
             position: { x: 0, y: 0, z: 0 },
-            size: this.CHUNK_SIZE
+            size: 5
         });
         chunk.setAttribute('position', '0 0 0');
         chunk.setAttribute('visible', true);
@@ -110,7 +110,7 @@ class ChunkManager {
                 Math.abs(z - centerChunkPos.z)
             );
             
-            if (distance > this.renderDistance) {
+            if (distance > 3) {
                 this.container.removeChild(chunk);
                 this.chunks.delete(key);
             }
