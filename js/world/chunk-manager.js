@@ -91,6 +91,7 @@ class ChunkManager {
     }
 
     createChunk(position) {
+        console.log('Creating chunk at position:', position);
         const chunk = document.createElement('a-entity');
         const key = `${position.x},${position.y},${position.z}`;
 
@@ -111,6 +112,11 @@ class ChunkManager {
 
         this.chunks.set(key, chunk);
         this.container.appendChild(chunk);
+        console.log('Chunk created:', {
+            key: key,
+            position: chunk.getAttribute('position'),
+            containerChildren: this.container.children.length
+        });
         return chunk;
     }
 
