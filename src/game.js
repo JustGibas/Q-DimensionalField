@@ -126,7 +126,17 @@ if (CONFIG.LOGGING.performance) {
 
 document.querySelector('a-scene').addEventListener('loaded', () => {
     Logger.info('Game', 'A-Frame scene loaded');
-    initializeWorld();
+    
+    // Force immediate chunk generation
+    const worldManager = new WorldManager();
+    const initialChunk = worldManager.chunkManager.spawnInitialChunk();
+    
+    // Verify chunk creation
+    if (initialChunk) {
+        Logger.info('Game', 'Initial chunk created successfully');
+    } else {
+        Logger.error('Game', 'Failed to create initial chunk');
+    }
 });
 
 // VR controller integration

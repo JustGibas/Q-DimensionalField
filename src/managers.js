@@ -1,9 +1,9 @@
-import ChunkGenerator from './generators.js';
+import { TextureManager, TextureGenerator } from './generators.js';
 import { CONFIG, Logger } from './config.js';
 
 class ChunkManager {
     constructor() {
-        Logger.info('ChunkManager', `Initializing version ${CONFIG.VERSIONS.CHUNK_MANAGER}`);
+        Logger.info('ChunkManager', 'Initializing', { version: CONFIG.VERSIONS.CHUNK_MANAGER });
         this.chunks = new Map();
         this.CHUNK_SIZE = 10; // 10x10x10 blocks per chunk
         this.container = document.querySelector('#world-container');
@@ -59,16 +59,28 @@ class ChunkManager {
     }
 
     updateChunksAroundPlayer(playerPosition) {
+        const startTime = performance.now();
+        Logger.logStep('ChunkManager', 'Updating chunks around player', { playerPosition });
+
         const chunkPos = this.getChunkPosition(playerPosition);
+        Logger.logStep('ChunkManager', 'Calculated chunk position', { chunkPos });
         
         if (chunkPos.x !== this.lastPlayerChunkPos.x || 
             chunkPos.z !== this.lastPlayerChunkPos.z) {
+            
+            Logger.logStep('ChunkManager', 'Player moved to new chunk', {
+                from: this.lastPlayerChunkPos,
+                to: chunkPos
+            });
             
             this.loadNewChunks(chunkPos);
             this.unloadDistantChunks(chunkPos);
             
             this.lastPlayerChunkPos = { ...chunkPos };
         }
+
+        Logger.logPerformance('ChunkManager', 'updateChunksAroundPlayer', 
+            performance.now() - startTime);
     }
 
     loadNewChunks(centerChunkPos) {
@@ -104,7 +116,15 @@ class ChunkManager {
     }
 
     createChunk(position) {
+        const startTime = performance.now();
+        Logger.logStep('ChunkManager', 'Creating new chunk', { position });
+
         const chunkData = ChunkGenerator.generateChunkData(position);
+        Logger.logStep('ChunkManager', 'Generated chunk data', { 
+            dataSize: chunkData.length,
+            position 
+        });
+
         const chunk = document.createElement('a-entity');
         const key = `${position.x},${position.y},${position.z}`;
 
@@ -112,6 +132,12 @@ class ChunkManager {
             position: position,
             size: this.CHUNK_SIZE,
             chunkData: chunkData
+        });
+
+        Logger.logStep('ChunkManager', 'Setting chunk position', {
+            worldX: position.x * this.CHUNK_SIZE * 16,
+            worldY: position.y * this.CHUNK_SIZE * 16,
+            worldZ: position.z * this.CHUNK_SIZE * 16
         });
 
         chunk.setAttribute('position', `${
@@ -125,20 +151,13 @@ class ChunkManager {
         this.chunks.set(key, chunk);
         this.container.appendChild(chunk);
 
-        const chunkCountElement = document.getElementById('chunk-count');
-        if (chunkCountElement) {
-            chunkCountElement.textContent = this.chunks.size;
-        }
-
-        const lastChunkNameElement = document.getElementById('last-chunk-name');
-        if (lastChunkNameElement) {
-            lastChunkNameElement.textContent = key;
-        }
-
-        const lastChunkPosElement = document.getElementById('last-chunk-pos');
-        if (lastChunkPosElement) {
-            lastChunkPosElement.textContent = `${position.x}, ${position.y}, ${position.z}`;
-        }
+        Logger.logStep('ChunkManager', 'Chunk created', { 
+            key,
+            totalChunks: this.chunks.size 
+        });
+        
+        Logger.logPerformance('ChunkManager', 'createChunk', performance.now() - startTime);
+        Logger.logMemory('ChunkManager', 'createChunk');
 
         return chunk;
     }

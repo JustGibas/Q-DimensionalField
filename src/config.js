@@ -14,7 +14,22 @@ export const CONFIG = {
         level: 'debug', // 'debug' | 'info' | 'warn' | 'error'
         component: true,
         manager: true,
-        performance: true
+        performance: true,
+        components: {
+            chunk: true,
+            player: true,
+            world: true
+        },
+        managers: {
+            chunk: true,
+            world: true,
+            texture: true
+        },
+        details: {
+            showValues: true,
+            showTiming: true,
+            showMemory: true
+        }
     }
 };
 
@@ -34,5 +49,21 @@ export const Logger = {
     error: (component, message, error = null) => {
         if (!CONFIG.LOGGING.enabled) return;
         console.error(`[${component}]`, message, error || '');
+    },
+    logStep: (component, step, data = null) => {
+        if (!CONFIG.LOGGING.enabled) return;
+        console.log(`[${component}] Step: ${step}`, data ? `Data: ${JSON.stringify(data)}` : '');
+    },
+    logPerformance: (component, operation, duration) => {
+        if (!CONFIG.LOGGING.enabled || !CONFIG.LOGGING.performance) return;
+        console.log(`[${component}] Performance - ${operation}: ${duration.toFixed(2)}ms`);
+    },
+    logMemory: (component, operation) => {
+        if (!CONFIG.LOGGING.enabled || !CONFIG.LOGGING.details.showMemory) return;
+        const memory = performance.memory;
+        console.log(`[${component}] Memory after ${operation}:`, {
+            usedHeap: `${(memory.usedJSHeapSize / 1048576).toFixed(2)}MB`,
+            totalHeap: `${(memory.totalJSHeapSize / 1048576).toFixed(2)}MB`
+        });
     }
 };

@@ -10,20 +10,23 @@ AFRAME.registerComponent('chunk', {
     },
 
     init: function() {
-        // Logging flag to enable/disable logging
-        const loggingEnabled = true;
+        const startTime = performance.now();
+        Logger.logStep('ChunkComponent', 'Initializing', {
+            position: this.data.position,
+            size: this.data.size
+        });
 
-        if (loggingEnabled) console.log('Initializing chunk component:', this.data);
-        this.textureManager = new TextureManager();
-        this.textureGenerator = new TextureGenerator();
         this.blocks = new Map();
         this.blockMeshes = new Map();
         this.generateChunk();
+
+        Logger.logPerformance('ChunkComponent', 'initialization', 
+            performance.now() - startTime);
     },
 
     generateChunk: function() {
-        // Log the start of the chunk generation process
-        if (loggingEnabled) console.log('Generating chunk at position:', this.el.getAttribute('position'));
+        const startTime = performance.now();
+        Logger.logStep('ChunkComponent', 'Starting chunk generation');
         
         this.chunkGroup = new THREE.Group();
         let blocksCreated = 0;
@@ -31,14 +34,18 @@ AFRAME.registerComponent('chunk', {
         const size = this.data.size;
         const chunkData = this.data.chunkData;
         
-        // Iterate through each position in the chunk
+        Logger.logStep('ChunkComponent', 'Chunk parameters', {
+            size,
+            dataLength: chunkData.length
+        });
+
+        // Block creation loop with progress logging
         for(let x = 0; x < size; x++) {
             for(let y = 0; y < size; y++) {
                 for(let z = 0; z < size; z++) {
                     const idx = x + y * size + z * size * size;
                     const value = chunkData[idx];
                     
-                    // Check if the value exceeds the threshold for block creation
                     if(value > 0.5) { 
                         this.createBlock(x, y, z, { 
                             texture: 'default',
@@ -48,15 +55,26 @@ AFRAME.registerComponent('chunk', {
                     }
                 }
             }
+            
+            // Log progress every few layers
+            if (x % 5 === 0) {
+                Logger.logStep('ChunkComponent', 'Generation progress', {
+                    layer: x,
+                    blocksCreated
+                });
+            }
         }
 
-        // Log the number of blocks created in the chunk
-        if (loggingEnabled) console.log(`Created ${blocksCreated} blocks in chunk`);
-        this.el.setObject3D('mesh', this.chunkGroup);
-        this.el.classList.add('interactive');
+        Logger.logStep('ChunkComponent', 'Chunk generation complete', {
+            totalBlocks: blocksCreated,
+            position: this.data.position
+        });
 
-        // Add a plane to the chunk
-        this.addPlaneToChunk();
+        this.el.setObject3D('mesh', this.chunkGroup);
+        
+        Logger.logPerformance('ChunkComponent', 'generateChunk', 
+            performance.now() - startTime);
+        Logger.logMemory('ChunkComponent', 'generateChunk');
     },
 
     createBlock(x, y, z, blockType) {
