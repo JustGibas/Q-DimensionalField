@@ -2,7 +2,10 @@ import ChunkGenerator from './chunk-generator.js';
 
 class ChunkManager {
     constructor() {
-        console.log('Initializing ChunkManager');
+        // Logging flag to enable/disable logging
+        const loggingEnabled = true;
+
+        if (loggingEnabled) console.log('Initializing ChunkManager');
         this.chunks = new Map();
         this.CHUNK_SIZE = 16; // 16x16x16 blocks per chunk
         this.container = document.querySelector('#world-container');
@@ -17,7 +20,9 @@ class ChunkManager {
     }
 
     spawnInitialChunk() {
-        console.log('Spawning initial chunk');
+        // Log the start of the initial chunk spawning process
+        if (loggingEnabled) console.log('Spawning initial chunk');
+        
         const chunk = document.createElement('a-entity');
         chunk.setAttribute('chunk', {
             position: { x: 0, y: 0, z: 0 },
@@ -29,14 +34,17 @@ class ChunkManager {
         this.container.appendChild(chunk);
         this.chunks.set('0,0,0', chunk);
         
-        // Debug output
-        console.log('Initial chunk created:', {
+        // Log the details of the created initial chunk
+        if (loggingEnabled) console.log('Initial chunk created:', {
             position: chunk.getAttribute('position'),
             containerChildren: this.container.children.length
         });
     }
 
     initializePlane() {
+        // Log the start of the plane initialization process
+        if (loggingEnabled) console.log('Initializing plane with chunks');
+        
         for (let x = -this.renderDistance; x <= this.renderDistance; x++) {
             for (let z = -this.renderDistance; z <= this.renderDistance; z++) {
                 this.createChunk({ x, y: 0, z });
@@ -91,7 +99,9 @@ class ChunkManager {
     }
 
     createChunk(position) {
-        console.log('Creating chunk at position:', position);
+        // Log the creation of a chunk at the specified position
+        if (loggingEnabled) console.log('Creating chunk at position:', position);
+        
         const chunk = document.createElement('a-entity');
         const key = `${position.x},${position.y},${position.z}`;
 
@@ -112,7 +122,9 @@ class ChunkManager {
 
         this.chunks.set(key, chunk);
         this.container.appendChild(chunk);
-        console.log('Chunk created:', {
+        
+        // Log the details of the created chunk
+        if (loggingEnabled) console.log('Chunk created:', {
             key: key,
             position: chunk.getAttribute('position'),
             containerChildren: this.container.children.length

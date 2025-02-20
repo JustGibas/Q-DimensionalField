@@ -9,7 +9,10 @@ AFRAME.registerComponent('chunk', {
     },
 
     init: function() {
-        console.log('Initializing chunk component:', this.data);
+        // Logging flag to enable/disable logging
+        const loggingEnabled = true;
+
+        if (loggingEnabled) console.log('Initializing chunk component:', this.data);
         this.textureManager = new TextureManager();
         this.blocks = new Map();
         this.blockMeshes = new Map();
@@ -17,20 +20,24 @@ AFRAME.registerComponent('chunk', {
     },
 
     generateChunk: function() {
-        console.log('Generating chunk at position:', this.el.getAttribute('position'));
+        // Log the start of the chunk generation process
+        if (loggingEnabled) console.log('Generating chunk at position:', this.el.getAttribute('position'));
+        
         this.chunkGroup = new THREE.Group();
         let blocksCreated = 0;
         
         const size = this.data.size;
         const chunkData = this.data.chunkData;
         
+        // Iterate through each position in the chunk
         for(let x = 0; x < size; x++) {
             for(let y = 0; y < size; y++) {
                 for(let z = 0; z < size; z++) {
                     const idx = x + y * size + z * size * size;
                     const value = chunkData[idx];
                     
-                    if(value > 0.5) { // Threshold for block creation
+                    // Check if the value exceeds the threshold for block creation
+                    if(value > 0.5) { 
                         this.createBlock(x, y, z, { 
                             texture: 'default',
                             color: this.getHeightBasedColor(y, value)
@@ -41,12 +48,16 @@ AFRAME.registerComponent('chunk', {
             }
         }
 
-        console.log(`Created ${blocksCreated} blocks in chunk`);
+        // Log the number of blocks created in the chunk
+        if (loggingEnabled) console.log(`Created ${blocksCreated} blocks in chunk`);
         this.el.setObject3D('mesh', this.chunkGroup);
         this.el.classList.add('interactive');
     },
 
     createBlock(x, y, z, blockType) {
+        // Log the creation of a block at the specified position
+        if (loggingEnabled) console.log('Creating block at position:', { x, y, z });
+
         const geometry = new THREE.BoxGeometry(1, 1, 1);
         const material = new THREE.MeshStandardMaterial({
             color: blockType.color,
@@ -64,7 +75,7 @@ AFRAME.registerComponent('chunk', {
     },
 
     getRandomColor: function() {
-        // Generate proper 6-digit hex color
+        // Generate a proper 6-digit hex color
         return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
     },
 
