@@ -62,7 +62,7 @@
       <a-sky color="#FFFFFF"></a-sky>
       
       <!-- Player rig -->
-      <a-entity id="player-rig" position="0 10 20" player-controls>
+      <a-entity id="player-rig" position="0 0 0" player-controls>
         <a-camera wasd-controls look-controls>
           <a-cursor raycaster="objects: .interactive"></a-cursor>
         </a-camera>
@@ -71,7 +71,7 @@
       </a-entity>
 
       <!-- World container -->
-      <a-entity id="world-container"></a-entity>
+      <a-entity id="world-container" chunk-manager></a-entity>
     </a-scene>
     <div id="feedback-popup" class="feedback-popup"></div>
   </main>
