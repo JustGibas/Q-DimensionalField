@@ -23,6 +23,13 @@ class ChunkManager {
         
         this.container.appendChild(chunk);
         this.chunks.set('X0Y0Z0', chunk);
+        
+        // Debug output
+        console.log('Initial chunk created:', {
+            position: chunk.getAttribute('position'),
+            chunkId: 'X0Y0Z0',
+            containerChildren: this.container.children.length
+        });
     }
 
     createChunk(position) {
