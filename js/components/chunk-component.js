@@ -1,4 +1,5 @@
 import TextureManager from '../utils/texture-manager.js';
+import TextureGenerator from '../utils/texture-generator.js';
 import { BlockTypes } from '../blocks/block-types.js';
 
 AFRAME.registerComponent('chunk', {
@@ -14,6 +15,7 @@ AFRAME.registerComponent('chunk', {
 
         if (loggingEnabled) console.log('Initializing chunk component:', this.data);
         this.textureManager = new TextureManager();
+        this.textureGenerator = new TextureGenerator();
         this.blocks = new Map();
         this.blockMeshes = new Map();
         this.generateChunk();
@@ -52,6 +54,9 @@ AFRAME.registerComponent('chunk', {
         if (loggingEnabled) console.log(`Created ${blocksCreated} blocks in chunk`);
         this.el.setObject3D('mesh', this.chunkGroup);
         this.el.classList.add('interactive');
+
+        // Add a plane to the chunk
+        this.addPlaneToChunk();
     },
 
     createBlock(x, y, z, blockType) {
@@ -98,5 +103,34 @@ AFRAME.registerComponent('chunk', {
         };
 
         return hslToHex(hue, saturation, lightness);
+    },
+
+    addPlaneToChunk: function() {
+        // Log the start of the plane addition process
+        if (loggingEnabled) console.log('Adding plane to chunk');
+
+        const geometry = new THREE.PlaneGeometry(this.data.size, this.data.size);
+        let material;
+
+        // Generate texture or random color for the plane
+        const textureType = 'grass'; // Example texture type
+        const textureData = this.textureGenerator.generateTexture(textureType);
+
+        if (textureData) {
+            const texture = new THREE.TextureLoader().load(textureData);
+            material = new THREE.MeshStandardMaterial({ map: texture });
+        } else {
+            const color = this.getRandomColor();
+            material = new THREE.MeshStandardMaterial({ color: color });
+        }
+
+        const plane = new THREE.Mesh(geometry, material);
+        plane.rotation.x = -Math.PI / 2; // Rotate plane to be horizontal
+        plane.position.set(this.data.size / 2, 0, this.data.size / 2);
+
+        this.chunkGroup.add(plane);
+
+        // Log the completion of the plane addition process
+        if (loggingEnabled) console.log('Plane added to chunk');
     }
 });
