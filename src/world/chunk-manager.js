@@ -148,6 +148,25 @@ class ChunkManager {
             position: chunk.getAttribute('position'),
             containerChildren: this.container.children.length
         });
+
+        // Update the debug box with the number of chunks spawned
+        const chunkCountElement = document.getElementById('chunk-count');
+        if (chunkCountElement) {
+            chunkCountElement.textContent = this.chunks.size;
+        }
+
+        // Update the debug box with the last chunk name
+        const lastChunkNameElement = document.getElementById('last-chunk-name');
+        if (lastChunkNameElement) {
+            lastChunkNameElement.textContent = key;
+        }
+
+        // Update the debug box with the position of the spawned chunk
+        const lastChunkPosElement = document.getElementById('last-chunk-pos');
+        if (lastChunkPosElement) {
+            lastChunkPosElement.textContent = `${position.x}, ${position.y}, ${position.z}`;
+        }
+
         return chunk;
     }
 
