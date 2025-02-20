@@ -29,6 +29,15 @@ export const CONFIG = {
             showValues: true,
             showTiming: true,
             showMemory: true
+        },
+        performance: {
+            enabled: true,
+            threshold: 16.67, // 60fps frame budget
+            warnThreshold: 33.33 // 30fps frame budget
+        },
+        memory: {
+            trackHeap: true,
+            warnThreshold: 0.8 // 80% of available heap
         }
     },
     SIZES: {
@@ -36,6 +45,12 @@ export const CONFIG = {
         BLOCK: 1,         // 1x1x1 units
         VOXEL: 0.1,      // 0.1x0.1x0.1 units
         RENDER_DISTANCE: 2 // Number of chunks to render in each direction
+    },
+    ERROR_CODES: {
+        CHUNK_GENERATION: 'ERR_CHUNK_GEN',
+        TEXTURE_LOADING: 'ERR_TEX_LOAD',
+        MESH_CREATION: 'ERR_MESH',
+        WORLD_INIT: 'ERR_WORLD_INIT'
     }
 };
 
@@ -71,5 +86,22 @@ export const Logger = {
             usedHeap: `${(memory.usedJSHeapSize / 1048576).toFixed(2)}MB`,
             totalHeap: `${(memory.totalJSHeapSize / 1048576).toFixed(2)}MB`
         });
+    },
+    performance: (component, operation, startTime) => {
+        const duration = performance.now() - startTime;
+        if (duration > CONFIG.LOGGING.performance.warnThreshold) {
+            console.warn(`[${component}] Performance warning: ${operation} took ${duration.toFixed(2)}ms`);
+        } else if (CONFIG.LOGGING.performance.enabled) {
+            console.debug(`[${component}] ${operation}: ${duration.toFixed(2)}ms`);
+        }
+    },
+
+    memory: (component) => {
+        if (!CONFIG.LOGGING.memory.trackHeap) return;
+        const memory = performance.memory;
+        const usage = memory.usedJSHeapSize / memory.jsHeapSizeLimit;
+        if (usage > CONFIG.LOGGING.memory.warnThreshold) {
+            console.warn(`[${component}] High memory usage: ${(usage * 100).toFixed(1)}%`);
+        }
     }
 };

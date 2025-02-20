@@ -4,7 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Voxel VR</title>
+  <script>window.AFRAME_STATS_DISABLE_COMPONENT_STATS = true;</script>
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <script type="importmap">
+  {
+      "imports": {
+          "three": "https://unpkg.com/three@0.147.0/build/three.module.js",
+          "SimplexNoise": "https://cdn.skypack.dev/simplex-noise@4.0.1"
+      }
+  }
+  </script>
   <script type="module" src="./src/config.js"></script>
   <script type="module" src="./src/generators.js"></script>
   <script type="module" src="./src/managers.js"></script>
@@ -143,6 +152,27 @@
         }
       });
     });
+
+    window.addEventListener('error', (event) => {
+      console.error('Global error:', event.error);
+      // Show user-friendly error message
+      const feedback = document.getElementById('feedback-popup');
+      feedback.textContent = 'An error occurred. Please refresh the page.';
+      feedback.classList.add('visible');
+    });
+
+    // Add performance monitoring
+    let lastFrameTime = performance.now();
+    function checkFrameTime() {
+      const now = performance.now();
+      const frameDuration = now - lastFrameTime;
+      if (frameDuration > 50) { // More than 20fps
+        console.warn('Frame time warning:', frameDuration.toFixed(2), 'ms');
+      }
+      lastFrameTime = now;
+      requestAnimationFrame(checkFrameTime);
+    }
+    requestAnimationFrame(checkFrameTime);
   </script>
 </body>
 </html>

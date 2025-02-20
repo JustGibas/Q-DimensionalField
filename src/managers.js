@@ -1,21 +1,30 @@
+import * as THREE from 'three';
 import { TextureManager, TextureGenerator, chunkGenerator } from './generators.js';
 import { CONFIG, Logger } from './config.js';
 
 class ChunkManager {
     constructor() {
+        const startTime = performance.now();
         Logger.info('ChunkManager', 'Initializing', { version: CONFIG.VERSIONS.CHUNK_MANAGER });
-        this.chunks = new Map();
-        this.CHUNK_SIZE = CONFIG.SIZES.CHUNK;
-        this.BLOCK_SIZE = CONFIG.SIZES.BLOCK;
-        this.container = document.querySelector('#world-container');
-        if (!this.container) {
-            console.error('Could not find world-container element!');
-            return;
+        
+        try {
+            this.chunks = new Map();
+            this.CHUNK_SIZE = CONFIG.SIZES.CHUNK;
+            this.BLOCK_SIZE = CONFIG.SIZES.BLOCK;
+            this.container = document.querySelector('#world-container');
+            if (!this.container) {
+                console.error('Could not find world-container element!');
+                return;
+            }
+            this.renderDistance = 2; // Number of chunks to render in each direction
+            this.lastPlayerChunkPos = { x: 0, z: 0 };
+            this.spawnInitialChunk();
+            this.initializePlane();
+            
+            Logger.performance('ChunkManager', 'initialization', startTime);
+        } catch (error) {
+            Logger.error('ChunkManager', CONFIG.ERROR_CODES.WORLD_INIT, error);
         }
-        this.renderDistance = 2; // Number of chunks to render in each direction
-        this.lastPlayerChunkPos = { x: 0, z: 0 };
-        this.spawnInitialChunk();
-        this.initializePlane();
     }
 
     spawnInitialChunk() {
@@ -118,49 +127,54 @@ class ChunkManager {
 
     createChunk(position) {
         const startTime = performance.now();
-        Logger.logStep('ChunkManager', 'Creating new chunk', { position });
+        try {
+            Logger.logStep('ChunkManager', 'Creating new chunk', { position });
 
-        const chunkData = chunkGenerator.generateChunkData(position);
-        Logger.logStep('ChunkManager', 'Generated chunk data', { 
-            dataSize: chunkData.length,
-            position 
-        });
+            const chunkData = chunkGenerator.generateChunkData(position);
+            Logger.logStep('ChunkManager', 'Generated chunk data', { 
+                dataSize: chunkData.length,
+                position 
+            });
 
-        const chunk = document.createElement('a-entity');
-        const key = `${position.x},${position.y},${position.z}`;
+            const chunk = document.createElement('a-entity');
+            const key = `${position.x},${position.y},${position.z}`;
 
-        chunk.setAttribute('chunk', {
-            position: position,
-            size: this.CHUNK_SIZE,
-            chunkData: chunkData
-        });
+            chunk.setAttribute('chunk', {
+                position: position,
+                size: this.CHUNK_SIZE,
+                chunkData: chunkData
+            });
 
-        Logger.logStep('ChunkManager', 'Setting chunk position', {
-            worldX: position.x * this.CHUNK_SIZE * 16,
-            worldY: position.y * this.CHUNK_SIZE * 16,
-            worldZ: position.z * this.CHUNK_SIZE * 16
-        });
+            Logger.logStep('ChunkManager', 'Setting chunk position', {
+                worldX: position.x * this.CHUNK_SIZE * 16,
+                worldY: position.y * this.CHUNK_SIZE * 16,
+                worldZ: position.z * this.CHUNK_SIZE * 16
+            });
 
-        chunk.setAttribute('position', `${
-            position.x * this.CHUNK_SIZE * 16
-        } ${
-            position.y * this.CHUNK_SIZE * 16
-        } ${
-            position.z * this.CHUNK_SIZE * 16
-        }`);
+            chunk.setAttribute('position', `${
+                position.x * this.CHUNK_SIZE * 16
+            } ${
+                position.y * this.CHUNK_SIZE * 16
+            } ${
+                position.z * this.CHUNK_SIZE * 16
+            }`);
 
-        this.chunks.set(key, chunk);
-        this.container.appendChild(chunk);
+            this.chunks.set(key, chunk);
+            this.container.appendChild(chunk);
 
-        Logger.logStep('ChunkManager', 'Chunk created', { 
-            key,
-            totalChunks: this.chunks.size 
-        });
-        
-        Logger.logPerformance('ChunkManager', 'createChunk', performance.now() - startTime);
-        Logger.logMemory('ChunkManager', 'createChunk');
+            Logger.logStep('ChunkManager', 'Chunk created', { 
+                key,
+                totalChunks: this.chunks.size 
+            });
+            
+            Logger.performance('ChunkManager', 'chunk_creation', startTime);
+            Logger.memory('ChunkManager');
 
-        return chunk;
+            return chunk;
+        } catch (error) {
+            Logger.error('ChunkManager', 'Failed to create chunk', error);
+            return null;
+        }
     }
 
     getOrCreateChunk(worldPosition) {
@@ -228,13 +242,56 @@ class WorldManager {
     // Add manager methods here
 }
 
-/* Taichi.js Integration Placeholder
-export class TaichiManager {
+class TaichiManager {
     constructor() {
-        Logger.warn('TaichiManager', 'Taichi.js integration not implemented yet');
+        Logger.info('TaichiManager', 'Initializing');
+        this.initialized = false;
+    }
+
+    async initialize() {
+        try {
+            // TODO: Initialize Taichi.js when available
+            this.initialized = true;
+            Logger.info('TaichiManager', 'Initialized successfully');
+        } catch (error) {
+            Logger.error('TaichiManager', 'Failed to initialize', error);
+        }
+    }
+
+    async generateChunkDataParallel(position, size) {
+        /* TODO: Implement in Taichi
+        return ti.kernel(function(pos, size) {
+            for(i, j, k in ti.ndrange(size, size, size)) {
+                // Generate voxel data in parallel
+                let noise = this.computeNoise(pos[0] + i, pos[1] + j, pos[2] + k)
+                // Store in 3D grid
+            }
+        })(position, size)
+        */
+    }
+
+    async optimizeMesh(vertices, indices) {
+        /* TODO: Implement in Taichi
+        return ti.kernel(function(verts, idx) {
+            // Parallel mesh optimization
+            // - Remove hidden faces
+            // - Merge vertices
+            // - Generate LODs
+        })(vertices, indices)
+        */
+    }
+
+    async simulateParticles(particles, deltaTime) {
+        /* TODO: Implement in Taichi
+        return ti.kernel(function(p, dt) {
+            // Parallel particle updates
+            // - Apply forces
+            // Handle collisions
+            // - Update positions
+        })(particles, deltaTime)
+        */
     }
 }
-*/
 
 class UIManager {
     constructor() {
@@ -379,4 +436,4 @@ class UIManager {
     }
 }
 
-export { ChunkManager, VoxelManager, WorldManager, UIManager };
+export { ChunkManager, VoxelManager, WorldManager, UIManager, TaichiManager };
