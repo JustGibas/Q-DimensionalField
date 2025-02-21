@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import { CONFIG, Logger } from './config.js';
 
 class NoiseGenerator {
@@ -177,7 +176,7 @@ class BlockTypeGenerator {
     }
 
     varyColor(baseColor, range) {
-        const color = new THREE.Color(baseColor);
+        const color = new AFRAME.THREE.Color(baseColor);
         color.r += (Math.random() - 0.5) * (range / 255);
         color.g += (Math.random() - 0.5) * (range / 255);
         color.b += (Math.random() - 0.5) * (range / 255);
@@ -288,9 +287,9 @@ class TextureManager {
 
         const loadingPromise = new Promise((resolve) => {
             const textureData = this.textureGenerator.generateTexture(type);
-            const texture = new THREE.TextureLoader().load(textureData, (tex) => {
-                tex.wrapS = THREE.RepeatWrapping;
-                tex.wrapT = THREE.RepeatWrapping;
+            const texture = new AFRAME.THREE.TextureLoader().load(textureData, (tex) => {
+                tex.wrapS = AFRAME.THREE.RepeatWrapping;
+                tex.wrapT = AFRAME.THREE.RepeatWrapping;
                 tex.needsUpdate = true;
                 this.textureCache.set(type, tex);
                 resolve(tex);

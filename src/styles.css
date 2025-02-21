@@ -262,6 +262,30 @@
     cursor: move;
 }
 
+/* Update draggable styles for mobile */
+.draggable {
+    position: fixed !important;
+    touch-action: none; /* Prevents scrolling while dragging on touch devices */
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.draggable .window-header {
+    cursor: move;
+    touch-action: none;
+}
+
+@media (max-width: 768px) {
+    .draggable {
+        max-height: 80vh; /* Prevent windows from being too tall on mobile */
+        overflow-y: auto;
+    }
+    
+    .settings-scroll-container {
+        max-height: 120px; /* Slightly smaller on mobile */
+    }
+}
+
 /* Settings Panel */
 .settings-panel {
     top: 20px;
@@ -316,7 +340,7 @@
     background: var(--ui-background);
     border-radius: var(--ui-border-radius);
     border: 1px solid var(--ui-border);
-    z-index: 1001;
+    z-index: 999;
 }
 
 .tool-button {
@@ -456,7 +480,7 @@
 }
 
 .error .metric-value {
-    color: var(--error);
+    color: var (--error);
 }
 
 /* Quick Actions */
@@ -510,4 +534,106 @@
     .ui-window {
         width: calc(100% - 40px) !important;
     }
+}
+
+/* Improved select (dropdown) styling for debug window */
+select {
+    background: var(--ui-background);
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-border-radius);
+    color: var(--text);
+    padding: 10px 12px;
+    font-size: 14px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10'><polygon points='0,0 10,0 5,6' fill='%23ffffff'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+select:focus {
+    border-color: var(--primary);
+    outline: none;
+}
+
+option {
+    background: var(--ui-background);
+    color: var(--text);
+    padding: 8px;
+}
+
+/* Make the debug flags list scrollable */
+.settings-scroll-container {
+    max-height: 150px; /* Adjust height as needed */
+    overflow-y: auto;
+    padding-right: 10px;
+    margin: 10px 0;
+}
+
+/* Optional scrollbar styling */
+.settings-scroll-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.settings-scroll-container::-webkit-scrollbar-track {
+    background: var(--ui-background);
+    border-radius: 4px;
+}
+
+.settings-scroll-container::-webkit-scrollbar-thumb {
+    background: var(--ui-border);
+    border-radius: 4px;
+}
+
+.settings-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
+/* Main Menu Styles */
+.main-menu {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 300px;
+    z-index: 1000;
+}
+
+.menu-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 0;
+}
+
+.menu-button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-border-radius);
+    color: var(--text);
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 16px;
+    text-align: left;
+}
+
+.menu-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.menu-button.warning {
+    color: #ff4444;
+    border-color: #ff4444;
+}
+
+.menu-button.warning:hover {
+    background: rgba(255, 0, 0, 0.2);
+}
+
+.menu-separator {
+    height: 1px;
+    background: var(--ui-border);
+    margin: 5px 0;
 }

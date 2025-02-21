@@ -1,4 +1,4 @@
-import { ChunkManager } from './managers.js';
+import { CONFIG, Logger } from './config.js';
 
 AFRAME.registerComponent('player-controls', {
     init: function() {
@@ -7,11 +7,43 @@ AFRAME.registerComponent('player-controls', {
         this.setupVRControls();
         this.setupKeyboardControls();
 
-        // Initialize chunkManager before calling updateChunksAroundPlayer
-        this.chunkManager = new ChunkManager();
+        // Wait for game initialization
+        this.waitForGame().then(() => {
+            // Get manager references from game instance
+            this.chunkManager = window.game.chunkManager;
+            this.uiManager = window.game.uiManager;
+            
+            // Update chunks around the player
+            this.updateChunksAroundPlayer();
+        }).catch(error => {
+            console.error('Failed to initialize player controls:', error);
+        });
 
-        // Update chunks around the player
-        this.updateChunksAroundPlayer();
+        // Add position update interval
+        this.lastPosition = new THREE.Vector3();
+        this.positionUpdateInterval = setInterval(() => {
+            this.updatePlayerPosition();
+        }, CONFIG.LOGGING.updateFrequency);
+    },
+
+    waitForGame() {
+        return new Promise((resolve, reject) => {
+            const maxAttempts = 10;
+            let attempts = 0;
+            
+            const checkGame = () => {
+                if (window.game?.chunkManager) {
+                    resolve();
+                } else if (attempts >= maxAttempts) {
+                    reject(new Error('Game initialization timeout'));
+                } else {
+                    attempts++;
+                    setTimeout(checkGame, 500);
+                }
+            };
+            
+            checkGame();
+        });
     },
 
     setupVRControls: function() {
@@ -49,20 +81,60 @@ AFRAME.registerComponent('player-controls', {
     },
 
     updateChunksAroundPlayer: function() {
+        if (!window.game) return;
+        
         const playerRig = document.querySelector('#player-rig');
         if (playerRig) {
-            const playerPosition = playerRig.getAttribute('position');
-            this.chunkManager.updateChunksAroundPlayer(playerPosition);
+            const position = playerRig.getAttribute('position');
+            window.game.updateChunksAroundPlayer();
 
             // Update debug info with current position
             if (window.uiManager) {
                 window.uiManager.updateDebugInfo({
-                    'player-position': `${playerPosition.x.toFixed(2)}, ${playerPosition.y.toFixed(2)}, ${playerPosition.z.toFixed(2)}`
+                    'player-position': `${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)}`,
+                    'player-chunk': `${Math.floor(position.x / CONFIG.WORLD.CHUNK_SIZE)}, ${Math.floor(position.z / CONFIG.WORLD.CHUNK_SIZE)}`
                 });
             }
         }
 
         // Keep checking position periodically
         requestAnimationFrame(() => this.updateChunksAroundPlayer());
+    },
+
+    updatePlayerPosition: function() {
+        // Get camera position instead of player rig
+        const camera = document.querySelector('a-camera');
+        if (!camera) return;
+
+        const cameraObject3D = camera.object3D;
+        const worldPosition = new THREE.Vector3();
+        cameraObject3D.getWorldPosition(worldPosition);
+        
+        // Only update if position has changed
+        if (!worldPosition.equals(this.lastPosition)) {
+            if (CONFIG.FLAGS.LOG_PLAYER_POSITION) {
+                Logger.info('Player', 'Camera Position:', {
+                    x: worldPosition.x.toFixed(2),
+                    y: worldPosition.y.toFixed(2),
+                    z: worldPosition.z.toFixed(2)
+                });
+            }
+
+            // Always update debug info regardless of logging flag
+            if (window.game?.uiManager) {
+                window.game.uiManager.updateDebugInfo({
+                    'player-position': `${worldPosition.x.toFixed(2)}, ${worldPosition.y.toFixed(2)}, ${worldPosition.z.toFixed(2)}`,
+                    'player-chunk': `${Math.floor(worldPosition.x / CONFIG.WORLD.CHUNK_SIZE)}, ${Math.floor(worldPosition.z / CONFIG.WORLD.CHUNK_SIZE)}`
+                });
+            }
+            this.lastPosition.copy(worldPosition);
+        }
+    },
+
+    remove: function() {
+        // Clean up interval when component is removed
+        if (this.positionUpdateInterval) {
+            clearInterval(this.positionUpdateInterval);
+        }
     }
 });

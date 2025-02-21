@@ -32,7 +32,7 @@
     
     <!-- Updated toolbar with icon buttons -->
     <div class="window-toolbar">
-      <button class="tool-button" data-window="debug-window" title="Debug">
+      <button class="tool-button" id="debug-window-toggle" onclick="window.uiManager.toggleWindow('debug-window')" title="Debug">
         <i class="fas fa-bug"></i>D
       </button>
       <button class="tool-button" data-window="inventory-panel" title="Inventory">
@@ -86,7 +86,7 @@
         </div>
     </div>
 
-    <div class="ui-window debug-window draggable" id="debug-window">
+    <div class="ui-window debug-window draggable" id="debug-window" style="display: none;">
         <div class="window-header">
             <span class="window-title">Debug Info</span>
             <button class="action-button" onclick="uiManager.toggleWindow('debug-window', false)">×</button>
@@ -115,42 +115,114 @@
         <!-- Debug Flags -->
         <div class="settings-group">
             <div class="settings-group-title">Debug Flags</div>
-            <label class="toggle-switch">
-                <input type="checkbox" id="flag-blocks" onchange="uiManager.toggleFlag('ENABLE_BLOCK_GENERATION')">
-                <span class="toggle-slider"></span>
-                Enable Blocks
-            </label>
-            <label class="toggle-switch">
-                <input type="checkbox" id="flag-chunks" onchange="uiManager.toggleFlag('ENABLE_CHUNK_GENERATION')" checked>
-                <span class="toggle-slider"></span>
-                Enable Chunks
-            </label>
-            <label class="toggle-switch">
-                <input type="checkbox" id="flag-wireframe" onchange="uiManager.toggleFlag('WIREFRAME_MODE')">
-                <span class="toggle-slider"></span>
-                Wireframe Mode
-            </label>
-            <label class="toggle-switch">
-                <input type="checkbox" id="flag-bounds" onchange="uiManager.toggleFlag('SHOW_CHUNK_BOUNDS')">
-                <span class="toggle-slider"></span>
-                Show Bounds
-            </label>
+            <div class="settings-scroll-container">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="flag-blocks" onchange="uiManager.toggleFlag('ENABLE_BLOCK_GENERATION')">
+                    <span class="toggle-slider"></span>
+                    Generate Blocks  <!-- Changed from "Show Blocks" to "Generate Blocks" -->
+                </label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="flag-chunks" onchange="uiManager.toggleFlag('ENABLE_CHUNK_GENERATION')" checked>
+                    <span class="toggle-slider"></span>
+                    Enable Chunks
+                </label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="flag-bounds" onchange="uiManager.toggleFlag('SHOW_CHUNK_BOUNDS')">
+                    <span class="toggle-slider"></span>
+                    Show Bounds
+                </label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="flag-wireframe" onchange="uiManager.toggleFlag('WIREFRAME_MODE')">
+                    <span class="toggle-slider"></span>
+                    Wireframe Mode
+                </label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="flag-shadows" onchange="uiManager.toggleFlag('ENABLE_SHADOWS')">
+                    <span class="toggle-slider"></span>
+                    Enable Shadows
+                </label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="flag-ao" onchange="uiManager.toggleFlag('ENABLE_AMBIENT_OCCLUSION')">
+                    <span class="toggle-slider"></span>
+                    Ambient Occlusion
+                </label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="flag-fog" onchange="uiManager.toggleFlag('ENABLE_FOG')">
+                    <span class="toggle-slider"></span>
+                    Enable Fog
+                </label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="flag-bloom" onchange="uiManager.toggleFlag('ENABLE_BLOOM')">
+                    <span class="toggle-slider"></span>
+                    Enable Bloom
+                </label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="flag-physics-debug" onchange="uiManager.toggleFlag('ENABLE_PHYSICS_DEBUG')">
+                    <span class="toggle-slider"></span>
+                    Physics Debug
+                </label>
+            </div>
         </div>
 
         <!-- Test Mode -->
         <div class="settings-group">
             <div class="settings-group-title">Test Mode</div>
             <select id="test-mode" onchange="uiManager.setTestMode(this.value)">
-                <option value="EMPTY">Empty</option>
-                <option value="SINGLE_BLOCK">Single Block</option>
-                <option value="FULL">Full Generation</option>
+                <option value="EMPTY_CENTER">Empty Center Chunk</option>
+                <option value="CENTER_WITH_BLOCKS">Center with Blocks</option>
+                <option value="DYNAMIC_CHUNKS">Dynamic Chunks</option>
+                <option value="DYNAMIC_WITH_BLOCKS">Dynamic with Blocks</option>
+                <option value="TEXTURED">Full with Textures</option>
             </select>
+
+            <!-- Single Texture Controls Section -->
+            <div class="settings-group">
+                <div class="settings-group-title">Texture Settings</div>
+                <div class="texture-controls">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-textures" onchange="uiManager.toggleTextures(this.checked)">
+                        <span class="toggle-slider"></span>
+                        Enable Textures
+                    </label>
+                    <select id="texture-resolution" onchange="uiManager.setTextureResolution(this.value)">
+                        <option value="32">32x32</option>
+                        <option value="64" selected>64x64</option>
+                        <option value="128">128x128</option>
+                    </select>
+                    <button class="action-button" onclick="uiManager.generateTextures()">Generate Textures</button>
+                </div>
+            </div>
+
+            <!-- Add RStats Toggle -->
+            <div class="settings-group">
+                <div class="settings-group-title">Debug Tools</div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="toggle-rstats" onchange="uiManager.toggleRStats(this.checked)">
+                    <span class="toggle-slider"></span>
+                    Show Performance Stats
+                </label>
+            </div>
         </div>
 
         <!-- Actions -->
         <div class="quick-actions">
-            <button class="action-button" onclick="uiManager.regenerateWorld()">Regenerate World</button>
-            <button class="action-button" onclick="uiManager.clearChunks()">Clear Chunks</button>
+            <button class="action-button" onclick="window.game.initializeWorld()">Regenerate World</button>
+            <button class="action-button" onclick="window.game.chunkManager.clear()">Clear Chunks</button>
+        </div>
+    </div>
+
+    <div class="ui-window main-menu draggable" id="main-menu" style="display: none;">
+        <div class="window-header">
+            <span class="window-title">Main Menu</span>
+            <button class="action-button" onclick="window.uiManager.toggleWindow('main-menu', false)">×</button>
+        </div>
+        <div class="menu-content">
+            <button class="menu-button" onclick="window.uiManager.startNewGame()">New Game</button>
+            <button class="menu-button" onclick="window.uiManager.toggleWindow('settings-panel')">Settings</button>
+            <button class="menu-button" onclick="window.uiManager.toggleWindow('debug-window')">Debug</button>
+            <button class="menu-button" onclick="window.uiManager.toggleInventory()">Inventory</button>
+            <div class="menu-separator"></div>
+            <button class="menu-button warning" onclick="window.uiManager.exitGame()">Exit Game</button>
         </div>
     </div>
 
@@ -176,6 +248,21 @@
         <div class="performance-metric">
             <span class="metric-label">Draw Calls</span>
             <span class="metric-value" id="draw-calls">0</span>
+        </div>
+
+        <!-- Add R-stats toggle to performance section -->
+        <div class="settings-group">
+            <div class="settings-group-title">Performance Tools</div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggle-rstats" onchange="uiManager.toggleRStats(this.checked)">
+                <span class="toggle-slider"></span>
+                R-Stats Profiling
+            </label>
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggle-fps-graph" onchange="uiManager.toggleFPSGraph(this.checked)">
+                <span class="toggle-slider"></span>
+                FPS Graph
+            </label>
         </div>
     </div>
   </div>

@@ -1,6 +1,5 @@
-import * as THREE from 'three';
-import { TextureManager, TextureGenerator, chunkGenerator } from './generators.js';
 import { CONFIG, Logger } from './config.js';
+import { TextureManager, TextureGenerator, chunkGenerator } from './generators.js';
 
 class ChunkManager {
     constructor() {
@@ -9,145 +8,14 @@ class ChunkManager {
             return;
         }
 
-        const startTime = performance.now();
-        Logger.info('ChunkManager', 'Initializing', { version: CONFIG.VERSIONS.CHUNK_MANAGER });
+        this.chunks = new Map();
+        this.chunkCount = 0;
+        this.CHUNK_SIZE = CONFIG.WORLD.CHUNK_SIZE;
+        this.container = document.querySelector('#world-container');
         
-        try {
-            this.chunks = new Map();
-            this.chunksToLoad = [];
-            this.chunkCount = 0;
-            this.CHUNK_SIZE = CONFIG.WORLD.CHUNK_SIZE;
-            this.EXTENT = CONFIG.WORLD.EXTENT;
-            this.LOD = CONFIG.WORLD.LOD;
-            this.container = document.querySelector('#world-container');
-            if (!this.container) {
-                console.error('Could not find world-container element!');
-                return;
-            }
-            this.renderDistance = 2; // Number of chunks to render in each direction
-            this.lastPlayerChunkPos = null;
-            this.spawnInitialChunk();
-            this.initializePlane();
-            
-            if (CONFIG.DEBUG_OPTIONS.LOG_CHUNK_CREATION) {
-                Logger.info('ChunkManager', 'Initialized with debug options', CONFIG.DEBUG_OPTIONS);
-            }
-
-            Logger.performance('ChunkManager', 'initialization', startTime);
-        } catch (error) {
-            Logger.error('ChunkManager', CONFIG.ERROR_CODES.WORLD_INIT, error);
-        }
-
-        this.lastPlayerPos = { x: 0, y: 0, z: 0 };
-        this.currentChunkPos = { x: 0, y: 0, z: 0 };
-        this.lastUpdateTime = 0;
-    }
-
-    spawnInitialChunk() {
-        const chunkData = chunkGenerator.generateChunkData({ x: 0, y: 0, z: 0 });
-        const chunk = document.createElement('a-entity');
-        chunk.setAttribute('chunk', {
-            position: { x: 0, y: 0, z: 0 },
-            size: this.CHUNK_SIZE,
-            chunkData: chunkData
-        });
-        chunk.setAttribute('position', '0 0 0');
-        chunk.setAttribute('visible', true);
-        
-        this.container.appendChild(chunk);
-        this.chunks.set('0,0,0', chunk);
-
-        this.spawnNeighboringChunks({ x: 0, y: 0, z: 0 });
-    }
-
-    spawnNeighboringChunks(centerChunkPos) {
-        const neighbors = [
-            { x: centerChunkPos.x + 1, y: centerChunkPos.y, z: centerChunkPos.z },
-            { x: centerChunkPos.x - 1, y: centerChunkPos.y, z: centerChunkPos.z },
-            { x: centerChunkPos.x, y: centerChunkPos.y, z: centerChunkPos.z + 1 },
-            { x: centerChunkPos.x, y: centerChunkPos.y, z: centerChunkPos.z - 1 }
-        ];
-
-        for (const pos of neighbors) {
-            const key = `${pos.x},${pos.y},${pos.z}`;
-            if (!this.chunks.has(key)) {
-                this.createChunk(pos);
-            }
-        }
-    }
-
-    initializePlane() {
-        for (let x = -this.renderDistance; x <= this.renderDistance; x++) {
-            for (let z = -this.renderDistance; z <= this.renderDistance; z++) {
-                this.createChunk({ x, y: 0, z });
-            }
-        }
-    }
-
-    updateChunksAroundPlayer(playerPosition) {
-        const chunkPos = this.calculateChunkPosition(playerPosition);
-        
-        // Only update if player moved to new chunk
-        if (this.lastPlayerChunkPos && 
-            chunkPos.x === this.lastPlayerChunkPos.x && 
-            chunkPos.z === this.lastPlayerChunkPos.z) {
+        if (!this.container) {
+            Logger.error('ChunkManager', 'Could not find world-container element!');
             return;
-        }
-
-        this.loadChunksAroundPosition(chunkPos);
-        this.unloadDistantChunks(chunkPos);
-        this.updateChunkLODs(chunkPos);
-        
-        this.lastPlayerChunkPos = chunkPos;
-    }
-
-    hasChangedChunks(newChunkPos) {
-        return this.currentChunkPos.x !== newChunkPos.x ||
-               this.currentChunkPos.y !== newChunkPos.y ||
-               this.currentChunkPos.z !== newChunkPos.z;
-    }
-
-    loadNewChunks(centerChunkPos) {
-        const chunksToLoad = new Set();
-        const renderDist = CONFIG.SIZES.RENDER_DISTANCE;
-
-        // Calculate needed chunks
-        for (let x = -renderDist; x <= renderDist; x++) {
-            for (let z = -renderDist; z <= renderDist; z++) {
-                const pos = {
-                    x: centerChunkPos.x + x,
-                    y: centerChunkPos.y,
-                    z: centerChunkPos.z + z
-                };
-                const key = `${pos.x},${pos.y},${pos.z}`;
-                chunksToLoad.add(key);
-            }
-        }
-
-        // Remove already loaded chunks from the set
-        for (const [key, _] of this.chunks) {
-            chunksToLoad.delete(key);
-        }
-
-        // Load new chunks
-        for (const key of chunksToLoad) {
-            const [x, y, z] = key.split(',').map(Number);
-            this.createChunk({ x, y, z });
-        }
-    }
-
-    unloadDistantChunks(centerChunkPos) {
-        for (const [key, chunk] of this.chunks) {
-            const [x, y, z] = key.split(',').map(Number);
-            const distance = Math.max(
-                Math.abs(x - centerChunkPos.x),
-                Math.abs(z - centerChunkPos.z)
-            );
-            
-            if (distance > 3) {
-                this.container.removeChild(chunk);
-                this.chunks.delete(key);
-            }
         }
     }
 
@@ -157,177 +25,55 @@ class ChunkManager {
             return null;
         }
 
-        // Add delay if specified
-        if (CONFIG.DEBUG_OPTIONS.CHUNK_CREATION_DELAY > 0) {
-            setTimeout(() => {
-                this._createChunkInternal(position);
-            }, CONFIG.DEBUG_OPTIONS.CHUNK_CREATION_DELAY);
-            return null;
+        const key = `${position.x},${position.y},${position.z}`;
+        if (this.chunks.has(key)) {
+            return this.chunks.get(key);
         }
 
-        return this._createChunkInternal(position);
-    }
-
-    _createChunkInternal(position) {
-        const startTime = performance.now();
-        try {
-            Logger.logStep('ChunkManager', 'Creating new chunk', { position });
-
-            const chunkData = chunkGenerator.generateChunkData(position);
-            Logger.logStep('ChunkManager', 'Generated chunk data', { 
-                dataSize: chunkData.length,
-                position 
-            });
-
+        return new Promise((resolve) => {
             const chunk = document.createElement('a-entity');
-            const key = `${position.x},${position.y},${position.z}`;
-
             chunk.setAttribute('chunk', {
                 position: position,
                 size: this.CHUNK_SIZE,
-                chunkData: chunkData
+                chunkData: chunkGenerator.generateChunkData(position)
             });
 
-            // FIX: Remove extra multiplier; use CHUNK_SIZE directly.
             chunk.setAttribute('position', `${position.x * this.CHUNK_SIZE} ${position.y * this.CHUNK_SIZE} ${position.z * this.CHUNK_SIZE}`);
 
             this.chunks.set(key, chunk);
             this.container.appendChild(chunk);
+            this.chunkCount++;
 
-            Logger.logStep('ChunkManager', 'Chunk created', { 
-                key,
-                totalChunks: this.chunks.size 
-            });
-            
-            Logger.performance('ChunkManager', 'chunk_creation', startTime);
-            Logger.memory('ChunkManager');
-
-            // Update debug info with new chunk count and player's current chunk
-            if(window.uiManager) {
-                window.uiManager.updateDebugInfo({
-                    'chunk-count': this.chunks.size,
-                    'player-chunk': `${position.x}, ${position.z}`
-                });
-            }
-
-            return chunk;
-        } catch (error) {
-            Logger.error('ChunkManager', 'Failed to create chunk', error);
-            return null;
-        }
+            // Listen for the loaded event to resolve the promise
+            chunk.addEventListener('loaded', () => resolve(chunk), { once: true });
+        });
     }
 
-    getOrCreateChunk(worldPosition) {
-        const chunkPos = this.getChunkPosition(worldPosition);
-        const key = `${chunkPos.x},${chunkPos.y},${chunkPos.z}`;
-        
-        if (!this.chunks.has(key)) {
-            return this.createChunk(chunkPos);
-        }
-        return this.chunks.get(key);
-    }
-
-    getChunkPosition(worldPos) {
-        return {
-            x: Math.floor(worldPos.x / (this.CHUNK_SIZE * this.BLOCK_SIZE)),
-            y: Math.floor(worldPos.y / (this.CHUNK_SIZE * this.BLOCK_SIZE)),
-            z: Math.floor(worldPos.z / (this.CHUNK_SIZE * this.BLOCK_SIZE))
-        };
-    }
-
-    calculateChunkPosition(worldPosition) {
-        return {
-            x: Math.floor(worldPosition.x / this.CHUNK_SIZE),
-            y: Math.floor(worldPosition.y / this.CHUNK_SIZE),
-            z: Math.floor(worldPosition.z / this.CHUNK_SIZE)
-        };
-    }
-
-    getLODLevel(distance) {
-        if (distance <= this.LOD.FULL.DISTANCE) return this.LOD.FULL;
-        if (distance <= this.LOD.MEDIUM.DISTANCE) return this.LOD.MEDIUM;
-        return this.LOD.FAR;
-    }
-
-    loadChunksAroundPosition(centerPos) {
-        const maxDist = CONFIG.WORLD.LOD.FAR.DISTANCE;
-        
-        for (let x = -maxDist; x <= maxDist; x++) {
-            for (let z = -maxDist; z <= maxDist; z++) {
-                const pos = {
-                    x: centerPos.x + x,
-                    y: centerPos.y,
-                    z: centerPos.z + z
-                };
-                
-                const distance = Math.max(Math.abs(x), Math.abs(z));
-                const lod = this.getLODLevel(distance);
-                
-                this.createOrUpdateChunk(pos, lod);
-            }
-        }
-    }
-
-    createOrUpdateChunk(position, lod) {
+    getOrCreateChunk(position) {
         const key = `${position.x},${position.y},${position.z}`;
-        
-        if (!this.chunks.has(key)) {
-            const chunk = this.createChunk(position, lod);
-            this.chunks.set(key, chunk);
-        } else {
-            const chunk = this.chunks.get(key);
-            this.updateChunkLOD(chunk, lod);
+        if (this.chunks.has(key)) {
+            return this.chunks.get(key);
+        }
+        return this.createChunk(position);
+    }
+
+    removeChunk(position) {
+        const key = `${position.x},${position.y},${position.z}`;
+        const chunk = this.chunks.get(key);
+        if (chunk) {
+            this.container.removeChild(chunk);
+            this.chunks.delete(key);
+            this.chunkCount--;
         }
     }
 
-    updateChunkLOD(chunk, lod) {
-        if (!chunk || !lod) return;
-
-        try {
-            // Get current chunk attributes
-            const currentAttrs = chunk.getAttribute('chunk');
-            if (!currentAttrs) return;
-
-            // Update chunk attributes with new LOD settings
-            chunk.setAttribute('chunk', {
-                ...currentAttrs,
-                lodLevel: lod.RESOLUTION,
-                quality: this.getLODQualitySettings(lod)
-            });
-
-            Logger.debug('ChunkManager', 'Updated chunk LOD', {
-                chunkId: chunk.id,
-                newLOD: lod.RESOLUTION
-            });
-
-        } catch (error) {
-            Logger.error('ChunkManager', 'Failed to update chunk LOD', error);
-        }
+    clear() {
+        this.chunks.forEach(chunk => this.container.removeChild(chunk));
+        this.chunks.clear();
+        this.chunkCount = 0;
     }
 
-    updateChunkLODs(centerPos) {
-        for (const [key, chunk] of this.chunks) {
-            const [x, y, z] = key.split(',').map(Number);
-            const distance = Math.max(
-                Math.abs(x - centerPos.x),
-                Math.abs(z - centerPos.z)
-            );
-            
-            const lod = this.getLODLevel(distance);
-            this.updateChunkLOD(chunk, lod);
-        }
-    }
-
-    getLODQualitySettings(lod) {
-        // Placeholder LOD quality settings
-        return {
-            geometryDetail: lod.RESOLUTION,
-            textureQuality: lod.RESOLUTION === 1 ? 'high' : 
-                           lod.RESOLUTION === 2 ? 'medium' : 'low',
-            shadowQuality: lod.RESOLUTION === 1 ? 'high' : 'low',
-            skipGeometry: lod.RESOLUTION > 4  // Skip geometry for very far chunks
-        };
-    }
+    // Remove all other chunk management methods as they're now in game.js
 }
 
 class VoxelManager {
@@ -367,87 +113,110 @@ class VoxelManager {
     }
 }
 
-class WorldManager {
-    constructor() {
-        Logger.info('WorldManager', `Initializing version ${CONFIG.VERSIONS.WORLD_MANAGER}`);
-        this.chunkManager = new ChunkManager();
-    }
-
-    // Add manager methods here
-}
-
-class TaichiManager {
-    constructor() {
-        Logger.info('TaichiManager', 'Initializing');
-        this.initialized = false;
-    }
-
-    async initialize() {
-        try {
-            // TODO: Initialize Taichi.js when available
-            this.initialized = true;
-            Logger.info('TaichiManager', 'Initialized successfully');
-        } catch (error) {
-            Logger.error('TaichiManager', 'Failed to initialize', error);
-        }
-    }
-
-    async generateChunkDataParallel(position, size) {
-        /* TODO: Implement in Taichi
-        return ti.kernel(function(pos, size) {
-            for(i, j, k in ti.ndrange(size, size, size)) {
-                // Generate voxel data in parallel
-                let noise = this.computeNoise(pos[0] + i, pos[1] + j, pos[2] + k)
-                // Store in 3D grid
-            }
-        })(position, size)
-        */
-    }
-
-    async optimizeMesh(vertices, indices) {
-        /* TODO: Implement in Taichi
-        return ti.kernel(function(verts, idx) {
-            // Parallel mesh optimization
-            // - Remove hidden faces
-            // - Merge vertices
-            // - Generate LODs
-        })(vertices, indices)
-        */
-    }
-
-    async simulateParticles(particles, deltaTime) {
-        /* TODO: Implement in Taichi
-        return ti.kernel(function(p, dt) {
-            // Parallel particle updates
-            // - Apply forces
-            // Handle collisions
-            // - Update positions
-        })(particles, deltaTime)
-        */
-    }
-}
-
 class UIManager {
     constructor() {
         this.DEBUG = CONFIG.DEBUG;
-        this.windows = new Map();
-        this.metrics = new Map();
+        this.windows = new Map();  // Add this line
+        this.metrics = new Map();  // Add this line
+        this.toolbarButtons = new Map();  // Add this line
+        this.inventory = new Array(32).fill(null);  // Add this line
+        this.hotbar = new Array(8).fill(null);  // Add this line
+        this.activeHotbarSlot = 0;  // Add this line
+        this.inventoryVisible = false;  // Add this line
+        
+        // Initialize after properties are set
+        this.setupDebugFlags();
+        this.setupEventListeners();
+        this.initializeUI();
+        
+        // Start performance monitoring
         this.lastFrameTime = performance.now();
         this.frameCount = 0;
-        this.lastFPS = 60;
-        
-        // Inventory state
-        this.inventoryVisible = false;
-        this.debugVisible = false;
-        this.activeHotbarSlot = 0;
-        this.inventory = new Array(32).fill(null);
-        this.hotbar = new Array(8).fill(null);
-
-        this.toolbarButtons = new Map();
-        this.initializeUI();
-        this.setupEventListeners();
         this.startPerformanceMonitoring();
-        this.initializeToolbar();
+
+        // Initialize stats panel as hidden on startup
+        requestAnimationFrame(() => {
+            const scene = document.querySelector('a-scene');
+            if (scene) {
+                // Make sure stats are initialized first
+                scene.setAttribute('stats', 'true');
+                // Then hide them after a short delay
+                setTimeout(() => {
+                    if (!CONFIG.FLAGS.SHOW_DEBUG_STATS) {
+                        scene.setAttribute('stats', 'false');
+                    }
+                }, 100);
+            }
+        });
+
+        // Initialize stats with a proper lifecycle
+        this.initializeStats();
+
+        // Initialize main menu visibility state
+        this.windows.set('main-menu', {
+            element: document.getElementById('main-menu'),
+            visible: false
+        });
+
+        // Set up menu button listener
+        const menuButton = document.querySelector('[data-window="main-menu"]');
+        if (menuButton) {
+            menuButton.addEventListener('click', () => this.toggleWindow('main-menu'));
+        }
+
+        // Set up escape key listener for menu
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.toggleWindow('main-menu');
+            }
+        });
+    }
+
+    initializeStats() {
+        // Wait for scene to be ready
+        const scene = document.querySelector('a-scene');
+        if (!scene) {
+            setTimeout(() => this.initializeStats(), 100);
+            return;
+        }
+
+        // First ensure stats component exists and is initialized
+        scene.setAttribute('stats', '');
+        
+        // Wait a frame for stats to initialize
+        requestAnimationFrame(() => {
+            // Get the stats panel element
+            const statsPanel = document.querySelector('.rs-base');
+            if (statsPanel) {
+                // Force stats to be visible first for proper initialization
+                statsPanel.style.display = 'block';
+                
+                // Then apply the initial state after a short delay
+                setTimeout(() => {
+                    CONFIG.FLAGS.SHOW_DEBUG_STATS = false;  // Set initial state to false
+                    statsPanel.style.display = 'none';
+                    
+                    // Update checkbox state
+                    const checkbox = document.getElementById('flag-debug-stats');
+                    if (checkbox) {
+                        checkbox.checked = false;
+                    }
+
+                    Logger.info('UIManager', 'Stats panel initialized and hidden');
+                }, 100);
+            }
+        });
+    }
+
+    setupDebugFlags() {
+        // Ensure initial state matches CONFIG.FLAGS
+        Object.entries(CONFIG.FLAGS).forEach(([flag, value]) => {
+            const element = document.getElementById(`flag-${flag.toLowerCase()}`);
+            if (element) {
+                // Make sure initial state matches the config
+                element.checked = value;
+            }
+        });
     }
 
     initializeUI() {
@@ -478,38 +247,53 @@ class UIManager {
             const header = window.querySelector('.window-header');
             if (!header) return;
 
-            let isDragging = false;
-            let currentX;
-            let currentY;
-            let initialX;
-            let initialY;
-            let xOffset = 0;
-            let yOffset = 0;
+            // Create dragging state for each window
+            const dragState = {
+                isDragging: false,
+                initialX: 0,
+                initialY: 0
+            };
 
-            header.addEventListener('mousedown', (e) => {
-                initialX = e.clientX - xOffset;
-                initialY = e.clientY - yOffset;
-                if (e.target === header) {
-                    isDragging = true;
-                }
-            });
+            // Mouse Events
+            header.addEventListener('mousedown', (e) => this.startDragging(e, window, header, dragState));
+            document.addEventListener('mousemove', (e) => this.onDrag(e, window, dragState));
+            document.addEventListener('mouseup', () => dragState.isDragging = false);
 
-            document.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
-                e.preventDefault();
-                
-                currentX = e.clientX - initialX;
-                currentY = e.clientY - initialY;
-                xOffset = currentX;
-                yOffset = currentY;
-
-                window.style.transform = `translate(${currentX}px, ${currentY}px)`;
-            });
-
-            document.addEventListener('mouseup', () => {
-                isDragging = false;
-            });
+            // Touch Events
+            header.addEventListener('touchstart', (e) => this.startDragging(e, window, header, dragState), { passive: true });
+            document.addEventListener('touchmove', (e) => this.onDrag(e, window, dragState), { passive: false });
+            document.addEventListener('touchend', () => dragState.isDragging = false);
         });
+    }
+
+    startDragging(e, window, header, dragState) {
+        const touch = e.type === 'touchstart' ? e.touches[0] : e;
+        if (e.target === header || e.target.parentNode === header) {
+            dragState.isDragging = true;
+            const bounds = window.getBoundingClientRect();
+            const transform = new DOMMatrix(window.style.transform);
+            dragState.initialX = touch.clientX - transform.m41;
+            dragState.initialY = touch.clientY - transform.m42;
+        }
+    }
+
+    onDrag(e, window, dragState) {
+        if (!dragState.isDragging) return;
+        e.preventDefault();
+        
+        const touch = e.type === 'touchmove' ? e.touches[0] : e;
+        const currentX = touch.clientX - dragState.initialX;
+        const currentY = touch.clientY - dragState.initialY;
+
+        // Constrain to viewport
+        const bounds = window.getBoundingClientRect();
+        const maxX = document.documentElement.clientWidth - bounds.width;
+        const maxY = document.documentElement.clientHeight - bounds.height;
+        
+        const constrainedX = Math.min(Math.max(0, currentX), maxX);
+        const constrainedY = Math.min(Math.max(0, currentY), maxY);
+
+        window.style.transform = `translate(${constrainedX}px, ${constrainedY}px)`;
     }
 
     // NEW: Add the missing setToggleState method
@@ -594,21 +378,55 @@ class UIManager {
     }
 
     toggleRSStats(enabled) {
-        CONFIG.FLAGS.ENABLE_RS_STATS = enabled;
-        const scene = document.querySelector('a-scene');
-        if (scene) {
-            scene.setAttribute('stats', enabled ? '' : 'false');
+        const prevState = CONFIG.FLAGS.SHOW_DEBUG_STATS;
+        CONFIG.FLAGS.SHOW_DEBUG_STATS = enabled;
+        
+        const statsPanel = document.querySelector('.rs-base');
+        if (statsPanel) {
+            statsPanel.style.display = enabled ? 'block' : 'none';
+            Logger.info('UIManager', `Performance stats ${enabled ? 'enabled' : 'disabled'}`);
+        } else if (enabled) {
+            Logger.warn('UIManager', 'Stats panel not found, reinitializing...');
+            this.initializeStats();
         }
+
+        // Update checkbox state
+        const checkbox = document.getElementById('flag-debug-stats');
+        if (checkbox) {
+            checkbox.checked = enabled;
+        }
+
+        // Log the state change
+        Logger.info('UIManager', `Stats visibility changed: ${prevState} -> ${enabled}`);
     }
 
     toggleWindow(windowId, force) {
         const window = this.windows.get(windowId);
-        if (window) {
-            const newState = force !== undefined ? force : !window.visible;
-            window.visible = newState;
-            window.element.classList.toggle('visible', newState);
-            this.updateToolbarButton(windowId);
+        if (!window) {
+            Logger.warn('UIManager', `Window ${windowId} not found`);
+            return;
         }
+
+        const newState = force !== undefined ? force : !window.visible;
+        window.visible = newState;
+        window.element.style.display = newState ? 'block' : 'none';
+        window.element.classList.toggle('visible', newState);
+
+        // Update toolbar button state
+        const button = this.toolbarButtons.get(windowId);
+        if (button) {
+            button.classList.toggle('active', newState);
+        }
+
+        // Update debug info if it's the debug window
+        if (windowId === 'debug-window') {
+            CONFIG.DEBUG = newState;
+            this.updateDebugInfo({
+                'debug-state': newState ? 'enabled' : 'disabled'
+            });
+        }
+
+        Logger.info('UIManager', `Window ${windowId} ${newState ? 'shown' : 'hidden'}`);
     }
 
     startPerformanceMonitoring() {
@@ -755,50 +573,101 @@ class UIManager {
     }
 
     updateDebugInfo(data) {
-        if (!this.DEBUG) return;
-        
-        // Only update every 100ms
-        if (this.lastDebugUpdate && performance.now() - this.lastDebugUpdate < 100) {
-            return;
-        }
-        
         Object.entries(data).forEach(([key, value]) => {
             const element = document.getElementById(key);
-            if (element && element.textContent !== value) {
-                element.textContent = value;
+            if (element && element.textContent !== value) {  // Only update if value changed
+                element.textContent = typeof value === 'number' ? value.toFixed(2) : value;
+                
+                // Add visual feedback
+                element.classList.remove('updated');
+                void element.offsetWidth; // Force reflow
                 element.classList.add('updated');
+                
+                // Remove highlight after animation
                 setTimeout(() => element.classList.remove('updated'), 300);
             }
         });
-        
-        this.lastDebugUpdate = performance.now();
     }
 
     toggleFlag(flagName) {
         if (flagName in CONFIG.FLAGS) {
             CONFIG.FLAGS[flagName] = !CONFIG.FLAGS[flagName];
             Logger.info('UIManager', `Toggle ${flagName}: ${CONFIG.FLAGS[flagName]}`);
-            this.refreshWorld();
+            
+            // Update all chunk materials when flags change
+            const chunks = document.querySelectorAll('[chunk]');
+            chunks.forEach(chunk => {
+                if (chunk.components.chunk) {
+                    chunk.components.chunk.update();
+                }
+            });
         }
     }
 
     setTestMode(mode) {
-        CONFIG.DEBUG_OPTIONS.TEST_MODE = mode;
-        Logger.info('UIManager', `Set test mode: ${mode}`);
-        this.refreshWorld();
+        const testConfig = CONFIG.DEBUG_OPTIONS.TEST_MODES[mode];
+        if (!testConfig) return;
+
+        // Apply settings from test mode
+        if (testConfig.settings) {
+            Object.entries(testConfig.settings).forEach(([flag, value]) => {
+                CONFIG.FLAGS[flag] = value;
+                this.setToggleState(`flag-${flag.toLowerCase()}`, value);
+            });
+        }
+
+        // Handle texture settings
+        CONFIG.TEXTURES.ENABLED = Boolean(testConfig.useTextures);
+        this.setToggleState('toggle-textures', CONFIG.TEXTURES.ENABLED);
+
+        // Regenerate world with new settings
+        this.regenerateWorld();
+    }
+
+    toggleTextures(enabled) {
+        CONFIG.TEXTURES.ENABLED = enabled;
+        this.regenerateBlocks();
+    }
+
+    setTextureResolution(resolution) {
+        CONFIG.TEXTURES.RESOLUTION = parseInt(resolution);
+        if (CONFIG.TEXTURES.ENABLED) {
+            this.regenerateBlocks();
+        }
+    }
+
+    generateTextures() {
+        if (!window.game?.textureManager) {
+            Logger.warn('UIManager', 'Texture manager not available');
+            return;
+        }
+
+        const resolution = CONFIG.TEXTURES.RESOLUTION;
+        Object.keys(CONFIG.TEXTURES.TYPES).forEach(type => {
+            const textureConfig = CONFIG.TEXTURES.TYPES[type];
+            window.game.textureManager.generateTextureForType(type, textureConfig, resolution);
+        });
+
+        Logger.info('UIManager', 'Generated textures', { 
+            resolution, 
+            types: Object.keys(CONFIG.TEXTURES.TYPES) 
+        });
+    }
+
+    updateTextureControls() {
+        const textureToggle = document.getElementById('toggle-textures');
+        const resolutionSelect = document.getElementById('texture-resolution');
+        if (textureToggle) textureToggle.checked = CONFIG.TEXTURES.ENABLED;
+        if (resolutionSelect) resolutionSelect.value = CONFIG.TEXTURES.RESOLUTION.toString();
     }
 
     regenerateWorld() {
-        Logger.info('UIManager', 'Regenerating world');
-        // Clear existing chunks
-        const container = document.querySelector('#world-container');
-        while (container.firstChild) {
-            container.removeChild(container.firstChild);
+        Logger.info('UIManager', 'Regenerating world with current settings');
+        if (window.game) {
+            window.game.chunkManager.clear();
+            window.game.initializeWorld();
+            this.syncDebugFlags();
         }
-        
-        // Spawn new initial chunk
-        const worldManager = new WorldManager();
-        worldManager.chunkManager.spawnInitialChunk();
     }
 
     initializeToolbar() {
@@ -846,6 +715,101 @@ class UIManager {
             button.classList.toggle('active', window.visible);
         }
     }
+
+    syncDebugFlags() {
+        // Sync all flag states with UI
+        Object.entries(CONFIG.FLAGS).forEach(([flag, value]) => {
+            const element = document.getElementById(`flag-${flag.toLowerCase()}`);
+            if (element) {
+                element.checked = value;
+            }
+        });
+    }
+
+    toggleRStats(enabled) {
+        if (enabled) {
+            // Initialize R-stats if not already done
+            if (!window.rStats) {
+                const rStatsConfig = {
+                    CSSPath: 'path/to/rstats.css',
+                    values: {
+                        fps: { caption: 'FPS', below: 30 },
+                        calls: { caption: 'Calls' },
+                        raf: { caption: 'RAF' },
+                        memory: { caption: 'Memory' }
+                    }
+                };
+                window.rStats = new rStats(rStatsConfig);
+            }
+            document.querySelector('.rs-base').style.display = 'block';
+        } else {
+            if (document.querySelector('.rs-base')) {
+                document.querySelector('.rs-base').style.display = 'none';
+            }
+        }
+    }
+
+    toggleFPSGraph(enabled) {
+        const graphContainer = document.getElementById('fps-graph');
+        if (enabled) {
+            if (!graphContainer) {
+                this.createFPSGraph();
+            }
+            graphContainer.style.display = 'block';
+        } else if (graphContainer) {
+            graphContainer.style.display = 'none';
+        }
+    }
+
+    handleResize() {
+        // Handle window resize for all UI elements
+        this.windows.forEach((window, id) => {
+            const element = window.element;
+            if (!element) return;
+
+            // Reset position if window is off-screen
+            const bounds = element.getBoundingClientRect();
+            if (bounds.right > window.innerWidth || bounds.bottom > window.innerHeight) {
+                element.style.transform = 'translate(0, 0)';
+            }
+        });
+    }
+
+    createMainMenu() {
+        return `
+        <div class="window-header">
+            <span class="window-title">Main Menu</span>
+            <button class="action-button" onclick="uiManager.toggleWindow('main-menu', false)">×</button>
+        </div>
+        <div class="menu-content">
+            <button class="menu-button" onclick="uiManager.startNewGame()">New Game</button>
+            <button class="menu-button" onclick="uiManager.toggleWindow('settings-panel')">Settings</button>
+            <button class="menu-button" onclick="uiManager.toggleWindow('debug-window')">Debug</button>
+            <button class="menu-button" onclick="uiManager.toggleInventory()">Inventory</button>
+            <div class="menu-separator"></div>
+            <button class="menu-button warning" onclick="uiManager.exitGame()">Exit Game</button>
+        </div>`;
+    }
+
+    initializeMainMenu() {
+        const mainMenu = document.createElement('div');
+        mainMenu.id = 'main-menu';
+        mainMenu.className = 'ui-window main-menu draggable';
+        mainMenu.innerHTML = this.createMainMenu();
+        document.body.appendChild(mainMenu);
+        this.windows.set('main-menu', { element: mainMenu, visible: false });
+    }
+
+    startNewGame() {
+        // Add game start logic here
+        this.toggleWindow('main-menu', false);
+    }
+
+    exitGame() {
+        if (confirm('Are you sure you want to exit?')) {
+            window.location.reload();
+        }
+    }
 }
 
-export { ChunkManager, VoxelManager, WorldManager, UIManager, TaichiManager };
+export { ChunkManager, VoxelManager, UIManager };

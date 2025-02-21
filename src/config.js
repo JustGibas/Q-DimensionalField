@@ -10,17 +10,22 @@ export const CONFIG = {
         AFRAME: '1.4.0'
     },
     FLAGS: {
-        ENABLE_BLOCK_GENERATION: false,    // Start with minimal features
-        ENABLE_CHUNK_GENERATION: true,     // Keep this enabled
-        ENABLE_CHUNK_UPDATES: true,        // Keep this enabled
-        ENABLE_TEXTURES: false,
-        ENABLE_PHYSICS: false,
-        ENABLE_COLLISIONS: false,
-        WIREFRAME_MODE: false,
-        SHOW_CHUNK_BOUNDS: false,
-        SIMPLE_GEOMETRY: true,            // Use simple geometry by default
-        ENABLE_RS_STATS: false,
-        SCENE_READY: false
+        ENABLE_BLOCK_GENERATION: false,    // Default blocks to invisible
+        ENABLE_CHUNK_GENERATION: true,     // Keep chunks enabled by default
+        ENABLE_CHUNK_UPDATES: true,        // Toggle chunk updates
+        SHOW_CHUNK_BOUNDS: false,          // Show chunk boundaries
+        WIREFRAME_MODE: false,             // Show wireframe
+        ENABLE_SHADOWS: false,             // Enable shadows
+        SHOW_COLLISION_BOUNDS: false,      // Show collision boundaries
+        ENABLE_AMBIENT_OCCLUSION: false,   // Enable AO
+        USE_HIGH_QUALITY_TEXTURES: false,  // Use high-res textures
+        ENABLE_FOG: false,                 // Enable fog
+        ENABLE_BLOOM: false,               // Enable bloom effect
+        SHOW_DEBUG_STATS: true,            // Changed from false to true
+        ENABLE_PHYSICS_DEBUG: false,       // Show physics debug
+        LOG_PLAYER_POSITION: true,         // Add this new flag
+        LOG_CHUNK_CREATION: true,          // Add this new flag
+        LOG_PERFORMANCE: true              // Add this new flag
     },
     LOADING: {
         TIMEOUT: 10000,                    // 10 second timeout for loading
@@ -29,15 +34,71 @@ export const CONFIG = {
     },
     DEBUG_OPTIONS: {
         LOG_CHUNK_CREATION: true,
-        LOG_BLOCK_CREATION: false,
+        LOG_BLOCK_CREATION: false,  // Set to false by default
         LOG_PERFORMANCE: true,
         CHUNK_CREATION_DELAY: 0,          // Delay in ms between chunk creation
         MAX_CHUNKS: 50,                   // Maximum number of chunks to generate
-        TEST_MODE: 'EMPTY',               // 'EMPTY', 'SINGLE_BLOCK', 'FULL'
+        TEST_MODE: 'CENTER_WITH_BLOCKS',  // Set default test mode
+        TEST_MODES: {                     // Added test mode definitions
+            EMPTY_CENTER: { 
+                description: 'Empty Center Chunk', 
+                neighborChunks: false, 
+                settings: { 
+                    ENABLE_BLOCK_GENERATION: false, 
+                    ENABLE_CHUNK_GENERATION: true, 
+                    SHOW_CHUNK_BOUNDS: true 
+                }
+            },
+            CENTER_WITH_BLOCKS: { 
+                description: 'Center Chunk with Blocks', 
+                neighborChunks: false, 
+                settings: { 
+                    ENABLE_BLOCK_GENERATION: true, 
+                    ENABLE_CHUNK_GENERATION: true 
+                }
+            },
+            DYNAMIC_CHUNKS: { 
+                description: 'Dynamic Chunks', 
+                neighborChunks: true, 
+                settings: { 
+                    ENABLE_BLOCK_GENERATION: false, 
+                    ENABLE_CHUNK_GENERATION: true, 
+                    SHOW_CHUNK_BOUNDS: true 
+                }
+            },
+            DYNAMIC_WITH_BLOCKS: { 
+                description: 'Dynamic with Blocks', 
+                neighborChunks: true, 
+                settings: { 
+                    ENABLE_BLOCK_GENERATION: true, 
+                    ENABLE_CHUNK_GENERATION: true 
+                }
+            },
+            TEXTURED: { 
+                description: 'Full with Textures', 
+                neighborChunks: true, 
+                settings: { 
+                    ENABLE_BLOCK_GENERATION: true, 
+                    ENABLE_CHUNK_GENERATION: true
+                },
+                useTextures: true 
+            }
+        }
+    },
+    TEXTURES: {
+        ENABLED: false,
+        RESOLUTION: 64,
+        TYPES: {
+            GRASS: { baseColor: '#567D46', variations: 5 },
+            DIRT: { baseColor: '#8B4513', variations: 3 },
+            STONE: { baseColor: '#808080', variations: 4 },
+            METAL: { baseColor: '#B8B8B8', variations: 2 },
+            CRYSTAL: { baseColor: '#00FFFF', variations: 3, isTransparent: true }
+        }
     },
     LOGGING: {
         enabled: true,
-        level: 'debug', // 'debug' | 'info' | 'warn' | 'error'
+        level: 'info',  // Changed from 'debug' to 'info' to reduce noise
         component: true,
         manager: true,
         performance: true,
@@ -99,12 +160,32 @@ export const CONFIG = {
             }
         },
         UNLOAD_DISTANCE: 10    // Distance at which chunks unload
+    },
+    PERFORMANCE: {
+        FRAME_BUDGET: 16.67, // 60fps target
+        CHUNK_GENERATION_BUDGET: 100, // ms
+        THROTTLE: {
+            CHUNK_UPDATES: 100, // ms between chunk updates
+            DEBUG_UPDATES: 500, // ms between debug updates
+            POSITION_UPDATES: 100 // ms between position updates
+        },
+        RAF_WARNING_THRESHOLD: 16.67 // Show warning if RAF takes longer
     }
+};
+
+export const getThree = () => {
+    // Return A-Frame's THREE instance or null if A-Frame isn't loaded yet
+    return typeof AFRAME !== 'undefined' ? AFRAME.THREE : null;
 };
 
 export const Logger = {
     debug: (component, message, data = null) => {
-        if (!CONFIG.LOGGING.enabled || CONFIG.LOGGING.level !== 'debug') return;
+        // Only log debug messages if explicitly enabled for the component
+        if (!CONFIG.LOGGING.enabled || 
+            CONFIG.LOGGING.level !== 'debug' ||
+            (component === 'ChunkComponent' && !CONFIG.DEBUG_OPTIONS.LOG_BLOCK_CREATION)) {
+            return;
+        }
         console.debug(`[${component}]`, message, data || '');
     },
     info: (component, message, data = null) => {
@@ -162,4 +243,18 @@ export const Logger = {
         }
     },
     lastLogs: new Map()
+};
+
+export const ColorUtils = {
+    isValidHex: (hex) => {
+        return typeof hex === 'string' && /^#[0-9A-F]{6}$/i.test(hex);
+    },
+    
+    sanitizeColor: (color, fallback = '#808080') => {
+        if (ColorUtils.isValidHex(color)) {
+            return color;
+        }
+        Logger.warn('ColorUtils', 'Invalid color, using fallback:', { given: color, fallback });
+        return fallback;
+    }
 };
