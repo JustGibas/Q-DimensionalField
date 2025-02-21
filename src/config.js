@@ -10,22 +10,29 @@ export const CONFIG = {
         AFRAME: '1.4.0'
     },
     FLAGS: {
-        ENABLE_BLOCK_GENERATION: false,    // Toggle block mesh generation
-        ENABLE_CHUNK_GENERATION: true,     // Toggle chunk creation
-        ENABLE_CHUNK_UPDATES: true,        // Toggle dynamic chunk updates
-        ENABLE_TEXTURES: false,            // Toggle texture loading
-        ENABLE_PHYSICS: false,             // Toggle physics
-        ENABLE_COLLISIONS: false,          // Toggle collision detection
-        WIREFRAME_MODE: true,              // Show wireframe instead of solid blocks
-        SHOW_CHUNK_BOUNDS: true,          // Show chunk boundary boxes
-        SIMPLE_GEOMETRY: true,            // Use simple geometry for testing
+        ENABLE_BLOCK_GENERATION: false,    // Start with minimal features
+        ENABLE_CHUNK_GENERATION: true,     // Keep this enabled
+        ENABLE_CHUNK_UPDATES: true,        // Keep this enabled
+        ENABLE_TEXTURES: false,
+        ENABLE_PHYSICS: false,
+        ENABLE_COLLISIONS: false,
+        WIREFRAME_MODE: false,
+        SHOW_CHUNK_BOUNDS: false,
+        SIMPLE_GEOMETRY: true,            // Use simple geometry by default
+        ENABLE_RS_STATS: false,
+        SCENE_READY: false
+    },
+    LOADING: {
+        TIMEOUT: 10000,                    // 10 second timeout for loading
+        MINIMUM_TIME: 1000,                // Minimum loading screen time
+        FADE_DURATION: 500                 // Fade out duration in ms
     },
     DEBUG_OPTIONS: {
         LOG_CHUNK_CREATION: true,
         LOG_BLOCK_CREATION: false,
         LOG_PERFORMANCE: true,
         CHUNK_CREATION_DELAY: 0,          // Delay in ms between chunk creation
-        MAX_CHUNKS: 10,                   // Maximum number of chunks to generate
+        MAX_CHUNKS: 50,                   // Maximum number of chunks to generate
         TEST_MODE: 'EMPTY',               // 'EMPTY', 'SINGLE_BLOCK', 'FULL'
     },
     LOGGING: {
@@ -34,6 +41,7 @@ export const CONFIG = {
         component: true,
         manager: true,
         performance: true,
+        updateFrequency: 500, // ms between debug updates
         components: {
             chunk: true,
             player: true,
@@ -52,7 +60,9 @@ export const CONFIG = {
         performance: {
             enabled: true,
             threshold: 16.67, // 60fps frame budget
-            warnThreshold: 33.33 // 30fps frame budget
+            warnThreshold: 33.33, // 30fps frame budget
+            logFrequency: 1000, // 1 second between logs
+            positionUpdateThreshold: 0.1 // Minimum position change to log
         },
         memory: {
             trackHeap: true,
@@ -70,6 +80,25 @@ export const CONFIG = {
         TEXTURE_LOADING: 'ERR_TEX_LOAD',
         MESH_CREATION: 'ERR_MESH',
         WORLD_INIT: 'ERR_WORLD_INIT'
+    },
+    WORLD: {
+        CHUNK_SIZE: 10,
+        EXTENT: 5, // How far each chunk extends from center
+        LOD: {
+            FULL: {
+                DISTANCE: 2,    // Chunks with full detail
+                RESOLUTION: 1   // Full resolution
+            },
+            MEDIUM: {
+                DISTANCE: 4,    // Medium detail chunks
+                RESOLUTION: 2   // Half resolution
+            },
+            FAR: {
+                DISTANCE: 8,    // Far chunks
+                RESOLUTION: 4   // Quarter resolution
+            }
+        },
+        UNLOAD_DISTANCE: 10    // Distance at which chunks unload
     }
 };
 
@@ -92,6 +121,15 @@ export const Logger = {
     },
     logStep: (component, step, data = null) => {
         if (!CONFIG.LOGGING.enabled) return;
+        
+        const now = performance.now();
+        const lastLog = Logger.lastLogs.get(`${component}-${step}`);
+        
+        if (lastLog && (now - lastLog) < CONFIG.LOGGING.performance.logFrequency) {
+            return;
+        }
+        
+        Logger.lastLogs.set(`${component}-${step}`, now);
         console.log(`[${component}] Step: ${step}`, data ? `Data: ${JSON.stringify(data)}` : '');
     },
     logPerformance: (component, operation, duration) => {
@@ -122,5 +160,6 @@ export const Logger = {
         if (usage > CONFIG.LOGGING.memory.warnThreshold) {
             console.warn(`[${component}] High memory usage: ${(usage * 100).toFixed(1)}%`);
         }
-    }
+    },
+    lastLogs: new Map()
 };

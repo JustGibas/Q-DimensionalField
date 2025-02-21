@@ -228,3 +228,98 @@ AFRAME.registerComponent('voxel', {
         this.mesh.material.transparent = this.blockType.transparent || false;
     }
 });
+
+AFRAME.registerComponent('ui-window', {
+    schema: {
+        title: { type: 'string', default: 'Window' },
+        draggable: { type: 'boolean', default: true }
+    },
+
+    init: function() {
+        this.dragState = {
+            dragging: false,
+            offset: { x: 0, y: 0 }
+        };
+
+        if (this.data.draggable) {
+            this.setupDragging();
+        }
+    },
+
+    setupDragging: function() {
+        const header = this.el.querySelector('.window-header');
+        if (!header) return;
+
+        header.addEventListener('mousedown', this.onDragStart.bind(this));
+        document.addEventListener('mousemove', this.onDrag.bind(this));
+        document.addEventListener('mouseup', this.onDragEnd.bind(this));
+    },
+
+    onDragStart: function(e) {
+        const bounds = this.el.getBoundingClientRect();
+        this.dragState = {
+            dragging: true,
+            offset: {
+                x: e.clientX - bounds.left,
+                y: e.clientY - bounds.top
+            }
+        };
+    },
+
+    onDrag: function(e) {
+        if (!this.dragState.dragging) return;
+        
+        const x = e.clientX - this.dragState.offset.x;
+        const y = e.clientY - this.dragState.offset.y;
+        
+        this.el.style.left = `${x}px`;
+        this.el.style.top = `${y}px`;
+    },
+
+    onDragEnd: function() {
+        this.dragState.dragging = false;
+    }
+});
+
+AFRAME.registerComponent('debug-info', {
+    schema: {
+        refreshRate: { type: 'number', default: 500 }
+    },
+
+    init: function() {
+        this.lastUpdate = 0;
+        this.display = document.createElement('div');
+        this.display.className = 'debug-overlay';
+        document.body.appendChild(this.display);
+    },
+
+    tick: function(time) {
+        if (time - this.lastUpdate < this.data.refreshRate) return;
+        
+        const position = this.el.object3D.position;
+        const chunkPos = this.getChunkPosition(position);
+        
+        this.updateDisplay({
+            position: `${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)}`,
+            chunk: `${chunkPos.x}, ${chunkPos.y}, ${chunkPos.z}`,
+            fps: (1000 / (time - this.lastUpdate)).toFixed(1)
+        });
+        
+        this.lastUpdate = time;
+    },
+
+    getChunkPosition(position) {
+        const size = CONFIG.WORLD.CHUNK_SIZE;
+        return {
+            x: Math.floor(position.x / size),
+            y: Math.floor(position.y / size),
+            z: Math.floor(position.z / size)
+        };
+    },
+
+    updateDisplay: function(data) {
+        this.display.innerHTML = Object.entries(data)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join('<br>');
+    }
+});

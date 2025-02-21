@@ -16,15 +16,16 @@ class ChunkManager {
             this.chunks = new Map();
             this.chunksToLoad = [];
             this.chunkCount = 0;
-            this.CHUNK_SIZE = CONFIG.SIZES.CHUNK;
-            this.BLOCK_SIZE = CONFIG.SIZES.BLOCK;
+            this.CHUNK_SIZE = CONFIG.WORLD.CHUNK_SIZE;
+            this.EXTENT = CONFIG.WORLD.EXTENT;
+            this.LOD = CONFIG.WORLD.LOD;
             this.container = document.querySelector('#world-container');
             if (!this.container) {
                 console.error('Could not find world-container element!');
                 return;
             }
             this.renderDistance = 2; // Number of chunks to render in each direction
-            this.lastPlayerChunkPos = { x: 0, z: 0 };
+            this.lastPlayerChunkPos = null;
             this.spawnInitialChunk();
             this.initializePlane();
             
@@ -36,6 +37,10 @@ class ChunkManager {
         } catch (error) {
             Logger.error('ChunkManager', CONFIG.ERROR_CODES.WORLD_INIT, error);
         }
+
+        this.lastPlayerPos = { x: 0, y: 0, z: 0 };
+        this.currentChunkPos = { x: 0, y: 0, z: 0 };
+        this.lastUpdateTime = 0;
     }
 
     spawnInitialChunk() {
@@ -80,44 +85,54 @@ class ChunkManager {
     }
 
     updateChunksAroundPlayer(playerPosition) {
-        const startTime = performance.now();
-        Logger.logStep('ChunkManager', 'Updating chunks around player', { playerPosition });
-
-        const chunkPos = this.getChunkPosition(playerPosition);
-        Logger.logStep('ChunkManager', 'Calculated chunk position', { chunkPos });
+        const chunkPos = this.calculateChunkPosition(playerPosition);
         
-        if (chunkPos.x !== this.lastPlayerChunkPos.x || 
-            chunkPos.z !== this.lastPlayerChunkPos.z) {
-            
-            Logger.logStep('ChunkManager', 'Player moved to new chunk', {
-                from: this.lastPlayerChunkPos,
-                to: chunkPos
-            });
-            
-            this.loadNewChunks(chunkPos);
-            this.unloadDistantChunks(chunkPos);
-            
-            this.lastPlayerChunkPos = { ...chunkPos };
+        // Only update if player moved to new chunk
+        if (this.lastPlayerChunkPos && 
+            chunkPos.x === this.lastPlayerChunkPos.x && 
+            chunkPos.z === this.lastPlayerChunkPos.z) {
+            return;
         }
 
-        Logger.logPerformance('ChunkManager', 'updateChunksAroundPlayer', 
-            performance.now() - startTime);
+        this.loadChunksAroundPosition(chunkPos);
+        this.unloadDistantChunks(chunkPos);
+        this.updateChunkLODs(chunkPos);
+        
+        this.lastPlayerChunkPos = chunkPos;
+    }
+
+    hasChangedChunks(newChunkPos) {
+        return this.currentChunkPos.x !== newChunkPos.x ||
+               this.currentChunkPos.y !== newChunkPos.y ||
+               this.currentChunkPos.z !== newChunkPos.z;
     }
 
     loadNewChunks(centerChunkPos) {
-        for (let x = -this.renderDistance; x <= this.renderDistance; x++) {
-            for (let z = -this.renderDistance; z <= this.renderDistance; z++) {
+        const chunksToLoad = new Set();
+        const renderDist = CONFIG.SIZES.RENDER_DISTANCE;
+
+        // Calculate needed chunks
+        for (let x = -renderDist; x <= renderDist; x++) {
+            for (let z = -renderDist; z <= renderDist; z++) {
                 const pos = {
                     x: centerChunkPos.x + x,
-                    y: 0,
+                    y: centerChunkPos.y,
                     z: centerChunkPos.z + z
                 };
                 const key = `${pos.x},${pos.y},${pos.z}`;
-                
-                if (!this.chunks.has(key)) {
-                    this.createChunk(pos);
-                }
+                chunksToLoad.add(key);
             }
+        }
+
+        // Remove already loaded chunks from the set
+        for (const [key, _] of this.chunks) {
+            chunksToLoad.delete(key);
+        }
+
+        // Load new chunks
+        for (const key of chunksToLoad) {
+            const [x, y, z] = key.split(',').map(Number);
+            this.createChunk({ x, y, z });
         }
     }
 
@@ -173,19 +188,8 @@ class ChunkManager {
                 chunkData: chunkData
             });
 
-            Logger.logStep('ChunkManager', 'Setting chunk position', {
-                worldX: position.x * this.CHUNK_SIZE * 16,
-                worldY: position.y * this.CHUNK_SIZE * 16,
-                worldZ: position.z * this.CHUNK_SIZE * 16
-            });
-
-            chunk.setAttribute('position', `${
-                position.x * this.CHUNK_SIZE * 16
-            } ${
-                position.y * this.CHUNK_SIZE * 16
-            } ${
-                position.z * this.CHUNK_SIZE * 16
-            }`);
+            // FIX: Remove extra multiplier; use CHUNK_SIZE directly.
+            chunk.setAttribute('position', `${position.x * this.CHUNK_SIZE} ${position.y * this.CHUNK_SIZE} ${position.z * this.CHUNK_SIZE}`);
 
             this.chunks.set(key, chunk);
             this.container.appendChild(chunk);
@@ -197,6 +201,14 @@ class ChunkManager {
             
             Logger.performance('ChunkManager', 'chunk_creation', startTime);
             Logger.memory('ChunkManager');
+
+            // Update debug info with new chunk count and player's current chunk
+            if(window.uiManager) {
+                window.uiManager.updateDebugInfo({
+                    'chunk-count': this.chunks.size,
+                    'player-chunk': `${position.x}, ${position.z}`
+                });
+            }
 
             return chunk;
         } catch (error) {
@@ -220,6 +232,100 @@ class ChunkManager {
             x: Math.floor(worldPos.x / (this.CHUNK_SIZE * this.BLOCK_SIZE)),
             y: Math.floor(worldPos.y / (this.CHUNK_SIZE * this.BLOCK_SIZE)),
             z: Math.floor(worldPos.z / (this.CHUNK_SIZE * this.BLOCK_SIZE))
+        };
+    }
+
+    calculateChunkPosition(worldPosition) {
+        return {
+            x: Math.floor(worldPosition.x / this.CHUNK_SIZE),
+            y: Math.floor(worldPosition.y / this.CHUNK_SIZE),
+            z: Math.floor(worldPosition.z / this.CHUNK_SIZE)
+        };
+    }
+
+    getLODLevel(distance) {
+        if (distance <= this.LOD.FULL.DISTANCE) return this.LOD.FULL;
+        if (distance <= this.LOD.MEDIUM.DISTANCE) return this.LOD.MEDIUM;
+        return this.LOD.FAR;
+    }
+
+    loadChunksAroundPosition(centerPos) {
+        const maxDist = CONFIG.WORLD.LOD.FAR.DISTANCE;
+        
+        for (let x = -maxDist; x <= maxDist; x++) {
+            for (let z = -maxDist; z <= maxDist; z++) {
+                const pos = {
+                    x: centerPos.x + x,
+                    y: centerPos.y,
+                    z: centerPos.z + z
+                };
+                
+                const distance = Math.max(Math.abs(x), Math.abs(z));
+                const lod = this.getLODLevel(distance);
+                
+                this.createOrUpdateChunk(pos, lod);
+            }
+        }
+    }
+
+    createOrUpdateChunk(position, lod) {
+        const key = `${position.x},${position.y},${position.z}`;
+        
+        if (!this.chunks.has(key)) {
+            const chunk = this.createChunk(position, lod);
+            this.chunks.set(key, chunk);
+        } else {
+            const chunk = this.chunks.get(key);
+            this.updateChunkLOD(chunk, lod);
+        }
+    }
+
+    updateChunkLOD(chunk, lod) {
+        if (!chunk || !lod) return;
+
+        try {
+            // Get current chunk attributes
+            const currentAttrs = chunk.getAttribute('chunk');
+            if (!currentAttrs) return;
+
+            // Update chunk attributes with new LOD settings
+            chunk.setAttribute('chunk', {
+                ...currentAttrs,
+                lodLevel: lod.RESOLUTION,
+                quality: this.getLODQualitySettings(lod)
+            });
+
+            Logger.debug('ChunkManager', 'Updated chunk LOD', {
+                chunkId: chunk.id,
+                newLOD: lod.RESOLUTION
+            });
+
+        } catch (error) {
+            Logger.error('ChunkManager', 'Failed to update chunk LOD', error);
+        }
+    }
+
+    updateChunkLODs(centerPos) {
+        for (const [key, chunk] of this.chunks) {
+            const [x, y, z] = key.split(',').map(Number);
+            const distance = Math.max(
+                Math.abs(x - centerPos.x),
+                Math.abs(z - centerPos.z)
+            );
+            
+            const lod = this.getLODLevel(distance);
+            this.updateChunkLOD(chunk, lod);
+        }
+    }
+
+    getLODQualitySettings(lod) {
+        // Placeholder LOD quality settings
+        return {
+            geometryDetail: lod.RESOLUTION,
+            textureQuality: lod.RESOLUTION === 1 ? 'high' : 
+                           lod.RESOLUTION === 2 ? 'medium' : 'low',
+            shadowQuality: lod.RESOLUTION === 1 ? 'high' : 'low',
+            skipGeometry: lod.RESOLUTION > 4  // Skip geometry for very far chunks
         };
     }
 }
@@ -337,9 +443,11 @@ class UIManager {
         this.inventory = new Array(32).fill(null);
         this.hotbar = new Array(8).fill(null);
 
+        this.toolbarButtons = new Map();
         this.initializeUI();
         this.setupEventListeners();
         this.startPerformanceMonitoring();
+        this.initializeToolbar();
     }
 
     initializeUI() {
@@ -362,6 +470,54 @@ class UIManager {
         // Generate inventory slots
         this.initializeInventory();
         this.initializeHotbar();
+        this.initializeDraggableWindows();
+    }
+
+    initializeDraggableWindows() {
+        document.querySelectorAll('.draggable').forEach(window => {
+            const header = window.querySelector('.window-header');
+            if (!header) return;
+
+            let isDragging = false;
+            let currentX;
+            let currentY;
+            let initialX;
+            let initialY;
+            let xOffset = 0;
+            let yOffset = 0;
+
+            header.addEventListener('mousedown', (e) => {
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
+                if (e.target === header) {
+                    isDragging = true;
+                }
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+                
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+                xOffset = currentX;
+                yOffset = currentY;
+
+                window.style.transform = `translate(${currentX}px, ${currentY}px)`;
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+        });
+    }
+
+    // NEW: Add the missing setToggleState method
+    setToggleState(toggleId, state) {
+        const toggle = document.getElementById(toggleId);
+        if (toggle) {
+            toggle.checked = state;
+        }
     }
 
     initializeInventory() {
@@ -377,6 +533,10 @@ class UIManager {
 
     initializeHotbar() {
         const hotbar = document.getElementById('hotbar');
+        // Clear existing slots first
+        hotbar.innerHTML = '';
+        
+        // Create exactly 8 slots
         for (let i = 0; i < 8; i++) {
             const slot = document.createElement('div');
             slot.className = 'hotbar-slot';
@@ -407,6 +567,11 @@ class UIManager {
             this.refreshWorld();
         });
 
+        // Add RS-stats toggle
+        document.getElementById('toggle-rs-stats')?.addEventListener('change', (e) => {
+            this.toggleRSStats(e.target.checked);
+        });
+
         // Keyboard shortcuts
         window.addEventListener('keydown', (e) => {
             if (e.key === 'F3') {
@@ -428,12 +593,21 @@ class UIManager {
         });
     }
 
+    toggleRSStats(enabled) {
+        CONFIG.FLAGS.ENABLE_RS_STATS = enabled;
+        const scene = document.querySelector('a-scene');
+        if (scene) {
+            scene.setAttribute('stats', enabled ? '' : 'false');
+        }
+    }
+
     toggleWindow(windowId, force) {
         const window = this.windows.get(windowId);
         if (window) {
             const newState = force !== undefined ? force : !window.visible;
             window.visible = newState;
             window.element.classList.toggle('visible', newState);
+            this.updateToolbarButton(windowId);
         }
     }
 
@@ -568,15 +742,108 @@ class UIManager {
         return false;
     }
 
+    clearChunks() {
+        Logger.info('UIManager', 'Clearing all chunks');
+        const container = document.querySelector('#world-container');
+        while (container.firstChild) {
+            container.removeChild(container.firstChild);
+        }
+        this.updateDebugInfo({
+            'chunk-count': '0',
+            'total-blocks': '0'
+        });
+    }
+
     updateDebugInfo(data) {
         if (!this.DEBUG) return;
         
-        const debugContent = document.getElementById('debug-content');
-        for (const [key, value] of Object.entries(data)) {
-            const element = debugContent.querySelector(`#debug-${key}`);
-            if (element) {
+        // Only update every 100ms
+        if (this.lastDebugUpdate && performance.now() - this.lastDebugUpdate < 100) {
+            return;
+        }
+        
+        Object.entries(data).forEach(([key, value]) => {
+            const element = document.getElementById(key);
+            if (element && element.textContent !== value) {
                 element.textContent = value;
+                element.classList.add('updated');
+                setTimeout(() => element.classList.remove('updated'), 300);
             }
+        });
+        
+        this.lastDebugUpdate = performance.now();
+    }
+
+    toggleFlag(flagName) {
+        if (flagName in CONFIG.FLAGS) {
+            CONFIG.FLAGS[flagName] = !CONFIG.FLAGS[flagName];
+            Logger.info('UIManager', `Toggle ${flagName}: ${CONFIG.FLAGS[flagName]}`);
+            this.refreshWorld();
+        }
+    }
+
+    setTestMode(mode) {
+        CONFIG.DEBUG_OPTIONS.TEST_MODE = mode;
+        Logger.info('UIManager', `Set test mode: ${mode}`);
+        this.refreshWorld();
+    }
+
+    regenerateWorld() {
+        Logger.info('UIManager', 'Regenerating world');
+        // Clear existing chunks
+        const container = document.querySelector('#world-container');
+        while (container.firstChild) {
+            container.removeChild(container.firstChild);
+        }
+        
+        // Spawn new initial chunk
+        const worldManager = new WorldManager();
+        worldManager.chunkManager.spawnInitialChunk();
+    }
+
+    initializeToolbar() {
+        const toolbar = document.querySelector('.window-toolbar');
+        if (!toolbar) return;
+
+        // Setup existing buttons
+        toolbar.querySelectorAll('.tool-button').forEach(button => {
+            const windowId = button.dataset.window;
+            if (windowId) {
+                this.toolbarButtons.set(windowId, button);
+                button.addEventListener('click', () => {
+                    this.toggleWindow(windowId);
+                    this.updateToolbarButton(windowId);
+                });
+            }
+        });
+    }
+
+    addToolbarButton(id, icon, title, onClick) {
+        const toolbar = document.querySelector('.window-toolbar');
+        if (!toolbar) return;
+
+        const button = document.createElement('button');
+        button.className = 'tool-button';
+        button.dataset.window = id;
+        button.title = title;
+        button.innerHTML = `<i class="fas fa-${icon}"></i>${title[0]}`;
+        
+        if (onClick) {
+            button.addEventListener('click', onClick);
+        }
+
+        this.toolbarButtons.set(id, button);
+        toolbar.appendChild(button);
+        
+        return button;
+    }
+
+    updateToolbarButton(windowId) {
+        const button = this.toolbarButtons.get(windowId);
+        const window = this.windows.get(windowId);
+        
+        if (button && window) {
+            button.classList.toggle('active', window.visible);
         }
     }
 }
