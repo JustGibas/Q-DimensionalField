@@ -17,10 +17,10 @@ VR/AR/XR experience built using A-Frame and Taichi.js, featuring dynamic voxel c
 ### To-Do List
 
 #### Immediate Tasks
-- [ ] Test 3D space encoding using RGB channels for terrain data
+- [ ] Test 3D space encoding using RGB channels for terrain data using images it's posable to encode 3D space in our case 10x10x10 for block positions encoding
   - Red channel: X-axis height data
-  - Green channel: Y-axis density/type data
-  - Blue channel: Z-axis variation data
+  - Green channel: Y-axis with data
+  - Blue channel: Z-axis depth data
   - Alpha channel: Additional metadata
 - [ ] Implement texture baking system for chunk serialization
 - [ ] Fix chunk generation loop
