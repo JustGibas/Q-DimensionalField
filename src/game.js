@@ -1,5 +1,6 @@
 import { CONFIG, Logger } from './config.js';
-import { ChunkManager, UIManager, VoxelManager } from './managers.js';
+import { ChunkManager, VoxelManager, StateManager } from './managers.js';
+import { UIManager } from './ui.js';
 
 class GameInitializer {
     constructor() {
@@ -16,11 +17,14 @@ class GameInitializer {
             activeChunks: new Set()
         };
 
+        // Initialize managers
+        this.stateManager = null;
         this.chunkManager = null;
         this.uiManager = null;
         this.voxelManager = null;
         this.lastChunkUpdate = 0;
         this.chunkUpdateThrottle = CONFIG.PERFORMANCE.THROTTLE.CHUNK_UPDATES; // 100ms
+        this.updateChunksAroundPlayer = this.updateChunksAroundPlayer.bind(this);
     }
 
     async initialize() {
@@ -30,16 +34,28 @@ class GameInitializer {
             try {
                 Logger.info('GameInitializer', 'Starting initialization');
                 
+                // Wait for scene first
                 await this.waitForScene();
+                
+                // Initialize managers in sequence
                 await this.initializeManagers();
+                
+                // Wait for player after managers
                 await this.waitForPlayer();
+                
+                // Initialize UI last, after everything else is ready
+                if (this.uiManager) {
+                    await this.uiManager.initialize();
+                }
+                
+                // Start game systems
                 await this.initializeWorld();
                 this.setupEventListeners();
+                this.setupDebugUpdates(); // Make sure debug updates are set up
                 this.startGameLoop();
                 this.fadeOutLoadingScreen();
                 
                 this.initialized = true;
-                CONFIG.FLAGS.SCENE_READY = true;
                 Logger.info('GameInitializer', 'Initialization complete');
                 resolve();
             } catch (error) {
@@ -53,23 +69,20 @@ class GameInitializer {
 
     async initializeManagers() {
         try {
-            // Initialize managers in correct order
-            this.chunkManager = new ChunkManager();
-            this.voxelManager = new VoxelManager();
-            this.uiManager = new UIManager();
+            // Initialize StateManager first
+            this.stateManager = new StateManager();
             
-            // Make managers available globally for debugging
+            // Make it globally available
             window.game = this;
             
-            // Get initial player position
-            const playerRig = document.querySelector('#player-rig');
-            if (playerRig) {
-                const position = playerRig.getAttribute('position');
-                const chunkPos = this.calculateChunkPosition(position);
-                // Generate initial chunks around player
-                await this.loadChunksAroundPosition(chunkPos);
-            }
+            // Initialize other managers
+            this.chunkManager = new ChunkManager();
+            this.voxelManager = new VoxelManager();
             
+            // Initialize UI last, after state is ready
+            await new Promise(resolve => setTimeout(resolve, 0)); // Ensure state is set
+            this.uiManager = new UIManager();
+
             Logger.info('GameInitializer', 'Managers initialized successfully');
         } catch (error) {
             Logger.error('GameInitializer', 'Failed to initialize managers:', error);
@@ -154,16 +167,15 @@ class GameInitializer {
 
         const position = playerRig.getAttribute('position');
         const chunkPos = this.calculateChunkPosition(position);
-
-        // Only update if player moved to new chunk
-        if (this.hasChunkPositionChanged(chunkPos)) {
-            this.loadChunksAroundPosition(chunkPos);
-            this.unloadDistantChunks(chunkPos);
-            this.lastChunkPos = chunkPos;
-        }
+        this.loadChunksAroundPosition(chunkPos);
     }
 
     async loadChunksAroundPosition(centerPos) {
+        if (!this.chunkManager) {
+            Logger.warn('GameInitializer', 'ChunkManager not initialized');
+            return;
+        }
+
         // Check if enough time has passed since last update
         const now = performance.now();
         if (now - this.lastChunkUpdate < this.chunkUpdateThrottle) {
@@ -186,8 +198,8 @@ class GameInitializer {
                 };
                 const key = `${pos.x},${pos.y},${pos.z}`;
                 
-                // Only create chunk if it doesn't exist and isn't pending
-                if (!this.chunkManager.chunks.has(key) && !pendingChunks.has(key)) {
+                // Check if chunk exists using ChunkManager's method
+                if (!this.chunkManager.hasChunk(key) && !pendingChunks.has(key)) {
                     pendingChunks.add(key);
                     const chunk = this.chunkManager.createChunk(pos);
                     if (chunk) promises.push(chunk);
@@ -376,20 +388,45 @@ class GameInitializer {
     updateDebugInfo() {
         if (!this.initialized || !this.uiManager) return;
 
-        // Use camera position instead of player rig
         const camera = document.querySelector('a-camera');
-        if (camera) {
-            const worldPosition = new THREE.Vector3();
-            camera.object3D.getWorldPosition(worldPosition);
-            const chunkPos = this.calculateChunkPosition(worldPosition);
-            
-            this.uiManager.updateDebugInfo({
-                'player-position': `${worldPosition.x.toFixed(2)}, ${worldPosition.y.toFixed(2)}, ${worldPosition.z.toFixed(2)}`,
-                'player-chunk': `${chunkPos.x}, ${chunkPos.z}`,
-                'chunk-count': this.chunkManager?.chunks.size || 0,
-                'total-blocks': this.getTotalBlockCount()
-            });
+        if (!camera) return;
+
+        const metrics = this.gatherDebugMetrics(camera);
+        
+        // Update UI through UIManager
+        if (this.uiManager) {
+            this.uiManager.updateDebugInfo(metrics);
         }
+
+        this.lastFrameTime = performance.now();
+    }
+
+    gatherDebugMetrics(camera) {
+        const worldPos = new THREE.Vector3();
+        camera.object3D.getWorldPosition(worldPos);
+        
+        const chunkPos = this.calculateChunkPosition(worldPos);
+        
+        return {
+            'player-position': `${worldPos.x.toFixed(2)}, ${worldPos.y.toFixed(2)}, ${worldPos.z.toFixed(2)}`,
+            'player-chunk': `${chunkPos.x}, ${chunkPos.y}, ${chunkPos.z}`,
+            'fps-counter': Math.round(1000 / (performance.now() - (this.lastFrameTime || performance.now()))),
+            'chunk-count': this.chunkManager?.chunks.size || 0,
+            'memory-usage': `${Math.round(performance.memory?.usedJSHeapSize / 1048576) || 0} MB`,
+            'draw-calls': this.sceneEl?.renderer?.info.render.calls || 0
+        };
+    }
+
+    verifyDebugElements() {
+        // Check if DevTools window exists
+        const devTools = document.getElementById('devtools-window');
+        if (!devTools) return false;
+
+        // Check if metric elements exist within DevTools
+        const requiredMetrics = ['position', 'fps', 'memory', 'drawcalls', 'chunks'];
+        return requiredMetrics.every(metric => 
+            devTools.querySelector(`[data-metric="${metric}"]`) !== null
+        );
     }
 
     updatePlayerDebugInfo(worldPosition) {
@@ -432,26 +469,111 @@ class GameInitializer {
     }
 
     pause() {
-        this.state.paused = true;
-        Logger.info('Game', 'Game paused');
+        Logger.info('Game', 'Attempting to pause game');
+        if (!this.state.paused) {
+            this.state.paused = true;
+            Logger.info('Game', 'Game state set to paused');
+            
+            const camera = document.querySelector('a-camera');
+            if (camera) {
+                camera.setAttribute('look-controls', 'enabled', false);
+                camera.setAttribute('wasd-controls', 'enabled', false);
+                Logger.info('Game', 'Camera controls disabled');
+            } else {
+                Logger.warn('Game', 'Camera element not found');
+            }
+        } else {
+            Logger.info('Game', 'Game already paused');
+        }
     }
 
     resume() {
-        this.state.paused = false;
-        Logger.info('Game', 'Game resumed');
+        Logger.info('Game', 'Attempting to resume game');
+        if (this.state.paused) {
+            this.state.paused = false;
+            Logger.info('Game', 'Game state set to resumed');
+            
+            const camera = document.querySelector('a-camera');
+            if (camera) {
+                camera.setAttribute('look-controls', 'enabled', true);
+                camera.setAttribute('wasd-controls', 'enabled', true);
+                Logger.info('Game', 'Camera controls enabled');
+            } else {
+                Logger.warn('Game', 'Camera element not found');
+            }
+        } else {
+            Logger.info('Game', 'Game already running');
+        }
     }
 
     togglePause() {
-        if (this.state.paused) {
-            this.resume();
-        } else {
-            this.pause();
+        if (!this.initialized || !this.stateManager) return;
+
+        this.state.paused = !this.state.paused;
+        
+        // Update store instead of using setMenuState
+        useGameStore.getState().setPaused(this.state.paused);
+        
+        // Update UI visibility
+        const mainMenu = document.getElementById('main-menu');
+        if (mainMenu) {
+            mainMenu.style.display = this.state.paused ? 'block' : 'none';
         }
+
+        // Update camera controls
+        const camera = document.querySelector('a-camera');
+        if (camera) {
+            camera.setAttribute('look-controls', 'enabled', !this.state.paused);
+            camera.setAttribute('wasd-controls', 'enabled', !this.state.paused);
+        }
+
+        Logger.info('Game', 'Game pause toggled:', {
+            wasPaused: !this.state.paused,
+            isPaused: this.state.paused,
+            trigger: 'manual_toggle'
+        });
     }
 
     handleResize() {
         if (this.uiManager) {
             this.uiManager.handleResize();
+        }
+    }
+
+    async resetWorld() {
+        try {
+            Logger.info('Game', 'Resetting world');
+            // Clear existing chunks
+            if (this.chunkManager) {
+                this.chunkManager.clear();
+            }
+            // Re-initialize world
+            await this.initializeWorld();
+            Logger.info('Game', 'World reset complete');
+        } catch (error) {
+            Logger.error('Game', 'Failed to reset world:', error);
+        }
+    }
+
+    // Add safe pointer lock methods
+    requestPointerLock() {
+        const canvas = document.querySelector('a-scene').canvas;
+        if (!canvas) return;
+        
+        try {
+            canvas.requestPointerLock();
+        } catch (error) {
+            Logger.warn('Game', 'Pointer lock request failed:', error);
+        }
+    }
+
+    exitPointerLock() {
+        if (document.pointerLockElement) {
+            try {
+                document.exitPointerLock();
+            } catch (error) {
+                Logger.warn('Game', 'Exit pointer lock failed:', error);
+            }
         }
     }
 }
@@ -476,3 +598,5 @@ window.addEventListener('error', (event) => {
         lineno: event.lineno
     });
 });
+
+export { GameInitializer };

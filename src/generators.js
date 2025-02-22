@@ -1,5 +1,12 @@
 import { CONFIG, Logger } from './config.js';
 
+function ensureThree() {
+    if (typeof AFRAME === 'undefined' || !AFRAME.THREE) {
+        throw new Error('THREE.js not found. Make sure A-Frame is loaded first.');
+    }
+    return AFRAME.THREE;
+}
+
 class NoiseGenerator {
     constructor(seed = Math.random()) {
         this.seed = seed;
@@ -66,6 +73,7 @@ class NoiseGenerator {
 
 class BlockTypeGenerator {
     constructor() {
+        const THREE = ensureThree(); // Get THREE reference safely
         this.noise = new NoiseGenerator();
         this.blockTypes = new Map();
         this.generateBaseBlockTypes();
@@ -203,6 +211,7 @@ class BlockTypeGenerator {
 
 class TextureGenerator {
     constructor(resolution = 16) {
+        const THREE = ensureThree(); // Get THREE reference safely
         this.resolution = resolution;
         this.canvas = document.createElement('canvas');
         this.canvas.width = resolution;
@@ -271,6 +280,7 @@ class TextureGenerator {
 
 class TextureManager {
     constructor() {
+        const THREE = ensureThree(); // Get THREE reference safely
         this.textureGenerator = new TextureGenerator(64); // Higher res textures
         this.textureCache = new Map();
         this.loadingPromises = new Map();
@@ -373,6 +383,37 @@ class ChunkGenerator {
     }
 }
 
-export const blockTypeGenerator = new BlockTypeGenerator();
-export const chunkGenerator = new ChunkGenerator();
-export { TextureGenerator, TextureManager, ChunkGenerator, BlockTypeGenerator };
+class BlockSystem {
+    constructor() {
+        this.breakingTextures = Array(10).fill(0).map((_, i) => 
+            `/assets/breaking/break_${i}.png`
+        );
+    }
+
+    updateBreakingTexture(block, progress) {
+        const stage = Math.floor(progress * 9);
+        const overlay = block.querySelector('.breaking-overlay') || this.createOverlay(block);
+        overlay.className = `breaking-overlay breaking-stage-${stage}`;
+    }
+
+    createOverlay(block) {
+        const overlay = document.createElement('div');
+        overlay.className = 'breaking-overlay';
+        block.appendChild(overlay);
+        return overlay;
+    }
+
+    cancelBreaking(block) {
+        const overlay = block.querySelector('.breaking-overlay');
+        if (overlay) overlay.remove();
+    }
+
+    destroyBlock(block) {
+        this.cancelBreaking(block);
+        if (block.parentNode) {
+            block.parentNode.removeChild(block);
+        }
+    }
+}
+
+export { NoiseGenerator, TextureGenerator, TextureManager, BlockTypeGenerator, ChunkGenerator, BlockSystem };

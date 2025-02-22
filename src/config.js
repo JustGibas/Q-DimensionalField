@@ -10,22 +10,42 @@ export const CONFIG = {
         AFRAME: '1.4.0'
     },
     FLAGS: {
-        ENABLE_BLOCK_GENERATION: false,    // Default blocks to invisible
-        ENABLE_CHUNK_GENERATION: true,     // Keep chunks enabled by default
-        ENABLE_CHUNK_UPDATES: true,        // Toggle chunk updates
-        SHOW_CHUNK_BOUNDS: false,          // Show chunk boundaries
-        WIREFRAME_MODE: false,             // Show wireframe
-        ENABLE_SHADOWS: false,             // Enable shadows
-        SHOW_COLLISION_BOUNDS: false,      // Show collision boundaries
-        ENABLE_AMBIENT_OCCLUSION: false,   // Enable AO
-        USE_HIGH_QUALITY_TEXTURES: false,  // Use high-res textures
-        ENABLE_FOG: false,                 // Enable fog
-        ENABLE_BLOOM: false,               // Enable bloom effect
-        SHOW_DEBUG_STATS: true,            // Changed from false to true
-        ENABLE_PHYSICS_DEBUG: false,       // Show physics debug
-        LOG_PLAYER_POSITION: true,         // Add this new flag
-        LOG_CHUNK_CREATION: true,          // Add this new flag
-        LOG_PERFORMANCE: true              // Add this new flag
+        SECTIONS: {
+            RENDERING: {
+                WIREFRAME_MODE: false,
+                ENABLE_SHADOWS: false,
+                ENABLE_AMBIENT_OCCLUSION: false,
+                USE_HIGH_QUALITY_TEXTURES: false,
+                ENABLE_FOG: false,
+                ENABLE_BLOOM: false,
+            },
+            DEBUGGING: {
+                SHOW_DEBUG_STATS: false,  // Start with debug stats off
+                ENABLE_PHYSICS_DEBUG: false,
+                LOG_PLAYER_POSITION: false,
+                LOG_CHUNK_CREATION: false,
+                LOG_PERFORMANCE: false,
+                SHOW_CHUNK_BOUNDS: false,
+                SHOW_COLLISION_BOUNDS: false,
+            },
+            WORLD_GENERATION: {
+                ENABLE_BLOCK_GENERATION: true, // Keep this true for basic functionality
+                ENABLE_CHUNK_GENERATION: true, // Keep this true for basic functionality
+                ENABLE_CHUNK_UPDATES: true,    // Keep this true for basic functionality
+            },
+            LOGGING: {
+                LOG_UI_STATE_CHANGES: false,
+                LOG_WINDOW_EVENTS: false,
+                LOG_INPUT_EVENTS: false,
+                LOG_HOTBAR_EVENTS: false,
+                LOG_INVENTORY_EVENTS: false,
+                LOG_PERFORMANCE_METRICS: false,
+                LOG_DEBUG_FLAGS: false,
+                LOG_UI_INTERACTIONS: false,
+                LOG_POINTER_EVENTS: false,
+                LOG_DRAG_EVENTS: false
+            }
+        }
     },
     LOADING: {
         TIMEOUT: 10000,                    // 10 second timeout for loading
@@ -83,6 +103,56 @@ export const CONFIG = {
                 },
                 useTextures: true 
             }
+        },
+        ACTIONS: {
+            GENERATION: [
+                {
+                    id: 'generate-center',
+                    label: 'Generate Center Chunk',
+                    description: 'Generates a single chunk at the center position',
+                    action: 'generateCenterChunk'
+                },
+                {
+                    id: 'generate-plains',
+                    label: 'Generate Plains Biome',
+                    description: 'Generates a flat plains biome',
+                    action: 'generatePlainsBiome'
+                },
+                {
+                    id: 'generate-mountains',
+                    label: 'Generate Mountains',
+                    description: 'Generates mountainous terrain',
+                    action: 'generateMountains'
+                }
+            ],
+            TESTING: [
+                {
+                    id: 'spawn-test-cubes',
+                    label: 'Spawn Test Cubes',
+                    description: 'Spawns various test cubes',
+                    action: 'spawnTestCubes'
+                },
+                {
+                    id: 'test-chunk-update',
+                    label: 'Test Chunk Updates',
+                    description: 'Tests chunk update system',
+                    action: 'testChunkUpdate'
+                }
+            ],
+            UTILITY: [
+                {
+                    id: 'clear-all',
+                    label: 'Clear All Chunks',
+                    description: 'Removes all chunks from the world',
+                    action: 'clearAllChunks'
+                },
+                {
+                    id: 'reload-textures',
+                    label: 'Reload Textures',
+                    description: 'Reloads all textures',
+                    action: 'reloadTextures'
+                }
+            ]
         }
     },
     TEXTURES: {
@@ -98,7 +168,7 @@ export const CONFIG = {
     },
     LOGGING: {
         enabled: true,
-        level: 'info',  // Changed from 'debug' to 'info' to reduce noise
+        level: 'debug',  // Changed from 'debug' to 'info' to reduce noise
         component: true,
         manager: true,
         performance: true,
@@ -128,6 +198,21 @@ export const CONFIG = {
         memory: {
             trackHeap: true,
             warnThreshold: 0.8 // 80% of available heap
+        },
+        UI: {
+            LOG_LEVEL: 'debug', // 'debug', 'info', 'warn', 'error'
+            THROTTLE: 100, // ms between state change logs
+            INCLUDE_TIMESTAMPS: true,
+            INCLUDE_COMPONENT: true,
+            INCLUDE_STATE_DIFFS: true,
+            MAX_STATE_HISTORY: 50
+        },
+        STATE_CHANGES: {
+            WINDOWS: true,
+            INVENTORY: true,
+            HOTBAR: true,
+            FLAGS: true,
+            SETTINGS: true
         }
     },
     SIZES: {
@@ -159,7 +244,7 @@ export const CONFIG = {
                 RESOLUTION: 4   // Quarter resolution
             }
         },
-        UNLOAD_DISTANCE: 10    // Distance at which chunks unload
+        UNLOAD_DISTANCE: 5    // Distance at which chunks unload
     },
     PERFORMANCE: {
         FRAME_BUDGET: 16.67, // 60fps target
@@ -170,6 +255,101 @@ export const CONFIG = {
             POSITION_UPDATES: 100 // ms between position updates
         },
         RAF_WARNING_THRESHOLD: 16.67 // Show warning if RAF takes longer
+    },
+    UI: {
+        WINDOWS: {
+            DEVTOOLS: {
+                id: 'devtools-window',
+                title: 'Developer Tools',
+                icon: 'code',
+                tabs: [
+                    {
+                        id: 'debug',
+                        label: 'Debug',
+                        sections: [
+                            {
+                                title: 'Player Info',
+                                metrics: [
+                                    { id: 'player-position', label: 'Position', default: '0, 0, 0' },
+                                    { id: 'player-chunk', label: 'Chunk', default: '0, 0' }
+                                ]
+                            },
+                            {
+                                title: 'World Info',
+                                metrics: [
+                                    { id: 'chunk-count', label: 'Active Chunks', default: '0' },
+                                    { id: 'total-blocks', label: 'Total Blocks', default: '0' }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        id: 'performance',
+                        label: 'Performance',
+                        sections: [
+                            {
+                                metrics: [
+                                    { id: 'fps-counter', label: 'FPS', default: '60', showBar: true },
+                                    { id: 'memory-usage', label: 'Memory', default: '0 MB', showBar: true },
+                                    { id: 'draw-calls', label: 'Draw Calls', default: '0' }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            SETTINGS: {
+                id: 'settings-window',
+                title: 'Settings',
+                icon: 'cog',
+                sections: [
+                    {
+                        title: 'Graphics',
+                        settings: [
+                            {
+                                id: 'graphics-quality',
+                                label: 'Quality',
+                                type: 'select',
+                                options: [
+                                    { value: 'low', label: 'Low' },
+                                    { value: 'medium', label: 'Medium', default: true },
+                                    { value: 'high', label: 'High' }
+                                ]
+                            },
+                            {
+                                id: 'view-distance',
+                                label: 'View Distance',
+                                type: 'select',
+                                options: [
+                                    { value: '2', label: 'Near' },
+                                    { value: '4', label: 'Medium', default: true },
+                                    { value: '6', label: 'Far' }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        title: 'Controls',
+                        settings: [
+                            {
+                                id: 'mouse-sensitivity',
+                                label: 'Mouse Sensitivity',
+                                type: 'range',
+                                min: 1,
+                                max: 10,
+                                default: 5
+                            },
+                            {
+                                id: 'invert-y',
+                                label: 'Invert Y-Axis',
+                                type: 'checkbox',
+                                default: false
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
     }
 };
 

@@ -1,6 +1,35 @@
-import { TextureManager, TextureGenerator, blockTypeGenerator } from './generators.js';
 import { CONFIG, Logger } from './config.js';
+import { useGameStore } from './managers.js';
+import { TextureManager, BlockTypeGenerator } from './generators.js';
 
+// Centralize common component utilities
+const ComponentUtils = {
+    ensureThree() {
+        if (!AFRAME.THREE) {
+            throw new Error('THREE.js not found. Make sure A-Frame is loaded first.');
+        }
+        return AFRAME.THREE;
+    },
+    
+    logComponentError(component, error, context = {}) {
+        Logger.error('Component', `${component} error:`, {
+            error: error.message,
+            context,
+            stack: error.stack
+        });
+    },
+
+    measurePerformance(callback, component, operation) {
+        const start = performance.now();
+        try {
+            return callback();
+        } finally {
+            Logger.performance(component, operation, start);
+        }
+    }
+};
+
+// World Components
 AFRAME.registerComponent('chunk', {
     schema: {
         position: { type: 'vec3' },
@@ -8,381 +37,213 @@ AFRAME.registerComponent('chunk', {
         chunkData: { type: 'array' }
     },
 
-    init: function() {
-        const startTime = performance.now();
-        Logger.logStep('ChunkComponent', 'Initializing', {
-            position: this.data.position,
-            size: this.data.size
-        });
+    init() {
+        ComponentUtils.measurePerformance(() => {
+            Logger.logStep('ChunkComponent', 'Initializing', {
+                position: this.data.position,
+                size: this.data.size
+            });
 
-        this.blocks = new Map();
-        this.blockMeshes = new Map();
-        this.generateChunk();
-
-        Logger.logPerformance('ChunkComponent', 'initialization', 
-            performance.now() - startTime);
+            this.blocks = new Map();
+            this.blockMeshes = new Map();
+            this.generateChunk();
+        }, 'ChunkComponent', 'initialization');
     },
 
-    generateChunk: function() {
+    generateChunk() {
         if (this.generatingChunk) return;
-        this.generatingChunk = true;
-        
-        this.chunkGroup = new AFRAME.THREE.Group();
-        
-        // Only generate blocks if block generation is enabled
-        if (CONFIG.FLAGS.ENABLE_BLOCK_GENERATION) {
-            this.generateBlocks();
-        } else {
-            // Create empty chunk bounds for visualization
-            this.createChunkBounds();
-        }
-        
-        this.el.setObject3D('mesh', this.chunkGroup);
-        this.generatingChunk = false;
+
+        ComponentUtils.measurePerformance(() => {
+            this.generatingChunk = true;
+            const THREE = ComponentUtils.ensureThree();
+            
+            this.chunkGroup = new THREE.Group();
+            
+            if (CONFIG.FLAGS.SECTIONS.WORLD_GENERATION.ENABLE_BLOCK_GENERATION) {
+                this.generateBlocks();
+            } else {
+                this.createChunkBounds();
+            }
+            
+            this.el.setObject3D('mesh', this.chunkGroup);
+            this.generatingChunk = false;
+        }, 'ChunkComponent', 'generateChunk');
     },
 
-    createChunkBounds: function() {
-        const size = this.data.size;
-        const geometry = new AFRAME.THREE.BoxGeometry(size, size, size);
-        const material = new AFRAME.THREE.MeshBasicMaterial({
-            wireframe: true,
-            color: '#00ff00',
-            transparent: true,
-            opacity: CONFIG.FLAGS.SHOW_CHUNK_BOUNDS ? 0.2 : 0
-        });
-        const boundingBox = new AFRAME.THREE.Mesh(geometry, material);
-        boundingBox.position.set(size/2, size/2, size/2);
-        this.chunkGroup.add(boundingBox);
-        this.boundingBox = boundingBox;
-    },
-
-    generateBlocks: function() {
-        const startTime = performance.now();
-        const maxBlocksPerFrame = 100; // Limit blocks per frame
-        let blocksCreated = 0;
-        let x = 0, y = 0, z = 0;
+    generateBlocks() {
+        const store = useGameStore.getState();
         const size = this.data.size;
         const chunkData = this.data.chunkData;
-        
-        this.chunkGroup = new AFRAME.THREE.Group();
+        const blockGenerator = new BlockTypeGenerator();
 
-        const processNextBatch = () => {
-            const batchStart = performance.now();
+        // Process blocks in batches for better performance
+        const processBatch = (startIndex, batchSize) => {
+            const endIndex = Math.min(startIndex + batchSize, size * size * size);
             
-            while (x < size && performance.now() - batchStart < 16) { // 16ms frame budget
-                for (; y < size; y++) {
-                    for (; z < size; z++) {
-                        const idx = x + y * size + z * size * size;
-                        const value = chunkData[idx];
-                        
-                        if (value > 0.5) {
-                            this.createBlock(x, y, z, {
-                                texture: 'default',
-                                color: this.getHeightBasedColor(y, value)
-                            });
-                            blocksCreated++;
-                        }
-                    }
-                    z = 0;
-                }
-                y = 0;
-                x++;
+            for (let i = startIndex; i < endIndex; i++) {
+                const x = i % size;
+                const y = Math.floor(i / size) % size;
+                const z = Math.floor(i / (size * size));
                 
-                if (blocksCreated >= maxBlocksPerFrame) {
-                    requestAnimationFrame(processNextBatch);
-                    return;
+                if (chunkData[i] > 0.5) {
+                    const blockType = blockGenerator.getBlockType(
+                        this.determineBlockType(x, y, z)
+                    );
+                    this.createBlock(x, y, z, blockType);
                 }
             }
 
-            if (x < size) {
-                requestAnimationFrame(processNextBatch);
+            if (endIndex < size * size * size) {
+                requestAnimationFrame(() => processBatch(endIndex, batchSize));
             } else {
-                this.el.setObject3D('mesh', this.chunkGroup);
                 this.generatingChunk = false;
-                Logger.performance('ChunkComponent', 'generateChunk', performance.now() - startTime);
             }
         };
 
-        processNextBatch();
+        // Start processing in batches
+        processBatch(0, CONFIG.PERFORMANCE.CHUNK_GENERATION_BUDGET);
     },
 
     createBlock(x, y, z, blockType) {
-        // Only log if block logging is explicitly enabled
-        if (CONFIG.DEBUG_OPTIONS.LOG_BLOCK_CREATION) {
-            Logger.debug('ChunkComponent', 'Creating block at position:', { x, y, z });
-        }
-
         try {
-            const geometry = new AFRAME.THREE.BoxGeometry(1, 1, 1);
-            
-            // Invert the opacity logic - blocks are visible by default when generation is enabled
-            const material = new AFRAME.THREE.MeshStandardMaterial({
+            const THREE = ComponentUtils.ensureThree();
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const material = new THREE.MeshStandardMaterial({
                 color: blockType.color || '#808080',
                 roughness: 0.7,
                 metalness: 0.2,
-                wireframe: CONFIG.FLAGS.WIREFRAME_MODE,
-                transparent: true,
-                opacity: CONFIG.FLAGS.ENABLE_BLOCK_GENERATION ? 1 : 0  // Show blocks when generation is enabled
+                transparent: blockType.transparent || false,
+                opacity: CONFIG.FLAGS.SECTIONS.WORLD_GENERATION.ENABLE_BLOCK_GENERATION ? 1 : 0
             });
 
-            const mesh = new AFRAME.THREE.Mesh(geometry, material);
+            const mesh = new THREE.Mesh(geometry, material);
             mesh.position.set(x, y, z);
+            
             const key = `${x},${y},${z}`;
             this.blockMeshes.set(key, mesh);
             this.blocks.set(key, blockType);
             this.chunkGroup.add(mesh);
+
+            if (CONFIG.FLAGS.SECTIONS.DEBUGGING.LOG_BLOCK_CREATION) {
+                Logger.debug('ChunkComponent', 'Block created', { position: { x, y, z }, type: blockType.name });
+            }
         } catch (error) {
-            Logger.error('ChunkComponent', 'Failed to create block:', error);
+            ComponentUtils.logComponentError('ChunkComponent', error, { x, y, z, blockType });
         }
     },
 
-    update: function(oldData) {
-        // Update chunk bounds visibility
-        if (this.boundingBox) {
-            this.boundingBox.material.opacity = CONFIG.FLAGS.SHOW_CHUNK_BOUNDS ? 0.2 : 0;
-            this.boundingBox.material.needsUpdate = true;
-        }
-
-        // Update block materials
-        if (this.blockMeshes) {
-            this.blockMeshes.forEach(mesh => {
-                mesh.material.wireframe = CONFIG.FLAGS.WIREFRAME_MODE;
-                mesh.material.opacity = CONFIG.FLAGS.ENABLE_BLOCK_GENERATION ? 1 : 0;
-                mesh.material.needsUpdate = true;
-            });
-        }
-    },
-
-    getRandomColor: function() {
-        // Generate a 6-digit hex color
-        return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
-    },
-
-    getHeightBasedColor: function(height, value) {
-        try {
-            const size = Number(this.data.size);
-            // Calculate HSL values within valid ranges.
-            const h = Math.floor((height / size) * 120); // 0-120 hue
-            const s = Math.min(Math.max(Math.floor(value * 100), 0), 100); // saturation 0-100
-            const l = Math.min(Math.max(Math.floor(50 + value * 20), 0), 100); // lightness 50-70
-            // Simple HSL to RGB conversion:
-            const c = (1 - Math.abs(2 * l / 100 - 1)) * (s / 100);
-            const x = c * (1 - Math.abs((h / 60) % 2 - 1));
-            const m = l / 100 - c / 2;
-            let r, g, b;
-            if (h < 60) { [r, g, b] = [c, x, 0]; }
-            else if (h < 120) { [r, g, b] = [x, c, 0]; }
-            else { [r, g, b] = [0, c, 0]; }
-            const toHex = (n) => {
-                const hex = Math.round((n + m) * 255).toString(16);
-                return hex.padStart(2, '0');
-            };
-            return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-        } catch (error) {
-            Logger.error('ChunkComponent', 'Color generation failed', error);
-            return '#808080';
-        }
-    },
-
-    addPlaneToChunk: function() {
-        // Log the start (remove any extraneous text)
-        if (typeof loggingEnabled !== 'undefined' && loggingEnabled) console.log('Adding plane to chunk');
+    determineBlockType(x, y, z) {
+        const worldY = this.data.position.y * this.data.size + y;
         
-        const geometry = new AFRAME.THREE.PlaneGeometry(this.data.size, this.data.size);
-        let material;
-        const textureType = 'grass';
-        const textureData = this.textureGenerator?.generateTexture(textureType);
-        if (textureData) {
-            const texture = new AFRAME.THREE.TextureLoader().load(textureData);
-            material = new AFRAME.THREE.MeshStandardMaterial({ map: texture });
-        } else {
-            const color = this.getRandomColor();
-            material = new AFRAME.THREE.MeshStandardMaterial({ color: color });
-        }
-        const plane = new AFRAME.THREE.Mesh(geometry, material);
-        plane.rotation.x = -Math.PI/2;
-        plane.position.set(this.data.size / 2, 0, this.data.size / 2);
-        this.chunkGroup.add(plane);
-        if (typeof loggingEnabled !== 'undefined' && loggingEnabled) console.log('Plane added to chunk');
-    }
-});
-
-AFRAME.registerComponent('loading-screen', {
-    schema: {
-        loggingEnabled: { type: 'boolean', default: true }
-    },
-
-    init: function() {
-        this.loadingScreen = document.querySelector('#loading-screen');
-        this.loadingText = this.loadingScreen.querySelector('.loader');
-        this.setupLoadingManager();
+        if (worldY < 0) return 'STONE_0';
+        if (worldY === 0) return 'DIRT_0';
+        if (worldY > 0) return 'GRASS_0';
         
-        Logger.info('LoadingScreen', 'Component initialized');
+        return 'STONE_0'; // Default fallback
     },
 
-    setupLoadingManager: function() {
-        Logger.info('LoadingScreen', 'Setting up loading manager');
-        AFRAME.THREE.DefaultLoadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
-            const progress = (itemsLoaded / itemsTotal * 100).toFixed(0);
-            this.loadingText.textContent = `Loading textures... ${progress}%`;
-            Logger.info('LoadingScreen', `Loading progress: ${progress}%`);
-        };
+    update(oldData) {
+        if (!this.blockMeshes) return;
 
-        AFRAME.THREE.DefaultLoadingManager.onLoad = () => {
-            Logger.info('LoadingScreen', 'Loading complete');
-            setTimeout(() => {
-                this.loadingScreen.style.opacity = '0';
-                setTimeout(() => {
-                    this.loadingScreen.style.display = 'none';
-                }, 500);
-            }, 1000);
-        };
-    }
-});
-
-AFRAME.registerComponent('touch-controls', {
-    init: function() {
-        const options = window.PASSIVE_SUPPORTED ? { passive: true } : false;
-        
-        this.el.addEventListener('touchstart', this.onTouchStart.bind(this), options);
-        this.el.addEventListener('touchmove', this.onTouchMove.bind(this), options);
-        this.el.addEventListener('touchend', this.onTouchEnd.bind(this), options);
-    },
-
-    onTouchStart: function(event) {
-        // Handle touch start
-    },
-
-    onTouchMove: function(event) {
-        // Handle touch move
-    },
-
-    onTouchEnd: function(event) {
-        // Handle touch end
-    }
-});
-
-AFRAME.registerComponent('voxel', {
-    schema: {
-        size: { type: 'number', default: CONFIG.SIZES.VOXEL },
-        typeId: { type: 'number', default: 1 }
-    },
-        
-    init: function() {
-        this.blockType = blockTypeGenerator.getBlockType(this.data.typeId);
-        this.createVoxel();
-    },
-
-    createVoxel: function() {
-        const geometry = new AFRAME.THREE.BoxGeometry(
-            this.data.size,
-            this.data.size,
-            this.data.size
-        );
-        const material = new AFRAME.THREE.MeshStandardMaterial({
-            color: this.getVoxelColor(),
-            roughness: 0.7,
-            metalness: 0.2
+        this.blockMeshes.forEach(mesh => {
+            mesh.material.wireframe = CONFIG.FLAGS.SECTIONS.RENDERING.WIREFRAME_MODE;
+            mesh.material.opacity = CONFIG.FLAGS.SECTIONS.WORLD_GENERATION.ENABLE_BLOCK_GENERATION ? 1 : 0;
+            mesh.material.needsUpdate = true;
         });
-        this.mesh = new AFRAME.THREE.Mesh(geometry, material);
-        this.el.setObject3D('mesh', this.mesh);
     },
 
-    getVoxelColor: function() {
-        const blockType = blockTypeGenerator.getBlockType(this.data.typeId);
-        return blockType.color || '#ffffff';
-    },
-
-    updateType: function(newTypeId) {
-        this.data.typeId = newTypeId;
-        this.blockType = blockTypeGenerator.getBlockType(newTypeId);
-        this.mesh.material.color.set(this.getVoxelColor());
-        this.mesh.material.transparent = this.blockType.transparent || false;
+    remove() {
+        if (this.chunkGroup) {
+            this.el.removeObject3D('mesh');
+        }
     }
 });
 
+// UI Components
 AFRAME.registerComponent('ui-window', {
     schema: {
         title: { type: 'string', default: 'Window' },
-        draggable: { type: 'boolean', default: true }
+        width: { type: 'number', default: 400 },
+        height: { type: 'number', default: 300 }
     },
 
-    init: function() {
-        this.dragState = {
-            dragging: false,
-            offset: { x: 0, y: 0 }
-        };
-        if (this.data.draggable) {
-            this.setupDragging();
+    init() {
+        this.createWindow();
+        this.setupEventListeners();
+    },
+
+    createWindow() {
+        const window = document.createElement('div');
+        window.className = 'ui-window';
+        window.innerHTML = `
+            <div class="window-header">
+                <span class="window-title">${this.data.title}</span>
+                <div class="window-controls">
+                    <button class="close-button">×</button>
+                </div>
+            </div>
+            <div class="window-content">
+                <slot></slot>
+            </div>
+        `;
+        this.el.appendChild(window);
+    },
+
+    setupEventListeners() {
+        const closeBtn = this.el.querySelector('.close-button');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                useGameStore.getState().toggleWindow(this.el.id);
+            });
         }
-    },
-
-    setupDragging: function() {
-        const header = this.el.querySelector('.window-header');
-        if (!header) return;
-        header.addEventListener('mousedown', this.onDragStart.bind(this));
-        document.addEventListener('mousemove', this.onDrag.bind(this));
-        document.addEventListener('mouseup', this.onDragEnd.bind(this));
-    },
-
-    onDragStart: function(e) {
-        const bounds = this.el.getBoundingClientRect();
-        this.dragState = {
-            dragging: true,
-            offset: {
-                x: e.clientX - bounds.left,
-                y: e.clientY - bounds.top
-            }
-        };
-    },
-
-    onDrag: function(e) {
-        if (!this.dragState.dragging) return;
-        
-        const x = e.clientX - this.dragState.offset.x;
-        const y = e.clientY - this.dragState.offset.y;
-        this.el.style.left = `${x}px`;
-        this.el.style.top = `${y}px`;
-    },
-
-    onDragEnd: function() {
-        this.dragState.dragging = false;
     }
 });
 
-AFRAME.registerComponent('debug-info', {
+// Debug Components
+AFRAME.registerComponent('debug-monitor', {
     schema: {
         refreshRate: { type: 'number', default: CONFIG.LOGGING.updateFrequency }
     },
 
-    init: function() {
+    init() {
         this.lastUpdate = 0;
-        this.lastPosition = new THREE.Vector3();
-        this.camera = document.querySelector('a-camera');
-        this.updateDebounceTimer = null;
+        this.setupMetrics();
     },
 
-    tick: function(time) {
+    tick(time) {
         if (time - this.lastUpdate < this.data.refreshRate) return;
         
-        if (this.camera) {
-            const worldPosition = new THREE.Vector3();
-            this.camera.object3D.getWorldPosition(worldPosition);
-            
-            // Only update if position has changed
-            if (!worldPosition.equals(this.lastPosition)) {
-                // Single point of update through game manager
-                if (window.game) {
-                    window.game.updatePlayerDebugInfo(worldPosition);
-                }
-                this.lastPosition.copy(worldPosition);
-            }
-        }
-        
-        this.lastUpdate = time;
+        ComponentUtils.measurePerformance(() => {
+            this.updateMetrics();
+            this.lastUpdate = time;
+        }, 'DebugMonitor', 'updateMetrics');
     },
 
-    remove: function() {
-        clearTimeout(this.updateDebounceTimer);
+    setupMetrics() {
+        if (!CONFIG.FLAGS.SECTIONS.DEBUGGING.SHOW_DEBUG_STATS) return;
+        
+        this.metrics = {
+            fps: 0,
+            memory: 0,
+            drawCalls: 0
+        };
+    },
+
+    updateMetrics() {
+        if (!CONFIG.FLAGS.SECTIONS.DEBUGGING.SHOW_DEBUG_STATS) return;
+
+        const scene = this.el.sceneEl;
+        if (!scene || !scene.renderer) return;
+
+        this.metrics = {
+            fps: Math.round(1000 / (performance.now() - this.lastUpdate)),
+            memory: performance.memory?.usedJSHeapSize || 0,
+            drawCalls: scene.renderer.info.render.calls
+        };
+
+        // Update store with new metrics
+        useGameStore.getState().updateMetrics(this.metrics);
     }
 });
+
+export { ComponentUtils };
