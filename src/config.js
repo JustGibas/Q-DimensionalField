@@ -1,11 +1,12 @@
 export const CONFIG = {
     DEBUG: true,
     VERSIONS: {
-        GAME: '0.1.0',
-        CHUNK_MANAGER: '0.1.0',
-        WORLD_MANAGER: '0.1.0',
-        CHUNK_COMPONENT: '0.1.0',
-        INTERACTION_COMPONENT: '0.1.0',
+        GAME: '0.0.1',
+        CHUNK_MANAGER: '0.0.1',
+        WORLD_MANAGER: '0.0.1',
+        CHUNK_COMPONENT: '0.0.1',
+        INTERACTION_COMPONENT: '0.0.1',
+        UI_MANAGER: '0.0.1',
         THREE: '0.149.0',
         AFRAME: '1.4.0'
     },
