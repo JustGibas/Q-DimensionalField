@@ -1,42 +1,67 @@
-VM36319:37274 WebXR emulator extension overrides native WebXR API with polyfill.
-index.js:95 A-Frame Version: 1.4.0 (Date 2022-12-26, Commit #60a324a2)
-index.js:96 THREE Version (https://github.com/supermedium/three.js): ^0.147.0
-index.js:98 WebVR Polyfill Version: ^0.10.12
-config.js:374 [UIManager] Initializing UI system 
-index.html:99 Initialization error: TypeError: this.setupHotbar is not a function
-    at UIManager.initialize (ui.js:15:14)
-    at initializeGame (index.html:93:29)
-    at index.html:107:9
-overrideMethod @ hook.js:608
-initializeGame @ index.html:99
-await in initializeGame
-(anonymous) @ index.html:107
-[Violation] Added non-passive event listener to a scroll-blocking <some> event. Consider marking event handler as 'passive' to make the page more responsive. See <URL>
-[Violation] Added non-passive event listener to a scroll-blocking <some> event. Consider marking event handler as 'passive' to make the page more responsive. See <URL>
-[Violation] Added non-passive event listener to a scroll-blocking <some> event. Consider marking event handler as 'passive' to make the page more responsive. See <URL>
-[Violation] Added non-passive event listener to a scroll-blocking <some> event. Consider marking event handler as 'passive' to make the page more responsive. See <URL>
-[Violation] Added non-passive event listener to a scroll-blocking <some> event. Consider marking event handler as 'passive' to make the page more responsive. See <URL>
-[Violation] Added non-passive event listener to a scroll-blocking <some> event. Consider marking event handler as 'passive' to make the page more responsive. See <URL>
-[Violation] Added non-passive event listener to a scroll-blocking <some> event. Consider marking event handler as 'passive' to make the page more responsive. See <URL>
-config.js:374 [GameInitializer] Starting initialization 
-config.js:374 [VoxelManager] Initializing version undefined 
-config.js:374 [GameInitializer] Managers initialized successfully 
-config.js:374 [UIManager] Initializing UI system 
-config.js:382 [GameInitializer] Initialization failed TypeError: this.setupHotbar is not a function
-    at UIManager.initialize (ui.js:15:14)
-    at game.js:48:42
-overrideMethod @ hook.js:608
-error @ config.js:382
-(anonymous) @ game.js:62
-await in (anonymous)
-initialize @ game.js:33
-(anonymous) @ game.js:584
-config.js:382 [Game] Failed to initialize game TypeError: this.setupHotbar is not a function
-    at UIManager.initialize (ui.js:15:14)
-    at game.js:48:42
-overrideMethod @ hook.js:608
-error @ config.js:382
-(anonymous) @ game.js:585
-Promise.catch
-(anonymous) @ game.js:584
-aframe.min.js:2 [Violation] 'requestAnimationFrame' handler took 64ms
+VM195447:37274 WebXR emulator extension overrides native WebXR API with polyfill.
+index.html:806 [DOM] mousedown
+index.html:810 [DOM] mouseup
+index.html:577 Window dimensions: 444.6875 485
+index.html:583 [Window Open] settings-window, Size: 445x485, Center: 403, 208
+index.html:806 [DOM] mousedown
+index.html:754 [Drag Start] Window: settings-window
+index.html:783 [Drag Move] Window: settings-window, Pos: 404, 207
+index.html:783 [Drag Move] Window: settings-window, Pos: 404, -517
+index.html:787 Uncaught ReferenceError: onsole is not defined
+    at end (index.html:787:25)
+    at Be (Eventable.ts:14:5)
+    at t.value (Eventable.ts:36:7)
+    at i.value (Interactable.ts:347:17)
+    at i.value (Interaction.ts:593:24)
+    at i.value (Interaction.ts:629:10)
+    at i.value (Interaction.ts:445:29)
+    at i.value (Interaction.ts:409:12)
+    at en.id (interactions.ts:216:19)
+end @ index.html:787
+Be @ Eventable.ts:14
+value @ Eventable.ts:36
+value @ Interactable.ts:347
+value @ Interaction.ts:593
+value @ Interaction.ts:629
+value @ Interaction.ts:445
+value @ Interaction.ts:409
+en.id @ interactions.ts:216
+index.html:810 [DOM] mouseup
+index.html:832 [DOM] mouseup on window: settings-window
+index.html:783 [Drag Move] Window: settings-window, Pos: 404, 206
+index.html:783 [Drag Move] Window: settings-window, Pos: 405, 204
+index.html:783 [Drag Move] Window: settings-window, Pos: 405, 203
+index.html:783 [Drag Move] Window: settings-window, Pos: 405, 202
+index.html:783 [Drag Move] Window: settings-window, Pos: 406, 202
+index.html:783 [Drag Move] Window: settings-window, Pos: 406, 201
+index.html:783 [Drag Move] Window: settings-window, Pos: 406, 200
+index.html:783 [Drag Move] Window: settings-window, Pos: 406, 198
+index.html:783 [Drag Move] Window: settings-window, Pos: 406, 197
+index.html:783 [Drag Move] Window: settings-window, Pos: 408, 196
+index.html:783 [Drag Move] Window: settings-window, Pos: 408, 195
+index.html:783 [Drag Move] Window: settings-window, Pos: 409, 194
+index.html:783 [Drag Move] Window: settings-window, Pos: 410, 193
+index.html:783 [Drag Move] Window: settings-window, Pos: 410, 192
+index.html:806 [DOM] mousedown
+index.html:783 [Drag Move] Window: settings-window, Pos: 410, -517
+index.html:787 Uncaught ReferenceError: onsole is not defined
+    at end (index.html:787:25)
+    at Be (Eventable.ts:14:5)
+    at t.value (Eventable.ts:36:7)
+    at i.value (Interactable.ts:347:17)
+    at i.value (Interaction.ts:593:24)
+    at i.value (Interaction.ts:629:10)
+    at i.value (Interaction.ts:445:29)
+    at i.value (Interaction.ts:409:12)
+    at en.id (interactions.ts:216:19)
+end @ index.html:787
+Be @ Eventable.ts:14
+value @ Eventable.ts:36
+value @ Interactable.ts:347
+value @ Interaction.ts:593
+value @ Interaction.ts:629
+value @ Interaction.ts:445
+value @ Interaction.ts:409
+en.id @ interactions.ts:216
+index.html:810 [DOM] mouseup
+index.html:832 [DOM] mouseup on window: settings-window
