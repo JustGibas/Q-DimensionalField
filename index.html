@@ -92,8 +92,12 @@
             padding: 1rem !important;
             background: rgba(0,0,0,0.03);
             border-bottom: 1px solid rgba(0,0,0,0.1);
-            cursor: move;
+            touch-action: none;
+            -webkit-user-select: none;
             user-select: none;
+            cursor: move;
+            cursor: -webkit-grab;
+            cursor: grab;
             display: flex;
             align-items: center;
         }
@@ -102,6 +106,11 @@
             margin: 0;
             font-size: 1.25rem;
             line-height: 1;
+        }
+
+        .dragging .drag-handle {
+            cursor: -webkit-grabbing;
+            cursor: grabbing;
         }
 
         /* Window styles */
@@ -137,6 +146,9 @@
             
             pointer-events: auto;*/
             
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
 
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(5px);           
@@ -289,7 +301,7 @@
             <canvas id="gameCanvas"></canvas>
         </div>
         
-        <div id="ui-layer" style="position: fixed; top: 0; left: 0; width: 100%; height: 120%; pointer-events: none; z-index: 999;">
+        <div id="ui-layer" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999;">
         <div class="container-fluid text-center mt-5 px-3" style="position: relative; height: 100vh; pointer-events: auto;">
 
                 <!-- DevTools Button - positioned in top right corner -->
@@ -305,6 +317,7 @@
                             <button class="btn btn-primary btn-lg py-3" onclick="startGame()">Start Game</button>
                             <button class="btn btn-secondary btn-lg py-3" onclick="showMultiplayer()">Multiplayer</button>
                             <button class="btn btn-secondary btn-lg py-3" onclick="showSettings()">Settings</button>
+                            <button class="btn btn-secondary btn-lg py-3" onclick="showCredits()">Credits</button>
                             <button class="btn btn-danger btn-lg py-3" onclick="exitGame()">Exit Game</button>
                         </div>
                     </div>
